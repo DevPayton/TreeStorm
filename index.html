@@ -128,15 +128,35 @@
   .compare .check { color: var(--sap); font-weight: 800; flex-shrink: 0; }
 
   /* ===== How it works ===== */
-  .how { background: var(--bark); color: var(--pulp); }
+  .how { background: var(--bark); color: var(--pulp); position: relative; overflow: hidden; }
+  .how::before { content:''; position:absolute; inset:0; background-image: radial-gradient(circle at 1px 1px, rgba(232,112,58,0.10) 1px, transparent 0); background-size: 24px 24px; opacity: 0.55; pointer-events:none; }
+  .how .wrap { position: relative; }
   .how .section-label { color: var(--sap); }
   .how h2 { color: var(--pulp); }
   .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 48px; }
-  .steps.steps-4 { grid-template-columns: repeat(4, 1fr); gap: 20px; }
-  .step { border-top: 3px solid var(--sap); padding-top: 22px; }
-  .step .num { font-size: 13px; font-weight: 800; color: var(--sap); letter-spacing: 1px; margin-bottom: 12px; }
-  .step h4 { font-size: 20px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.3px; }
-  .step p { font-size: 15px; color: var(--pulp-2); }
+  .steps.steps-4 { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  /* each step is a contained module in the system */
+  .step {
+    position: relative;
+    background: rgba(245,241,232,0.035);
+    border: 1px solid rgba(245,241,232,0.12);
+    border-top: 3px solid var(--sap);
+    padding: 22px 20px 24px;
+  }
+  .step .sno { font-size: 38px; font-weight: 800; line-height: 1; letter-spacing: -2px; color: rgba(232,112,58,0.28); font-family: 'Helvetica Neue', Arial; margin-bottom: 6px; }
+  .step .num { font-size: 12px; font-weight: 800; color: var(--sap); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px; }
+  .step h4 { font-size: 19px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.3px; line-height: 1.2; }
+  .step p { font-size: 14.5px; color: rgba(245,241,232,0.8); line-height: 1.55; }
+  /* connecting flow arrow between modules */
+  .steps-4 .step:not(:last-child)::after {
+    content: '';
+    position: absolute; right: -12px; top: 38px;
+    width: 9px; height: 9px;
+    border-top: 2px solid var(--sap);
+    border-right: 2px solid var(--sap);
+    transform: rotate(45deg);
+    z-index: 3;
+  }
 
   /* ===== Pricing ===== */
   .pricing { text-align: center; }
@@ -292,22 +312,26 @@
     <p style="font-size:18px;color:var(--bark-2);max-width:60ch;margin:18px auto 0;text-align:center;">You don't watch the radar. You don't cross-reference warnings against your ZIPs at 2 a.m. The system does it — every storm, every ZIP you own, nonstop — and hands you the work before the other trucks know it happened.</p>
     <div class="steps steps-4">
       <div class="step">
-        <div class="num">01 · Watch</div>
+        <div class="sno">01</div>
+        <div class="num">Watch</div>
         <h4>Your whole territory, 24/7</h4>
         <p>Every severe-storm, tornado, high-wind, and hurricane warning across your ZIPs — caught the instant the National Weather Service issues it.</p>
       </div>
       <div class="step">
-        <div class="num">02 · Detect</div>
+        <div class="sno">02</div>
+        <div class="num">Detect</div>
         <h4>The second it's your ground</h4>
         <p>We match each warning's exact footprint to the ZIPs you own. A storm three counties over doesn't ping you. One on your street does — immediately.</p>
       </div>
       <div class="step">
-        <div class="num">03 · Rank</div>
+        <div class="sno">03</div>
+        <div class="num">Rank</div>
         <h4>Hardest-hit first</h4>
         <p>We score every hit ZIP by damage and dollar potential — wind, rainfall, households — so the big removal jobs sort to the top. No guessing which streets to run.</p>
       </div>
       <div class="step">
-        <div class="num">04 · Deliver</div>
+        <div class="sno">04</div>
+        <div class="num">Deliver</div>
         <h4>Straight to you, alone</h4>
         <p>The alert hits your phone and inbox — ranked, mapped, only to you. You're rolling while everyone else is still checking the weather app.</p>
       </div>
