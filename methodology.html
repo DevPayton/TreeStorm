@@ -207,6 +207,33 @@
   </div>
 </section>
 
+<section class="stakes reveal">
+  <div class="wrap">
+    <div class="eyebrow">The honest math</div>
+    <h2>Same storms. Two very different months.</h2>
+    <div class="stakes-row">
+      <div class="stake without">
+        <div class="h">Without TreeStorm</div>
+        <ul>
+          <li>You hear about the storm when a neighbor mentions it &mdash; days late.</li>
+          <li>You drive the area hoping to spot damage, burning fuel and daylight.</li>
+          <li>The good removals are already signed by whoever knocked first.</li>
+          <li>You're competing for the same leads as four other crews.</li>
+        </ul>
+      </div>
+      <div class="stake with">
+        <div class="h">With TreeStorm</div>
+        <ul>
+          <li>The alert hits your phone the moment the storm clears your ZIPs.</li>
+          <li>You drive straight to the hardest-hit streets &mdash; already ranked.</li>
+          <li>You're the first credible crew on the driveway, every time.</li>
+          <li>It's your territory, alone &mdash; the alert went to nobody but you.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="feeds reveal">
   <div class="wrap">
     <div class="eyebrow">What's running underneath</div>
@@ -235,135 +262,11 @@
   </div>
 </section>
 
-<section class="edge reveal">
-  <div class="wrap">
-    <div class="eyebrow">How deep it goes &mdash; one example</div>
-    <h2>We don't just see the wind. We see whether it'll pull trees.</h2>
-    <p class="lead">Here's the kind of read most monitoring can't make. Two driveways, same 50 mph gust, same afternoon &mdash; but the system knows one of them is throwing off real removal work and the other isn't, because it knows how wet the ground was.</p>
-    <div class="scene-frame">
-<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica Neue, Arial, sans-serif">
-  <defs>
-    <linearGradient id="skyDry" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FBF8F1"/>
-      <stop offset="1" stop-color="#F2EADB"/>
-    </linearGradient>
-    <linearGradient id="skyWet" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#46586B"/>
-      <stop offset="1" stop-color="#37454F"/>
-    </linearGradient>
-    <linearGradient id="mud" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#3A2E22"/>
-      <stop offset="1" stop-color="#241B13"/>
-    </linearGradient>
-  </defs>
-
-  <!-- ============ DRY SIDE ============ -->
-  <g>
-    <rect x="0" y="0" width="400" height="420" fill="url(#skyDry)"/>
-    <!-- dry cracked ground -->
-    <rect x="0" y="330" width="400" height="90" fill="#E3D7BD"/>
-    <rect x="0" y="330" width="400" height="6" fill="#CDBE9C"/>
-    <path d="M70 360 l8 14 M150 348 l-6 18 M250 366 l10 12 M320 352 l-5 16" stroke="#C2B292" stroke-width="2" fill="none" opacity="0.7"/>
-
-    <!-- standing tree: trunk + branches + canopy clumps -->
-    <g>
-      <!-- trunk -->
-      <path d="M196 332 C 198 285, 200 250, 202 210 C 203 195, 207 195, 208 210 C 210 250, 212 285, 214 332 Z" fill="#3B2C1E"/>
-      <!-- main limbs -->
-      <path d="M205 240 C 180 220, 165 215, 150 210" stroke="#3B2C1E" stroke-width="9" fill="none" stroke-linecap="round"/>
-      <path d="M206 225 C 230 205, 248 202, 262 196" stroke="#3B2C1E" stroke-width="9" fill="none" stroke-linecap="round"/>
-      <path d="M205 255 C 192 240, 184 232, 176 226" stroke="#3B2C1E" stroke-width="7" fill="none" stroke-linecap="round"/>
-      <!-- canopy: overlapping organic clumps -->
-      <g fill="#4A5D3A">
-        <ellipse cx="205" cy="175" rx="62" ry="50"/>
-        <ellipse cx="158" cy="195" rx="42" ry="36"/>
-        <ellipse cx="255" cy="190" rx="46" ry="38"/>
-        <ellipse cx="205" cy="140" rx="44" ry="38"/>
-        <ellipse cx="178" cy="160" rx="34" ry="30"/>
-        <ellipse cx="238" cy="158" rx="36" ry="32"/>
-      </g>
-      <g fill="#566B44" opacity="0.85">
-        <ellipse cx="190" cy="150" rx="26" ry="22"/>
-        <ellipse cx="232" cy="175" rx="24" ry="20"/>
-      </g>
-    </g>
-
-    <!-- snapped limb on the ground -->
-    <g>
-      <path d="M70 348 C 100 342, 130 346, 156 350" stroke="#3B2C1E" stroke-width="8" fill="none" stroke-linecap="round"/>
-      <path d="M96 345 l-10 -12 M120 347 l8 -13 M140 349 l-7 -11" stroke="#3B2C1E" stroke-width="4" stroke-linecap="round"/>
-      <g fill="#4A5D3A"><circle cx="80" cy="344" r="11"/><circle cx="150" cy="350" r="9"/></g>
-    </g>
-
-    <!-- label plate -->
-    <text x="28" y="46" font-size="13" font-weight="700" letter-spacing="1.5" fill="#A03E10">DRY GROUND · 0.9" / 14 DAYS</text>
-    <text x="28" y="74" font-size="22" font-weight="800" fill="#2B2118">A limb breaks.</text>
-    <text x="28" y="98" font-size="14" fill="#6B6253">$300 cleanup call.</text>
-  </g>
-
-  <!-- ============ WET SIDE ============ -->
-  <g>
-    <rect x="400" y="0" width="400" height="420" fill="url(#skyWet)"/>
-    <!-- saturated dark ground with sheen -->
-    <rect x="400" y="330" width="400" height="90" fill="url(#mud)"/>
-    <rect x="400" y="330" width="400" height="6" fill="#4A5D70" opacity="0.7"/>
-    <ellipse cx="560" cy="360" rx="60" ry="7" fill="#5B7A99" opacity="0.25"/>
-    <ellipse cx="700" cy="375" rx="44" ry="6" fill="#5B7A99" opacity="0.22"/>
-
-    <!-- uprooted tree: whole tree tipped, root plate lifted -->
-    <g transform="rotate(38 560 330)">
-      <!-- trunk (now leaning hard) -->
-      <path d="M552 332 C 554 285, 556 250, 558 205 C 559 190, 563 190, 564 205 C 566 250, 568 285, 570 332 Z" fill="#241B13"/>
-      <!-- limbs -->
-      <path d="M561 235 C 536 215, 521 210, 506 204" stroke="#241B13" stroke-width="9" fill="none" stroke-linecap="round"/>
-      <path d="M562 220 C 586 200, 604 197, 618 191" stroke="#241B13" stroke-width="9" fill="none" stroke-linecap="round"/>
-      <!-- canopy -->
-      <g fill="#33442A">
-        <ellipse cx="561" cy="170" rx="60" ry="48"/>
-        <ellipse cx="516" cy="190" rx="40" ry="34"/>
-        <ellipse cx="610" cy="185" rx="44" ry="36"/>
-        <ellipse cx="561" cy="138" rx="42" ry="36"/>
-      </g>
-      <g fill="#3E5235" opacity="0.8"><ellipse cx="546" cy="150" rx="24" ry="20"/><ellipse cx="588" cy="172" rx="22" ry="18"/></g>
-    </g>
-
-    <!-- ROOT PLATE torn out of the mud (the money shot) -->
-    <g>
-      <!-- the lifted soil disk -->
-      <path d="M470 332 C 466 300, 478 282, 502 280 C 524 278, 540 292, 542 318 L 540 340 C 510 346, 484 344, 470 332 Z" fill="#2E2318" stroke="#1C1410" stroke-width="2"/>
-      <!-- dangling roots -->
-      <g stroke="#1C1410" stroke-width="4" fill="none" stroke-linecap="round">
-        <path d="M488 284 C 484 270, 480 258, 472 250"/>
-        <path d="M504 280 C 506 264, 504 252, 500 240"/>
-        <path d="M520 284 C 526 270, 530 258, 538 250"/>
-        <path d="M496 282 C 492 272, 486 266, 480 262"/>
-        <path d="M512 282 C 518 274, 524 270, 530 268"/>
-      </g>
-      <!-- clods of mud falling -->
-      <circle cx="478" cy="356" r="5" fill="#2E2318"/>
-      <circle cx="512" cy="362" r="4" fill="#2E2318"/>
-      <circle cx="498" cy="372" r="3" fill="#2E2318"/>
-    </g>
-
-    <!-- label plate -->
-    <text x="428" y="46" font-size="13" font-weight="700" letter-spacing="1.5" fill="#FF8A4C">SATURATED · 5.3" / 14 DAYS</text>
-    <text x="428" y="74" font-size="22" font-weight="800" fill="#F5F1E8">The whole tree comes out.</text>
-    <text x="428" y="98" font-size="14" fill="#C9BFA9">$4,000 removal.</text>
-  </g>
-
-  <!-- center divider -->
-  <line x1="400" y1="0" x2="400" y2="420" stroke="#2B2118" stroke-width="3"/>
-</svg>
-    </div>
-    <div class="scene-caption">Same <em>50 mph</em> wind. Dry ground drops a limb. Soaked ground lets the roots go and the <span class="big">whole tree comes out</span> &mdash; the system flags that storm as a removal, not a cleanup.</div>
-    <p class="edge-foot"><strong>That's one signal out of the stack.</strong> Wind tuned for trees instead of roofs. Rainfall read for root-holding instead of forecasts. Damage scored in dollars instead of categories. It all runs the second a warning drops &mdash; and it's why a TreeStorm alert means something a weather app never could.</p>
-  </div>
-</section>
-
 <section class="ladder-sec reveal">
   <div class="wrap">
-    <div class="eyebrow">What the wind is worth</div>
-    <h2>The same gust, scored two ways.</h2>
+    <div class="eyebrow">How deep the read goes</div>
+    <h2>The same gust isn't the same job.</h2>
+    <p style="font-size:17px;color:var(--bark-2);max-width:62ch;margin:14px 0 0;">Here's a read most monitoring can't make: the system doesn't just see the wind &mdash; it knows whether the ground will hold the roots. Two weeks of rain over the storm's footprint, and a middling gust pulls whole trees. That's the difference between a cleanup and a removal, and we flag it before you roll.</p>
     <div class="ladder">
       <div class="lad-row head">
         <div>Gust</div>
@@ -387,33 +290,6 @@
       </div>
     </div>
     <p class="ladder-foot">On dry ground it takes a real blow to pull a tree. On soaked ground a middling gust does it &mdash; the exact storm a plain weather alert tells you to ignore, and the one we send you straight at.</p>
-  </div>
-</section>
-
-<section class="stakes reveal">
-  <div class="wrap">
-    <div class="eyebrow">The honest math</div>
-    <h2>Same storms. Two very different months.</h2>
-    <div class="stakes-row">
-      <div class="stake without">
-        <div class="h">Without TreeStorm</div>
-        <ul>
-          <li>You hear about the storm when a neighbor mentions it &mdash; days late.</li>
-          <li>You drive the area hoping to spot damage, burning fuel and daylight.</li>
-          <li>The good removals are already signed by whoever knocked first.</li>
-          <li>You're competing for the same leads as four other crews.</li>
-        </ul>
-      </div>
-      <div class="stake with">
-        <div class="h">With TreeStorm</div>
-        <ul>
-          <li>The alert hits your phone the moment the storm clears your ZIPs.</li>
-          <li>You drive straight to the hardest-hit streets &mdash; already ranked.</li>
-          <li>You're the first credible crew on the driveway, every time.</li>
-          <li>It's your territory, alone &mdash; the alert went to nobody but you.</li>
-        </ul>
-      </div>
-    </div>
   </div>
 </section>
 

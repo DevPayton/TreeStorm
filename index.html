@@ -36,11 +36,19 @@
   .logo { font-weight: 800; font-size: 20px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 9px; }
   .logo .mark { color: var(--sap); font-size: 22px; }
   .nav-cta {
+    background: var(--sap); color: var(--pulp); text-decoration: none;
+    padding: 11px 20px; border-radius: 2px; font-weight: 700; font-size: 14px;
+    transition: background .15s;
+  }
+  .nav-cta:hover { background: var(--sap-deep); }
+  .nav-login {
     background: var(--bark); color: var(--pulp); text-decoration: none;
     padding: 11px 20px; border-radius: 2px; font-weight: 700; font-size: 14px;
     transition: background .15s;
   }
-  .nav-cta:hover { background: var(--sap); }
+  .nav-login:hover { background: var(--bark-2); }
+  .nav-link { color: var(--bark); text-decoration: none; font-weight: 600; font-size: 15px; }
+  .nav-link:hover { color: var(--sap-deep); }
 
   /* ===== Hero ===== */
   .hero {
@@ -124,6 +132,7 @@
   .how .section-label { color: var(--sap); }
   .how h2 { color: var(--pulp); }
   .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 48px; }
+  .steps.steps-4 { grid-template-columns: repeat(4, 1fr); gap: 20px; }
   .step { border-top: 3px solid var(--sap); padding-top: 22px; }
   .step .num { font-size: 13px; font-weight: 800; color: var(--sap); letter-spacing: 1px; margin-bottom: 12px; }
   .step h4 { font-size: 20px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.3px; }
@@ -198,6 +207,7 @@
 
   @media (max-width: 720px) {
     .compare, .steps { grid-template-columns: 1fr; }
+    .steps.steps-4 { grid-template-columns: 1fr 1fr; }
     .compare .them { border-right: none; border-bottom: 2px solid var(--bark); }
     .ticker { font-size: 12px; }
     section { padding: 56px 0; }
@@ -209,8 +219,8 @@
 <nav>
   <div class="logo"><span class="mark">◣</span> TreeStorm Leads</div>
   <div style="display:flex;align-items:center;gap:18px;">
-    <a href="methodology.html" style="color:var(--bark);text-decoration:none;font-weight:600;font-size:15px;">How we score</a>
-    <a href="dashboard.html" style="color:var(--bark);text-decoration:none;font-weight:600;font-size:15px;">Log in</a>
+    <a href="methodology.html" class="nav-link">How it works</a>
+    <a href="dashboard.html" class="nav-login">Log in</a>
     <a href="#pricing" class="nav-cta">Start free trial</a>
   </div>
 </nav>
@@ -278,24 +288,31 @@
 <section class="how" id="how">
   <div class="wrap">
     <div class="section-label">How it works</div>
-    <h2>From storm to doorstep — automatically.</h2>
-    <div class="steps">
+    <h2>Storm hits. We find the money. You go get it.</h2>
+    <p style="font-size:18px;color:var(--bark-2);max-width:60ch;margin:18px auto 0;text-align:center;">You don't watch the radar. You don't cross-reference warnings against your ZIPs at 2 a.m. The system does it — every storm, every ZIP you own, nonstop — and hands you the work before the other trucks know it happened.</p>
+    <div class="steps steps-4">
       <div class="step">
-        <div class="num">STEP 01</div>
-        <h4>We watch the sky</h4>
-        <p>Our system monitors National Weather Service alerts across your service area around the clock — every tornado, severe thunderstorm, high-wind, and hurricane warning, the instant it's issued.</p>
+        <div class="num">01 · Watch</div>
+        <h4>Your whole territory, 24/7</h4>
+        <p>Every severe-storm, tornado, high-wind, and hurricane warning across your ZIPs — caught the instant the National Weather Service issues it.</p>
       </div>
       <div class="step">
-        <div class="num">STEP 02</div>
-        <h4>You get the alert</h4>
-        <p>The moment a qualifying storm enters a ZIP you cover, you get a text and email — with the event, the affected neighborhoods, and a damage score so you know how big the job wave will be.</p>
+        <div class="num">02 · Detect</div>
+        <h4>The second it's your ground</h4>
+        <p>We match each warning's exact footprint to the ZIPs you own. A storm three counties over doesn't ping you. One on your street does — immediately.</p>
       </div>
       <div class="step">
-        <div class="num">STEP 03</div>
-        <h4>You get there first</h4>
-        <p>While competitors wait for the phone to ring, you're already routing crews to the hardest-hit blocks. First crew on the street wins the work — and the referrals next door.</p>
+        <div class="num">03 · Rank</div>
+        <h4>Hardest-hit first</h4>
+        <p>We score every hit ZIP by damage and dollar potential — wind, rainfall, households — so the big removal jobs sort to the top. No guessing which streets to run.</p>
+      </div>
+      <div class="step">
+        <div class="num">04 · Deliver</div>
+        <h4>Straight to you, alone</h4>
+        <p>The alert hits your phone and inbox — ranked, mapped, only to you. You're rolling while everyone else is still checking the weather app.</p>
       </div>
     </div>
+    <p style="text-align:center;margin-top:36px;"><a href="methodology.html" style="color:var(--sap-deep);font-weight:700;font-size:16px;text-decoration:none;border-bottom:2px solid var(--sap);padding-bottom:2px;">See the full system →</a></p>
   </div>
 </section>
 
