@@ -118,6 +118,14 @@
   .upgrade-link { display: block; text-align: center; margin-top: 14px; font-size: 13.5px; color: var(--ember-deep); text-decoration: none; font-weight: 600; padding: 11px; border: 1.5px dashed var(--line); border-radius: 3px; transition: border-color 0.15s, background 0.15s; }
   .upgrade-link:hover { border-color: var(--ember); background: rgba(200,83,27,0.04); }
 
+  .account-actions { display: flex; flex-direction: column; gap: 2px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+  .acct-link { background: none; border: none; text-align: left; padding: 7px 0; font-size: 13px; color: var(--muted); cursor: pointer; font-family: inherit; transition: color 0.15s; }
+  .acct-link:hover { color: var(--bark); }
+  .acct-link.danger:hover { color: var(--danger); }
+  .cancel-banner-box { margin-top: 14px; padding: 13px 15px; background: #FBEEE9; border: 1px solid #E8B9A6; border-radius: 4px; font-size: 13px; color: #A03E10; line-height: 1.5; }
+  .cancel-banner-box b { color: #8a3410; }
+  .cancel-banner-box button { display: inline-block; margin-top: 9px; background: var(--moss); color: #fff; border: none; padding: 7px 14px; border-radius: 3px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; }
+
   .alerts-body { max-height: 420px; overflow-y: auto; }
   .alert-row { padding: 15px 20px; border-bottom: 1px solid var(--line-soft); }
   .alert-row:last-child { border-bottom: none; }
@@ -272,6 +280,11 @@
             <div class="plan-row"><span class="lbl">ZIP allowance</span><span class="val" id="plan-allow">&mdash;</span></div>
             <div class="plan-row"><span class="lbl">Monitoring</span><span class="val" style="color:var(--moss-light);"><span class="live-dot"></span>Active 24/7</span></div>
             <a class="upgrade-link" id="upgrade-link" href="#">Need more ZIPs? Upgrade your plan &rarr;</a>
+            <div id="cancel-banner" style="display:none;"></div>
+            <div class="account-actions">
+              <button class="acct-link" onclick="openChangeHome()">Change home base</button>
+              <button class="acct-link danger" onclick="openCancel()">Cancel subscription</button>
+            </div>
           </div>
         </div>
 
@@ -329,6 +342,32 @@
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeDowngrade()">Cancel</button>
       <button class="btn" id="confirm-downgrade" onclick="confirmDowngrade()">Keep selected ZIPs</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE HOME BASE MODAL -->
+<div class="modal-bg" id="home-modal">
+  <div class="modal">
+    <h3 class="serif">Change your home base</h3>
+    <p>Your home base anchors your territory &mdash; all your ZIPs must be within <b id="home-radius-txt">50</b> miles of it. You can change it once every 30 days.</p>
+    <input id="new-home-zip" type="text" inputmode="numeric" maxlength="5" placeholder="New home ZIP code" style="width:100%;padding:13px;border:1.5px solid var(--line);border-radius:3px;font-size:15px;font-family:inherit;margin-bottom:8px;">
+    <div id="home-warn" style="display:none;font-size:13px;padding:11px 13px;border-radius:3px;line-height:1.5;margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeChangeHome()">Cancel</button>
+      <button class="btn" id="confirm-home" onclick="submitChangeHome(false)">Update home base</button>
+    </div>
+  </div>
+</div>
+
+<!-- CANCEL SUBSCRIPTION MODAL -->
+<div class="modal-bg" id="cancel-modal">
+  <div class="modal">
+    <h3 class="serif">Cancel your subscription?</h3>
+    <p id="cancel-text">You'll keep full access and your territory until the end of your current billing period. After that, your alerts stop and your ZIPs are released for other contractors to claim.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeCancel()">Never mind</button>
+      <button class="btn" id="confirm-cancel" style="background:var(--danger);" onclick="submitCancel()">Cancel subscription</button>
     </div>
   </div>
 </div>
@@ -436,6 +475,7 @@
     renderCert();
     renderNudge();
     renderLiveConditions();
+    renderCancelBanner();
   }
 
   // ---------- live conditions strip (proves real-time data) ----------
@@ -681,6 +721,76 @@
   }
   function closeDowngrade(){ document.getElementById('downgrade-modal').style.display='none'; }
   async function confirmDowngrade(){ myZips = new Set(pendingKeep); closeDowngrade(); await saveTerritory(); render(); }
+
+  // ---------- cancel / reactivate subscription ----------
+  function renderCancelBanner() {
+    const banner = document.getElementById('cancel-banner');
+    if (subscriber.cancel_at_period_end) {
+      const when = subscriber.cancel_effective ? new Date(subscriber.cancel_effective).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}) : 'the end of your billing period';
+      banner.style.display='block';
+      banner.innerHTML = '<div class="cancel-banner-box">Your subscription is set to cancel on <b>' + when + '</b>. You keep access and your territory until then. Changed your mind?<br><button onclick="reactivate()">Keep my subscription</button></div>';
+    } else { banner.style.display='none'; banner.innerHTML=''; }
+  }
+  function openCancel() {
+    const when = subscriber.cancel_effective ? new Date(subscriber.cancel_effective).toLocaleDateString(undefined,{month:'long',day:'numeric'}) : null;
+    document.getElementById('cancel-text').textContent = 'You\u2019ll keep full access and your territory until the end of your current billing period' + (when?' (' + when + ')':'') + '. After that, your alerts stop and your ' + myZips.size + ' ZIP' + (myZips.size===1?'':'s') + ' are released for other contractors to claim.';
+    document.getElementById('cancel-modal').style.display='flex';
+  }
+  function closeCancel(){ document.getElementById('cancel-modal').style.display='none'; }
+  async function submitCancel() {
+    const b = document.getElementById('confirm-cancel'); b.disabled=true; b.textContent='Cancelling…';
+    try {
+      const r = await fetch(API + '/cancel-subscription', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body:'{}' });
+      const d = await r.json();
+      if (d.ok) { subscriber.cancel_at_period_end=true; subscriber.cancel_effective=d.effective; closeCancel(); renderCancelBanner(); toast('Subscription will cancel at period end. You\u2019re covered until then.', 'ok'); }
+      else toast('Could not cancel. Try again or contact support.', 'err');
+    } catch { toast('Something went wrong. Try again.', 'err'); }
+    b.disabled=false; b.textContent='Cancel subscription';
+  }
+  async function reactivate() {
+    try {
+      const r = await fetch(API + '/reactivate', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body:'{}' });
+      const d = await r.json();
+      if (d.ok) { subscriber.cancel_at_period_end=false; subscriber.cancel_effective=null; renderCancelBanner(); toast('Welcome back — your subscription continues.', 'ok'); }
+      else toast('Could not reactivate. Try again.', 'err');
+    } catch { toast('Something went wrong. Try again.', 'err'); }
+  }
+
+  // ---------- change home base ----------
+  function openChangeHome() {
+    document.getElementById('home-radius-txt').textContent = radiusMiles();
+    document.getElementById('new-home-zip').value='';
+    document.getElementById('home-warn').style.display='none';
+    document.getElementById('home-modal').style.display='flex';
+  }
+  function closeChangeHome(){ document.getElementById('home-modal').style.display='none'; }
+  async function submitChangeHome(confirmed) {
+    const newHome = document.getElementById('new-home-zip').value.trim();
+    const warn = document.getElementById('home-warn');
+    if (!/^\d{5}$/.test(newHome)) { warn.style.display='block'; warn.style.background='#FBEEE9'; warn.style.color='#A03E10'; warn.textContent='Enter a valid 5-digit ZIP.'; return; }
+    const b = document.getElementById('confirm-home'); b.disabled=true; b.textContent='Updating…';
+    try {
+      const r = await fetch(API + '/change-home', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body: JSON.stringify({ homeZip:newHome, confirm:confirmed }) });
+      const d = await r.json();
+      if (d.ok) {
+        subscriber.homeZip = d.homeZip; (d.released||[]).forEach(z=>myZips.delete(z));
+        closeChangeHome(); await loadDashboard(); // reload to redraw circle + map fresh
+        toast('Home base moved to ' + d.homeZip + ((d.released&&d.released.length)?' — released ' + d.released.length + ' out-of-range ZIP' + (d.released.length===1?'':'s'):''), 'ok');
+      } else if (d.needsConfirm) {
+        warn.style.display='block'; warn.style.background='#FBEEE9'; warn.style.color='#A03E10';
+        warn.innerHTML = 'Moving to <b>' + d.newHome + '</b> would drop ' + d.orphans.length + ' ZIP' + (d.orphans.length===1?'':'s') + ' outside the new ' + d.radius + '-mi range: <b>' + d.orphans.join(', ') + '</b>. Tap again to confirm.';
+        b.disabled=false; b.textContent='Confirm & drop those ZIPs';
+        b.setAttribute('onclick','submitChangeHome(true)');
+        return;
+      } else if (d.error === 'rate_limited') {
+        warn.style.display='block'; warn.style.background='#FBEEE9'; warn.style.color='#A03E10';
+        warn.textContent = 'You can change your home base again in ' + d.daysLeft + ' day' + (d.daysLeft===1?'':'s') + '.';
+      } else if (d.error === 'bad_zip') {
+        warn.style.display='block'; warn.style.background='#FBEEE9'; warn.style.color='#A03E10'; warn.textContent='That ZIP isn\u2019t in our coverage area.';
+      } else toast('Could not change home base.', 'err');
+    } catch { toast('Something went wrong. Try again.', 'err'); }
+    b.disabled=false; b.textContent='Update home base';
+  }
 
   function logout(){ localStorage.removeItem('tsl_session'); sessionToken=null; location.reload(); }
   function toast(msg, kind){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+(kind||''); clearTimeout(t._h); t._h=setTimeout(()=>t.className='toast '+(kind||''),3800); }
