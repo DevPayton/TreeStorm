@@ -84,6 +84,14 @@
   .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 3px 0 var(--sap-deep); }
   .btn-ghost { color: var(--bark); text-decoration: none; font-weight: 700; font-size: 15px; padding: 16px 8px; border-bottom: 2px solid var(--bark); }
   .hero-note { margin-top: 18px; font-size: 14px; color: var(--ink-soft); }
+  .trust-bar { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; padding-top: 26px; border-top: 1px solid var(--line); }
+  .trust-item { display: flex; flex-direction: column; gap: 2px; padding-right: 22px; border-right: 1px solid var(--line); }
+  .trust-item:last-child { border-right: none; padding-right: 0; }
+  .trust-item .ti-k { font-size: 14px; font-weight: 800; color: var(--sap-deep); letter-spacing: -0.2px; }
+  .trust-item .ti-v { font-size: 12.5px; color: var(--ink-soft); }
+  @media (max-width: 640px) {
+    .trust-item { border-right: none; padding-right: 0; flex-direction: row; gap: 7px; align-items: baseline; width: 100%; }
+  }
 
   /* ===== Live ticker strip ===== */
   .ticker {
@@ -146,6 +154,9 @@
 
   /* ===== Pricing ===== */
   .pricing { text-align: center; }
+  .scarcity-callout { display: inline-flex; align-items: center; gap: 11px; max-width: 680px; margin: 24px auto 0; padding: 14px 22px; background: rgba(200,83,27,0.08); border: 1px solid rgba(200,83,27,0.3); border-radius: 3px; font-size: 14.5px; color: var(--bark-2); text-align: left; line-height: 1.45; }
+  .scarcity-callout .sc-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--sap); flex-shrink: 0; box-shadow: 0 0 0 0 rgba(200,83,27,0.5); animation: scpulse 2s infinite; }
+  @keyframes scpulse { 0%{box-shadow:0 0 0 0 rgba(200,83,27,0.5);} 70%{box-shadow:0 0 0 7px rgba(200,83,27,0);} 100%{box-shadow:0 0 0 0 rgba(200,83,27,0);} }
   .price-card {
     max-width: 440px; margin: 44px auto 0; border: 2px solid var(--bark);
     background: var(--pulp); text-align: left;
@@ -238,10 +249,16 @@
     <h1>Storm jobs in your inbox <span class="hl">before your competitors wake up.</span></h1>
     <p class="sub">We watch every severe wind, tornado, and hurricane warning across your service area 24/7. The moment a storm hits a neighborhood you cover, you get an alert — with the hardest-hit zones flagged — so you're knocking on doors while everyone else is still checking the news.</p>
     <div class="hero-ctas">
-      <a href="#pricing" class="btn-primary">Start 14-day free trial</a>
+      <a href="#pricing" class="btn-primary">Claim your territory</a>
       <a href="#how" class="btn-ghost">See how it works →</a>
     </div>
-    <p class="hero-note">No contract. Cancel anytime. Exclusive to your territory — we don't sell the same area twice.</p>
+    <p class="hero-note">No card charged for 14 days · Cancel in 2 clicks · One contractor per ZIP — we never sell your area twice.</p>
+    <div class="trust-bar">
+      <div class="trust-item"><span class="ti-k">Live</span><span class="ti-v">National Weather Service feed</span></div>
+      <div class="trust-item"><span class="ti-k">5 states</span><span class="ti-v">FL · GA · SC · NC · AL</span></div>
+      <div class="trust-item"><span class="ti-k">Exclusive</span><span class="ti-v">1 crew per ZIP, guaranteed</span></div>
+      <div class="trust-item"><span class="ti-k">Tree-only</span><span class="ti-v">Built for tree pros, not roofers</span></div>
+    </div>
   </div>
 </header>
 
@@ -327,6 +344,10 @@
   <div class="wrap">
     <div class="section-label">Pick your territory</div>
     <h2 style="margin-left:auto;margin-right:auto;">Lock your ZIPs. One contractor per ZIP. First come, first served.</h2>
+    <div class="scarcity-callout">
+      <span class="sc-dot"></span>
+      <span>Every ZIP is exclusive to one contractor. Once your competitor claims it, it's off the board — and you're locked out of that ground until they cancel.</span>
+    </div>
 
     <div class="tiers">
       <!-- STARTER -->
@@ -407,8 +428,8 @@
         <input id="f-homezip" type="text" inputmode="numeric" maxlength="5" placeholder="Your main ZIP code (we'll check what's open near you)" oninput="checkAvail()" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
         <div id="avail-preview" style="display:none;font-size:13.5px;padding:11px 13px;border-radius:3px;line-height:1.5;"></div>
       </div>
-      <button class="btn-primary" id="subscribe-btn" onclick="startCheckout()" style="margin-top:14px;width:100%;">Start 14-day free trial</button>
-      <p style="text-align:center;margin-top:8px;font-size:12px;color:var(--ink-soft);">Card required. Free for 14 days — cancel anytime before then and you won't be charged. You'll pick your exact ZIP codes right after signup.</p>
+      <button class="btn-primary" id="subscribe-btn" onclick="startCheckout()" style="margin-top:14px;width:100%;">Claim my territory — free for 14 days</button>
+      <p style="text-align:center;margin-top:8px;font-size:12px;color:var(--ink-soft);">No charge for 14 days. Cancel in 2 clicks before then and you pay nothing. You'll pick your exact ZIPs right after signup.</p>
       <p id="checkout-msg" style="text-align:center;margin-top:12px;font-size:14px;color:var(--sap-deep);display:none;"></p>
       <p style="margin-top:14px;font-size:12px;color:var(--ink-soft);line-height:1.5;">By providing your phone number and subscribing, you agree to receive recurring SMS storm-alert notifications from TreeStorm Leads at the number provided. Consent is not a condition of purchase. Message frequency varies by storm activity. Msg &amp; data rates may apply. Reply STOP to unsubscribe, HELP for help.</p>
       <p style="margin-top:8px;font-size:12px;color:var(--ink-soft);line-height:1.5;">By starting a subscription you agree to our <a href="terms.html" style="color:var(--sap-deep);">Terms of Service</a>, <a href="privacy.html" style="color:var(--sap-deep);">Privacy Policy</a>, and <a href="refund.html" style="color:var(--sap-deep);">Refund Policy</a>.</p>
@@ -438,8 +459,9 @@
 <section class="final">
   <div class="wrap">
     <h2>The next storm is coming. Be the first truck on the street.</h2>
-    <p>Set it up once. When the wind blows, you'll already know where the work is.</p>
-    <a href="#pricing" class="btn-dark">Start your free trial →</a>
+    <p>Set it up once. When the wind blows, you'll already know where the work is — and your competitor won't.</p>
+    <a href="#pricing" class="btn-dark">Claim your territory →</a>
+    <p style="margin-top:18px;font-size:13px;color:rgba(245,241,232,0.6);">Free for 14 days · No charge until then · Cancel in 2 clicks</p>
   </div>
 </section>
 
@@ -541,7 +563,7 @@
       }
     } catch (e) {
       btn.disabled = false;
-      btn.textContent = 'Start 14-day free trial';
+      btn.textContent = 'Claim my territory — free for 14 days';
       showErr('Something went wrong starting checkout. Please try again.');
       console.error('checkout error:', e);
     }
