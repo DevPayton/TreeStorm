@@ -268,7 +268,8 @@
           <li><span class="check">✓</span> Tree-removal permit alerts (where available)</li>
           <li><span class="check">✓</span> No contract — cancel anytime</li>
         </ul>
-        <a href="#" class="btn-primary">Start 14-day free trial</a>
+        <button class="btn-primary" id="subscribe-btn" onclick="startCheckout()">Start 14-day free trial</button>
+        <p id="checkout-msg" style="text-align:center;margin-top:12px;font-size:14px;color:var(--sap-deep);display:none;"></p>
       </div>
     </div>
     <p class="price-foot">No credit card for the trial. See real alerts for your area before you pay a cent.</p>
@@ -307,5 +308,47 @@
   </div>
 </footer>
 
+<script>
+  // Points at your live billing server on the VPS (via Cloudflare tunnel)
+  const BILLING_URL = 'https://api.treestormleads.com';
+
+  async function startCheckout() {
+    const btn = document.getElementById('subscribe-btn');
+    const msg = document.getElementById('checkout-msg');
+    btn.disabled = true;
+    btn.textContent = 'Loading checkout…';
+    msg.style.display = 'none';
+    try {
+      const res = await fetch(BILLING_URL + '/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // territory is collected after payment in the simple flow
+        body: JSON.stringify({})
+      });
+      const data = await res.json();
+      if (data.url) {
+        // send them to Stripe's hosted checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error ? JSON.stringify(data.error) : 'Could not start checkout');
+      }
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Start 14-day free trial';
+      msg.textContent = 'Something went wrong starting checkout. Please try again.';
+      msg.style.display = 'block';
+      console.error('checkout error:', e);
+    }
+  }
+
+  // make the other CTA buttons jump to the pricing section (where the real button lives)
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('a.btn-primary, a.btn-dark').forEach(a => {
+      if (a.getAttribute('href') === '#pricing') {
+        // default anchor scroll is fine; pricing has the working button
+      }
+    });
+  });
+</script>
 </body>
 </html>
