@@ -268,7 +268,21 @@
           <li><span class="check">✓</span> Tree-removal permit alerts (where available)</li>
           <li><span class="check">✓</span> No contract — cancel anytime</li>
         </ul>
-        <button class="btn-primary" id="subscribe-btn" onclick="startCheckout()">Start 14-day free trial</button>
+        <div id="signup-form" style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+          <input id="f-company" type="text" placeholder="Company name" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
+          <input id="f-email" type="email" placeholder="Email" required style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
+          <input id="f-phone" type="tel" placeholder="Cell phone (for storm text alerts)" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
+          <select id="f-state" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;background:#fff;">
+            <option value="">Your state…</option>
+            <option value="FL">Florida</option>
+            <option value="GA">Georgia</option>
+            <option value="SC">South Carolina</option>
+            <option value="NC">North Carolina</option>
+            <option value="AL">Alabama</option>
+          </select>
+          <input id="f-counties" type="text" placeholder="Counties you cover (e.g. Duval, Clay, St. Johns)" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
+        </div>
+        <button class="btn-primary" id="subscribe-btn" onclick="startCheckout()" style="margin-top:14px;">Start 14-day free trial</button>
         <p id="checkout-msg" style="text-align:center;margin-top:12px;font-size:14px;color:var(--sap-deep);display:none;"></p>
       </div>
     </div>
@@ -315,6 +329,21 @@
   async function startCheckout() {
     const btn = document.getElementById('subscribe-btn');
     const msg = document.getElementById('checkout-msg');
+
+    // collect the form
+    const company = document.getElementById('f-company').value.trim();
+    const email = document.getElementById('f-email').value.trim();
+    const phone = document.getElementById('f-phone').value.trim();
+    const state = document.getElementById('f-state').value;
+    const counties = document.getElementById('f-counties').value
+      .split(',').map(c => c.trim()).filter(Boolean);
+
+    // basic validation
+    function showErr(t){ msg.textContent = t; msg.style.display = 'block'; }
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showErr('Please enter a valid email.'); return; }
+    if (!state) { showErr('Please select your state.'); return; }
+    if (counties.length === 0) { showErr('Please enter at least one county you cover.'); return; }
+
     btn.disabled = true;
     btn.textContent = 'Loading checkout…';
     msg.style.display = 'none';
@@ -322,12 +351,10 @@
       const res = await fetch(BILLING_URL + '/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // territory is collected after payment in the simple flow
-        body: JSON.stringify({})
+        body: JSON.stringify({ company, email, phone, state, counties })
       });
       const data = await res.json();
       if (data.url) {
-        // send them to Stripe's hosted checkout
         window.location.href = data.url;
       } else {
         throw new Error(data.error ? JSON.stringify(data.error) : 'Could not start checkout');
@@ -335,8 +362,7 @@
     } catch (e) {
       btn.disabled = false;
       btn.textContent = 'Start 14-day free trial';
-      msg.textContent = 'Something went wrong starting checkout. Please try again.';
-      msg.style.display = 'block';
+      showErr('Something went wrong starting checkout. Please try again.');
       console.error('checkout error:', e);
     }
   }
