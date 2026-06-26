@@ -3,66 +3,82 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How we find the big jobs — TreeStorm Leads</title>
-<meta name="description" content="Any weather app tells you it's windy. We tell you when storms are uprooting whole trees in your area — the $4,000 removal jobs, not the $300 cleanups. Here's how.">
+<title>How it works — TreeStorm Leads</title>
+<meta name="description" content="TreeStorm is the intelligence layer for your tree business. We run live storm, wind, and rainfall data across your exclusive territory 24/7 and hand you the damage — ranked, before anyone else knows.">
 <style>
   :root {
-    --bark:#2B2118; --bark-2:#3D3023; --pulp:#F5F1E8; --pulp-2:#EAE3D4;
-    --sap:#C8531B; --sap-deep:#A03E10; --leaf:#4A5D3A; --sky:#5B7A99;
-    --line:#D8CFBC; --ink-soft:#6B6253; --money:#2F6B3A;
+    --bark:#2B2118; --bark-2:#3D3023; --ink:#1A1512; --pulp:#F5F1E8; --pulp-2:#EAE3D4;
+    --sap:#C8531B; --sap-deep:#A03E10; --sap-glow:#E8703A; --leaf:#4A5D3A; --sky:#5B7A99;
+    --line:#D8CFBC; --ink-soft:#6B6253; --signal:#4FB36A;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior:smooth; }
   body { font-family:'Helvetica Neue',Arial,sans-serif; background:var(--pulp); color:var(--bark); line-height:1.6; -webkit-font-smoothing:antialiased; }
-  .wrap { max-width:1000px; margin:0 auto; padding:0 24px; }
+  .wrap { max-width:1040px; margin:0 auto; padding:0 24px; }
 
-  .topbar { background:var(--bark); color:var(--pulp); }
+  .topbar { background:var(--ink); color:var(--pulp); }
   .topbar .wrap { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; }
   .brand { font-weight:800; font-size:18px; display:flex; align-items:center; gap:9px; }
   .brand .mark { color:var(--sap); font-size:20px; }
   .topbar a.back { color:var(--pulp); text-decoration:none; font-size:14px; font-weight:600; border-bottom:2px solid var(--sap); padding-bottom:2px; }
 
-  /* hero — his pain, his money */
-  .hero { padding:68px 0 52px; border-bottom:2px solid var(--bark); }
-  .eyebrow { font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--sap-deep); margin-bottom:18px; }
-  .hero h1 { font-size:clamp(34px,5.5vw,58px); line-height:1.05; letter-spacing:-1.5px; font-weight:800; max-width:17ch; }
-  .hero h1 em { font-style:normal; color:var(--sap); }
-  .hero .sub { font-size:clamp(17px,2.3vw,21px); color:var(--bark-2); max-width:56ch; margin-top:22px; }
+  /* ---- hero: the system ---- */
+  .hero { background:var(--ink); color:var(--pulp); padding:78px 0 68px; position:relative; overflow:hidden; }
+  .hero::before { content:''; position:absolute; inset:0; background-image:radial-gradient(circle at 1px 1px, rgba(232,112,58,0.10) 1px, transparent 0); background-size:26px 26px; opacity:0.6; }
+  .hero .wrap { position:relative; }
+  .eyebrow { font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--sap-glow); margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+  .eyebrow .live { width:8px; height:8px; border-radius:50%; background:var(--signal); box-shadow:0 0 0 0 rgba(79,179,106,0.6); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(79,179,106,0.6);} 70%{box-shadow:0 0 0 8px rgba(79,179,106,0);} 100%{box-shadow:0 0 0 0 rgba(79,179,106,0);} }
+  .hero h1 { font-size:clamp(36px,6vw,62px); line-height:1.03; letter-spacing:-1.8px; font-weight:800; max-width:18ch; }
+  .hero h1 em { font-style:normal; color:var(--sap-glow); }
+  .hero .sub { font-size:clamp(17px,2.3vw,21px); color:rgba(245,241,232,0.82); max-width:58ch; margin-top:24px; }
 
-  /* the money picture */
-  .money-pic { padding:56px 0; border-bottom:2px solid var(--bark); }
-  .mp-label { font-size:13px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px; }
-  .mp-title { font-size:clamp(24px,3.5vw,36px); font-weight:800; letter-spacing:-0.9px; margin-bottom:8px; max-width:20ch; }
-  .mp-intro { font-size:17px; color:var(--bark-2); max-width:60ch; margin-bottom:34px; }
+  /* ---- the pipeline ---- */
+  .pipeline { padding:64px 0; border-bottom:2px solid var(--bark); }
+  .sec-head { margin-bottom:40px; }
+  .sec-head .eyebrow { color:var(--sap-deep); margin-bottom:12px; }
+  .sec-head h2 { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-1px; max-width:22ch; }
+  .sec-head .lead { font-size:17px; color:var(--bark-2); max-width:60ch; margin-top:14px; }
+  .flow { display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:2px solid var(--bark); margin-top:8px; }
+  .step { padding:26px 22px; border-right:2px solid var(--bark); position:relative; background:var(--pulp); }
+  .step:last-child { border-right:none; background:var(--bark); color:var(--pulp); }
+  .step .sn { font-size:12px; font-weight:800; letter-spacing:1.5px; color:var(--sap); text-transform:uppercase; }
+  .step:last-child .sn { color:var(--sap-glow); }
+  .step h3 { font-size:18px; font-weight:800; margin:10px 0 9px; letter-spacing:-0.4px; line-height:1.15; }
+  .step p { font-size:14px; color:var(--bark-2); }
+  .step:last-child p { color:rgba(245,241,232,0.82); }
+  .step .ar { position:absolute; right:-9px; top:50%; transform:translateY(-50%); width:14px; height:14px; background:var(--pulp); border-top:2px solid var(--bark); border-right:2px solid var(--bark); rotate:45deg; z-index:2; }
+  .step:nth-child(4) .ar { display:none; }
+
+  /* ---- what we're watching: the data grid ---- */
+  .feeds { background:var(--ink); color:var(--pulp); padding:64px 0; }
+  .feeds .eyebrow { color:var(--sap-glow); margin-bottom:12px; }
+  .feeds h2 { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-1px; max-width:22ch; margin-bottom:10px; }
+  .feeds .lead { font-size:17px; color:rgba(245,241,232,0.75); max-width:62ch; margin-bottom:40px; }
+  .feed-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:rgba(245,241,232,0.12); border:1px solid rgba(245,241,232,0.12); }
+  .feed { background:var(--ink); padding:24px 22px; }
+  .feed .tag { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--signal); }
+  .feed h3 { font-size:17px; font-weight:800; margin:8px 0 8px; }
+  .feed p { font-size:13.5px; color:rgba(245,241,232,0.7); line-height:1.5; }
+  .feed .src { font-size:11.5px; color:rgba(245,241,232,0.45); margin-top:11px; }
+
+  /* ---- the edge: soil saturation as proof of depth ---- */
+  .edge { padding:64px 0; border-bottom:2px solid var(--bark); }
+  .edge .eyebrow { color:var(--sap-deep); margin-bottom:12px; }
+  .edge h2 { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-1px; max-width:20ch; margin-bottom:10px; }
+  .edge .lead { font-size:17px; color:var(--bark-2); max-width:62ch; margin-bottom:34px; }
   .scene-frame { border:2px solid var(--bark); line-height:0; }
   .scene-frame svg { width:100%; height:auto; display:block; }
   .scene-caption { background:var(--bark); color:var(--pulp); text-align:center; padding:18px 22px; font-size:15px; font-weight:700; line-height:1.5; border:2px solid var(--bark); border-top:none; }
-  .scene-caption em { color:var(--sap); font-style:normal; }
+  .scene-caption em { color:var(--sap-glow); font-style:normal; }
   .scene-caption .big { color:#7FD68F; }
+  .edge-foot { font-size:15px; color:var(--bark-2); max-width:64ch; margin-top:26px; }
+  .edge-foot strong { color:var(--bark); }
 
-  /* why it matters to him — three money cards */
-  .why { padding:56px 0; border-bottom:2px solid var(--bark); }
-  .sec-head { margin-bottom:36px; }
-  .sec-head .eyebrow { margin-bottom:12px; }
-  .sec-head h2 { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-1px; max-width:20ch; }
-  .why-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--bark); border:2px solid var(--bark); }
-  .why-card { background:var(--pulp); padding:26px 22px; }
-  .why-card .big { font-size:32px; font-weight:800; letter-spacing:-1px; color:var(--sap-deep); font-family:'Helvetica Neue',Arial; }
-  .why-card h3 { font-size:17px; font-weight:800; margin:6px 0 10px; }
-  .why-card p { font-size:14.5px; color:var(--bark-2); }
-
-  /* how it works — brief, as proof */
-  .how { padding:56px 0; border-bottom:2px solid var(--bark); }
-  .factors { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--bark); border:2px solid var(--bark); margin-top:32px; }
-  .factor { background:var(--pulp); padding:26px 24px; }
-  .factor .fnum { font-size:13px; font-weight:700; color:var(--sap); letter-spacing:1px; }
-  .factor h3 { font-size:19px; font-weight:800; margin:8px 0 10px; }
-  .factor p { font-size:15px; color:var(--bark-2); }
-  .factor .src { font-size:12.5px; color:var(--ink-soft); margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
-  .factor .src b { color:var(--leaf); }
-
-  /* the ladder, money-translated */
-  .ladder-sec { padding:56px 0; border-bottom:2px solid var(--bark); }
+  /* ---- the ladder ---- */
+  .ladder-sec { padding:64px 0; border-bottom:2px solid var(--bark); }
+  .ladder-sec .eyebrow { color:var(--sap-deep); margin-bottom:12px; }
+  .ladder-sec h2 { font-size:clamp(24px,3.5vw,34px); font-weight:800; letter-spacing:-0.9px; }
   .ladder { border:2px solid var(--bark); margin-top:32px; }
   .lad-row { display:grid; grid-template-columns:110px 1fr 1fr; border-bottom:1px solid var(--line); }
   .lad-row:last-child { border-bottom:none; }
@@ -80,33 +96,58 @@
   .dot.dry{background:#C9BD9E;} .dot.wet{background:#3A4A5C;}
   .ladder-foot { font-size:13.5px; color:var(--ink-soft); margin-top:16px; max-width:64ch; }
 
-  /* honest, short, repositioned near the end */
-  .honest { padding:56px 0; border-bottom:2px solid var(--bark); }
-  .honest h2 { font-size:clamp(22px,3.2vw,30px); font-weight:800; letter-spacing:-0.7px; margin-bottom:18px; max-width:22ch; }
-  .honest p { font-size:16px; color:var(--bark-2); max-width:64ch; margin-bottom:14px; }
-  .honest p strong { color:var(--bark); }
+  /* ---- the stakes ---- */
+  .stakes { background:var(--ink); color:var(--pulp); padding:64px 0; border-bottom:none; }
+  .stakes .eyebrow { color:var(--sap-glow); margin-bottom:16px; }
+  .stakes h2 { font-size:clamp(26px,4vw,40px); font-weight:800; letter-spacing:-1px; max-width:20ch; margin-bottom:24px; }
+  .stakes-row { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:rgba(245,241,232,0.12); border:1px solid rgba(245,241,232,0.12); }
+  .stake { background:var(--ink); padding:28px 26px; }
+  .stake .h { font-size:13px; font-weight:800; letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+  .stake.without .h { color:#C9645A; }
+  .stake.with .h { color:var(--signal); }
+  .stake ul { list-style:none; }
+  .stake li { font-size:15px; color:rgba(245,241,232,0.85); padding:7px 0 7px 22px; position:relative; line-height:1.45; }
+  .stake li::before { position:absolute; left:0; top:7px; font-weight:800; }
+  .stake.without li::before { content:'\2715'; color:#C9645A; }
+  .stake.with li::before { content:'\2713'; color:var(--signal); }
 
-  .closer { background:var(--bark); color:var(--pulp); padding:68px 0; }
-  .closer h2 { font-size:clamp(28px,4.5vw,42px); font-weight:800; letter-spacing:-1px; max-width:18ch; }
-  .closer h2 em { color:var(--sap); font-style:normal; }
+  /* ---- new-guy footnote ---- */
+  .footnote { padding:40px 0; border-bottom:2px solid var(--bark); background:var(--pulp-2); }
+  .footnote .wrap { display:flex; gap:18px; align-items:flex-start; }
+  .footnote .ico { font-size:22px; flex-shrink:0; margin-top:2px; }
+  .footnote h3 { font-size:16px; font-weight:800; margin-bottom:6px; }
+  .footnote p { font-size:14.5px; color:var(--bark-2); max-width:70ch; }
+
+  .closer { background:var(--bark); color:var(--pulp); padding:72px 0; }
+  .closer h2 { font-size:clamp(28px,4.5vw,44px); font-weight:800; letter-spacing:-1px; max-width:18ch; }
+  .closer h2 em { color:var(--sap-glow); font-style:normal; }
   .closer p { font-size:17px; color:rgba(245,241,232,0.8); max-width:54ch; margin:20px 0 30px; }
   .cta { display:inline-block; background:var(--sap); color:var(--pulp); text-decoration:none; font-weight:800; font-size:16px; padding:17px 38px; border:2px solid var(--sap); transition:background .15s; }
   .cta:hover { background:var(--sap-deep); border-color:var(--sap-deep); }
   .closer .micro { font-size:13.5px; color:rgba(245,241,232,0.55); margin-top:18px; }
 
-  footer { background:var(--bark); border-top:1px solid var(--bark-2); padding:26px 0; }
+  footer { background:var(--ink); border-top:1px solid var(--bark-2); padding:26px 0; }
   footer .wrap { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
   footer .fl { color:rgba(245,241,232,0.55); font-size:13px; }
   footer a { color:rgba(245,241,232,0.75); text-decoration:none; font-size:13px; margin-left:18px; }
-  footer a:hover { color:var(--sap); }
+  footer a:hover { color:var(--sap-glow); }
 
+  @media (max-width:820px){
+    .flow { grid-template-columns:1fr 1fr; }
+    .step:nth-child(2) .ar { display:none; }
+    .step:nth-child(1), .step:nth-child(2) { border-bottom:2px solid var(--bark); }
+    .feed-grid { grid-template-columns:1fr; }
+    .stakes-row { grid-template-columns:1fr; }
+  }
   @media (max-width:760px){
-    .why-grid { grid-template-columns:1fr; }
-    .factors { grid-template-columns:1fr; }
     .lad-row { grid-template-columns:78px 1fr 1fr; }
     .lad-wind { padding:13px 8px; font-size:15px; }
     .lad-cell { padding:12px; }
-    .hero { padding:48px 0 38px; }
+    .hero { padding:52px 0 44px; }
+    .flow { grid-template-columns:1fr; }
+    .step { border-right:none; border-bottom:2px solid var(--bark); }
+    .step:last-child { border-bottom:none; }
+    .step .ar { display:none; }
   }
   @media (prefers-reduced-motion:no-preference){
     .reveal { opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease; }
@@ -125,17 +166,80 @@
 
 <header class="hero">
   <div class="wrap">
-    <div class="eyebrow">How we find the big jobs</div>
-    <h1>Any weather app says it's windy. We tell you when storms are <em>pulling whole trees out of the ground.</em></h1>
-    <p class="sub">That's the difference between a $300 limb cleanup and a $4,000 removal &mdash; and it comes down to one thing nobody else is watching: how wet the ground was when the wind hit.</p>
+    <div class="eyebrow"><span class="live"></span> The system behind the alert</div>
+    <h1>The work is already out there. We just <em>find it before you do.</em></h1>
+    <p class="sub">TreeStorm runs live storm, wind, and rainfall data across your exclusive territory around the clock &mdash; the kind of monitoring you'd never stand up yourself &mdash; and the second a tree-dropping storm hits your ground, you get it. Ranked. Before the other trucks know it happened.</p>
   </div>
 </header>
 
-<section class="money-pic reveal">
+<section class="pipeline reveal">
   <div class="wrap">
-    <div class="mp-label">Same storm, two driveways</div>
-    <h2 class="mp-title">The wind was identical. The payday wasn't.</h2>
-    <p class="mp-intro">A 50 mph gust hits two neighborhoods on the same afternoon. One had a dry month. The other had two weeks of rain soaking the soil. Same wind &mdash; but only one of them is throwing off the kind of work you actually want to drive out for.</p>
+    <div class="sec-head">
+      <div class="eyebrow">The pipeline</div>
+      <h2>Storm hits. We find the money. You go get it.</h2>
+      <p class="lead">You don't watch the radar. You don't cross-reference warnings against your ZIPs at 2 a.m. The system does it &mdash; every storm, every ZIP you own, nonstop.</p>
+    </div>
+    <div class="flow">
+      <div class="step">
+        <div class="sn">01 · Watch</div>
+        <h3>Your whole territory, 24/7</h3>
+        <p>Every severe-storm, tornado, high-wind, and hurricane warning across your ZIPs &mdash; monitored the moment the National Weather Service issues it.</p>
+        <div class="ar"></div>
+      </div>
+      <div class="step">
+        <div class="sn">02 · Detect</div>
+        <h3>The instant it's your ground</h3>
+        <p>We match each warning's exact footprint against the ZIPs you own. A storm three counties over doesn't ping you. One on your street does &mdash; immediately.</p>
+        <div class="ar"></div>
+      </div>
+      <div class="step">
+        <div class="sn">03 · Rank</div>
+        <h3>Hardest-hit first</h3>
+        <p>We score every hit ZIP by damage and dollar potential &mdash; wind, rainfall, households &mdash; so you're not guessing which streets to run. The big jobs sort to the top.</p>
+        <div class="ar"></div>
+      </div>
+      <div class="step">
+        <div class="sn">04 · Deliver</div>
+        <h3>Straight to you, alone</h3>
+        <p>The alert hits your phone and inbox &mdash; ranked, mapped, only to you. You're rolling while everyone else is still checking the weather app.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feeds reveal">
+  <div class="wrap">
+    <div class="eyebrow">What's running underneath</div>
+    <h2>Live data feeds most tree outfits never touch.</h2>
+    <p class="lead">This isn't a weather app with your ZIP saved. It's a stack of live government and radar feeds, cross-referenced against your exclusive territory in real time &mdash; the kind of setup that'd cost you the data, the code, and the time to build. We run it. You get the output.</p>
+    <div class="feed-grid">
+      <div class="feed">
+        <div class="tag">Storm warnings</div>
+        <h3>Live NWS feed</h3>
+        <p>Every storm-based warning the National Weather Service issues, with the real gust speed and damage tags pulled off each one &mdash; the instant it drops.</p>
+        <div class="src">Source: National Weather Service</div>
+      </div>
+      <div class="feed">
+        <div class="tag">Rainfall</div>
+        <h3>Radar-measured soil data</h3>
+        <p>14 days of radar-estimated rainfall over each storm's exact footprint &mdash; so we know whether the ground will hold the roots or let them go.</p>
+        <div class="src">Source: MRMS radar precipitation</div>
+      </div>
+      <div class="feed">
+        <div class="tag">Your turf</div>
+        <h3>ZIP-level territory match</h3>
+        <p>Real ZIP-code boundaries and household counts, mapped to the exact territory you own &mdash; so every alert is your ground, scored by how much work is on it.</p>
+        <div class="src">Source: Census boundaries &amp; housing data</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="edge reveal">
+  <div class="wrap">
+    <div class="eyebrow">How deep it goes &mdash; one example</div>
+    <h2>We don't just see the wind. We see whether it'll pull trees.</h2>
+    <p class="lead">Here's the kind of read most monitoring can't make. Two driveways, same 50 mph gust, same afternoon &mdash; but the system knows one of them is throwing off real removal work and the other isn't, because it knows how wet the ground was.</p>
     <div class="scene-frame">
 <svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica Neue, Arial, sans-serif">
   <defs>
@@ -251,65 +355,15 @@
   <line x1="400" y1="0" x2="400" y2="420" stroke="#2B2118" stroke-width="3"/>
 </svg>
     </div>
-    <div class="scene-caption">Same <em>50 mph</em> wind. On dry ground a limb snaps. On soaked ground the roots let go and the <span class="big">whole tree comes out</span> &mdash; that's the job worth chasing.</div>
-  </div>
-</section>
-
-<section class="why reveal">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">Why this matters to your crew</div>
-      <h2>You don't want every storm. You want the ones that uproot trees.</h2>
-    </div>
-    <div class="why-grid">
-      <div class="why-card">
-        <div class="big">10&times;</div>
-        <h3>Bigger tickets</h3>
-        <p>An uprooted tree is a full removal &mdash; stump, crane, hauling. That's thousands, not the couple hundred a downed limb pays. We point you at the storms throwing off the big tickets.</p>
-      </div>
-      <div class="why-card">
-        <div class="big">48 hrs</div>
-        <h3>Before the rush</h3>
-        <p>Homeowners hire the first credible crew that knocks. When a storm hits your ZIPs, you know before the other trucks &mdash; ranked by which streets got hit hardest.</p>
-      </div>
-      <div class="why-card">
-        <div class="big">1</div>
-        <h3>Crew per ZIP</h3>
-        <p>You're the only TreeStorm contractor in your ZIPs. When the alert fires, it fires to you &mdash; not to four other crews racing you to the same driveway.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="how reveal">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">How we know</div>
-      <h2>Two things, checked the second a storm warning drops.</h2>
-    </div>
-    <div class="factors">
-      <div class="factor">
-        <div class="fnum">SIGNAL 01</div>
-        <h3>How hard the wind hit</h3>
-        <p>We pull the real gust speed off the active storm warning &mdash; not a city-wide forecast &mdash; and read it for trees, not roofs. Limbs start dropping around 25 mph. Trees come down past 40.</p>
-        <div class="src">From the <b>National Weather Service</b>, gust speed tagged on each warning.</div>
-      </div>
-      <div class="factor">
-        <div class="fnum">SIGNAL 02</div>
-        <h3>How wet the ground was</h3>
-        <p>We add up the last two weeks of rain over the exact storm footprint. Soaked soil can't hold roots &mdash; so the same wind that snaps a limb on dry ground tears the whole tree out of wet ground.</p>
-        <div class="src">From <b>radar-measured rainfall</b> over the storm's real footprint &mdash; not a guess.</div>
-      </div>
-    </div>
+    <div class="scene-caption">Same <em>50 mph</em> wind. Dry ground drops a limb. Soaked ground lets the roots go and the <span class="big">whole tree comes out</span> &mdash; the system flags that storm as a removal, not a cleanup.</div>
+    <p class="edge-foot"><strong>That's one signal out of the stack.</strong> Wind tuned for trees instead of roofs. Rainfall read for root-holding instead of forecasts. Damage scored in dollars instead of categories. It all runs the second a warning drops &mdash; and it's why a TreeStorm alert means something a weather app never could.</p>
   </div>
 </section>
 
 <section class="ladder-sec reveal">
   <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">What the wind is worth</div>
-      <h2>The same gust, dry vs. soaked.</h2>
-    </div>
+    <div class="eyebrow">What the wind is worth</div>
+    <h2>The same gust, scored two ways.</h2>
     <div class="ladder">
       <div class="lad-row head">
         <div>Gust</div>
@@ -318,7 +372,7 @@
       </div>
       <div class="lad-row">
         <div class="lad-wind">40 mph</div>
-        <div class="lad-cell"><span class="badge b-mod">Moderate</span><div class="ct">Branches and small limbs. <span class="dollars">Cleanup money.</span></div></div>
+        <div class="lad-cell"><span class="badge b-mod">Moderate</span><div class="ct">Branches, small limbs. <span class="dollars">Cleanup money.</span></div></div>
         <div class="lad-cell"><span class="badge b-high">High</span><div class="ct">Leaning trees, lifted roots. <span class="dollars">Real removals.</span></div></div>
       </div>
       <div class="lad-row">
@@ -328,27 +382,55 @@
       </div>
       <div class="lad-row">
         <div class="lad-wind">70 mph</div>
-        <div class="lad-cell"><span class="badge b-sev">Severe</span><div class="ct">Trees down even when it's dry. <span class="dollars">Busy week.</span></div></div>
+        <div class="lad-cell"><span class="badge b-sev">Severe</span><div class="ct">Trees down even dry. <span class="dollars">Busy week.</span></div></div>
         <div class="lad-cell"><span class="badge b-sev">Severe</span><div class="ct">Widespread uprooting. <span class="dollars">Booked solid.</span></div></div>
       </div>
     </div>
-    <p class="ladder-foot">On dry ground it takes a real blow to pull a tree. On soaked ground a middling gust does it &mdash; and that's exactly the job a plain weather alert would tell you to ignore.</p>
+    <p class="ladder-foot">On dry ground it takes a real blow to pull a tree. On soaked ground a middling gust does it &mdash; the exact storm a plain weather alert tells you to ignore, and the one we send you straight at.</p>
   </div>
 </section>
 
-<section class="honest reveal">
+<section class="stakes reveal">
   <div class="wrap">
-    <h2>Straight talk about what this is.</h2>
-    <p>We're not meteorologists and we don't chase hail. <strong>We watch the National Weather Service for you and turn it into one thing: where the tree damage is, ranked by how bad &mdash; so you knock the right doors first.</strong></p>
-    <p>The soaked-ground part is what nobody else does. The big storm-data outfits are built for roofers chasing hail &mdash; they think about shingles, not roots. We think about the dirt, because that's what decides whether a storm leaves you a pile of branches or a yard full of removals.</p>
-    <p>It's not a crystal ball &mdash; it's a head start. The faster you move on it, the more of those jobs you close before anyone else shows up.</p>
+    <div class="eyebrow">The honest math</div>
+    <h2>Same storms. Two very different months.</h2>
+    <div class="stakes-row">
+      <div class="stake without">
+        <div class="h">Without TreeStorm</div>
+        <ul>
+          <li>You hear about the storm when a neighbor mentions it &mdash; days late.</li>
+          <li>You drive the area hoping to spot damage, burning fuel and daylight.</li>
+          <li>The good removals are already signed by whoever knocked first.</li>
+          <li>You're competing for the same leads as four other crews.</li>
+        </ul>
+      </div>
+      <div class="stake with">
+        <div class="h">With TreeStorm</div>
+        <ul>
+          <li>The alert hits your phone the moment the storm clears your ZIPs.</li>
+          <li>You drive straight to the hardest-hit streets &mdash; already ranked.</li>
+          <li>You're the first credible crew on the driveway, every time.</li>
+          <li>It's your territory, alone &mdash; the alert went to nobody but you.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="footnote reveal">
+  <div class="wrap">
+    <span class="ico">&#127793;</span>
+    <div>
+      <h3>New to storm work?</h3>
+      <p>If you're just getting into it, every alert also comes with the basics &mdash; what damage to look for, how storm-removal insurance claims usually work, and how fast to move. Been doing this for years? Ignore all that. You already know what to do with a yard full of downed oaks.</p>
+    </div>
   </div>
 </section>
 
 <section class="closer reveal">
   <div class="wrap">
-    <h2>Stop driving around looking for work. <em>Know where it is.</em></h2>
-    <p>One crew per ZIP. The moment a tree-dropping storm hits your territory, you get the alert &mdash; ranked, with a plan, before your competition is out of bed.</p>
+    <h2>You're a tree guy. <em>This is your edge.</em></h2>
+    <p>One crew per ZIP. The system watches your ground around the clock and sends you the work, ranked, before your competition is out of bed. The guys who run on it make more off every storm. Simple as that.</p>
     <a class="cta" href="/#pricing">Claim your territory &rarr;</a>
     <div class="micro">Florida &middot; Georgia &middot; South Carolina &middot; North Carolina &middot; Alabama</div>
   </div>
@@ -368,7 +450,7 @@
 
 <script>
   if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-    const io = new IntersectionObserver((es)=>{ es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }); }, { threshold:0.12 });
+    const io = new IntersectionObserver((es)=>{ es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }); }, { threshold:0.1 });
     document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
   } else { document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in')); }
 </script>
