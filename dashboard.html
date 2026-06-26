@@ -60,6 +60,7 @@
   .live-cond .lc-temp { color: var(--paper); font-weight: 700; font-family: 'Fraunces', serif; }
   .live-cond .lc-sky { color: var(--muted-2); }
   .live-strip .lc-pulse { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--moss-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .live-strip .lc-more { font-size: 12px; color: var(--muted-2); font-weight: 500; padding: 7px 4px; }
 
   /* subtle system-status line under the stats */
   .sys-status { max-width: 1240px; margin: 18px auto 0; font-size: 12.5px; color: var(--muted-2); display: flex; align-items: center; gap: 8px; padding-top: 14px; border-top: 1px solid rgba(247,243,236,0.1); }
@@ -572,24 +573,30 @@
   // ---------- live conditions strip (proves real-time data) ----------
   async function renderLiveConditions() {
     const strip = document.getElementById('live-strip');
-    const zips = [...myZips].slice(0, 3); // show up to 3 to keep it clean
-    if (!zips.length) { strip.style.display='none'; strip.innerHTML=''; return; }
+    const all = [...myZips];
+    if (!all.length) { strip.style.display='none'; strip.innerHTML=''; return; }
+    const SHOW = 5;
+    const zips = all.slice(0, SHOW);
+    const moreCount = all.length - zips.length;
     // show the strip immediately with the Live pulse, then fill ZIPs as they resolve
     strip.style.display='flex';
     strip.innerHTML = '<span class="lc-pulse"><span class="live-dot"></span>Live</span>';
     let gotAny = false;
+    // fetch in parallel but preserve order by building placeholders first
+    const slots = {};
+    zips.forEach(z => { const el=document.createElement('div'); el.className='live-cond'; el.style.opacity='0.4'; el.innerHTML='<span class="lc-zip">'+z+'</span><span class="lc-temp">…</span>'; strip.appendChild(el); slots[z]=el; });
     await Promise.all(zips.map(async z => {
       try {
         const r = await fetch(API + '/conditions/' + z);
-        if (!r.ok) return;
+        if (!r.ok) { slots[z].remove(); return; }
         const c = await r.json();
-        if (c.temp == null) return;
+        if (c.temp == null) { slots[z].remove(); return; }
         gotAny = true;
-        const el = document.createElement('div'); el.className='live-cond';
-        el.innerHTML = '<span class="lc-zip">' + z + '</span><span class="lc-temp">' + Math.round(c.temp) + '°</span><span class="lc-sky">' + escapeHtml(c.sky||'') + '</span>';
-        strip.appendChild(el);
-      } catch {}
+        slots[z].style.opacity='1';
+        slots[z].innerHTML = '<span class="lc-zip">' + z + '</span><span class="lc-temp">' + Math.round(c.temp) + '°</span><span class="lc-sky">' + escapeHtml(c.sky||'') + '</span>';
+      } catch { slots[z].remove(); }
     }));
+    if (moreCount > 0 && gotAny) { const m=document.createElement('div'); m.className='lc-more'; m.textContent='+' + moreCount + ' more'; strip.appendChild(m); }
     if (!gotAny) { strip.style.display='none'; strip.innerHTML=''; }
   }
 
