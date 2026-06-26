@@ -5,40 +5,64 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Privacy Policy — TreeStorm Leads</title>
 <style>
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #F5F1E8; color: #2B2118; line-height: 1.6; max-width: 760px; margin: 0 auto; padding: 48px 24px; }
-  h1 { font-size: 32px; letter-spacing: -1px; }
-  h2 { font-size: 20px; margin-top: 32px; }
-  a { color: #A03E10; }
-  .logo { font-weight: 800; font-size: 18px; margin-bottom: 32px; }
-  .back { display: inline-block; margin-bottom: 24px; }
-  .muted { color: #6B6253; font-size: 14px; }
+  :root { --bark:#2B2118; --pulp:#F5F1E8; --sap:#C8531B; --sap-deep:#A03E10; --line:#D8CFBC; --ink-soft:#6B6253; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--pulp); color: var(--bark); line-height: 1.65; max-width: 760px; margin: 0 auto; padding: 0 24px 64px; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; border-bottom: 2px solid var(--bark); margin-bottom: 40px; }
+  .logo { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+  .logo .mark { color: var(--sap); font-size: 20px; }
+  .back { color: var(--bark); text-decoration: none; font-size: 14px; font-weight: 600; border-bottom: 2px solid var(--sap); padding-bottom: 2px; }
+  h1 { font-size: 34px; letter-spacing: -1px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin-top: 36px; letter-spacing: -0.3px; }
+  a { color: var(--sap-deep); }
+  .muted { color: var(--ink-soft); font-size: 14px; }
+  .lead { font-size: 17px; margin-top: 20px; }
+  strong { color: var(--bark); }
+  .box { background: #fff; border: 2px solid var(--bark); padding: 18px 22px; margin-top: 16px; }
+  footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-soft); }
+  footer a { color: var(--ink-soft); margin-right: 16px; }
 </style>
 </head>
 <body>
-  <div class="logo">◣ TreeStorm Leads</div>
-  <a class="back" href="index.html">← Back to home</a>
+  <div class="topbar">
+    <span class="logo"><span class="mark">&#9699;</span> TreeStorm Leads</span>
+    <a class="back" href="/">&larr; Back to home</a>
+  </div>
+
   <h1>Privacy Policy</h1>
   <p class="muted">Last updated: June 2026</p>
 
-  <p>TreeStorm Leads ("we," "us") provides storm-damage alert notifications to tree service professionals who subscribe to our service. This policy explains what information we collect and how we use it.</p>
+  <p class="lead">TreeStorm Leads ("we," "us") provides storm-damage alert notifications to tree-service professionals. This policy explains what we collect, how we use it, and your choices.</p>
 
   <h2>Information we collect</h2>
-  <p>When you subscribe, we collect the information you provide: your name or company name, email address, phone number, and the geographic service area (counties) you wish to monitor. Payment is processed securely by our payment processor (Stripe); we do not store your full card details.</p>
+  <p>When you subscribe, we collect what you provide: your name or company name, email address, phone number, the state you serve, and the ZIP-code territory you select to monitor. Payment is processed securely by our payment processor, Stripe &mdash; <strong>we never see or store your full card details.</strong></p>
 
   <h2>How we use your information</h2>
-  <p>We use your information solely to provide the service you signed up for: monitoring weather alerts in your selected service area and sending you SMS and/or email notifications when qualifying storm events occur. We use your phone number only to deliver these alerts and service-related messages.</p>
+  <p>We use your information solely to provide the service you signed up for: monitoring weather alerts in your selected ZIP codes and sending you SMS and/or email notifications when qualifying storm events occur. We use your phone number only to deliver these alerts and service-related messages. We do not use your information for advertising, and we do not sell it.</p>
 
   <h2>SMS messaging</h2>
   <p>By providing your phone number and subscribing, you consent to receive recurring SMS storm-alert notifications at the number you provide. Message frequency varies based on storm activity in your area. Message and data rates may apply. You can opt out at any time by replying STOP to any message, or reply HELP for assistance.</p>
-  <p><strong>We do not share your phone number or opt-in consent with any third parties for their marketing purposes.</strong> Mobile information will not be shared with or sold to third parties or affiliates for marketing or promotional purposes. All categories of personal information described above exclude text messaging originator opt-in data and consent; this information will not be shared with any third parties.</p>
+  <div class="box">
+    <strong>We do not share your phone number or SMS opt-in consent with any third parties for their marketing purposes.</strong> Mobile information will not be shared with or sold to third parties or affiliates for marketing or promotional purposes. The categories of personal information described in this policy exclude text-messaging originator opt-in data and consent; this information will not be shared with any third parties.
+  </div>
 
   <h2>Information sharing</h2>
-  <p>We do not sell your personal information. We share information only with service providers who help us operate (such as our payment processor and SMS/email delivery providers), and only as needed to provide the service. We may disclose information if required by law.</p>
+  <p>We do not sell your personal information. We share information only with the service providers who help us operate &mdash; our payment processor (Stripe) and our SMS and email delivery providers &mdash; and only as needed to deliver the service. We may disclose information if required by law.</p>
 
   <h2>Data retention and deletion</h2>
-  <p>We retain your information while your subscription is active. If you cancel, we remove your information from active alerting. You may request deletion of your data by contacting us.</p>
+  <p>We retain your information while your subscription is active. If you cancel, we remove your information from active alerting and release your ZIP codes. You may request deletion of your data at any time by emailing us, and we will delete it except where we are required to retain certain records (for example, billing records) by law.</p>
+
+  <h2>Your choices</h2>
+  <p>You can stop SMS alerts by replying STOP. You can cancel your subscription from your dashboard at any time. You can request a copy of, or deletion of, your data by contacting us.</p>
 
   <h2>Contact</h2>
   <p>Questions about this policy or your data: <a href="mailto:support@treestormleads.com">support@treestormleads.com</a></p>
+
+  <footer>
+    <a href="/">Home</a>
+    <a href="/terms.html">Terms</a>
+    <a href="/refund.html">Refund Policy</a>
+    <span>&copy; 2026 TreeStorm Leads</span>
+  </footer>
 </body>
 </html>

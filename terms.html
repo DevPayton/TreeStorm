@@ -5,39 +5,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Terms of Service — TreeStorm Leads</title>
 <style>
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #F5F1E8; color: #2B2118; line-height: 1.6; max-width: 760px; margin: 0 auto; padding: 48px 24px; }
-  h1 { font-size: 32px; letter-spacing: -1px; }
-  h2 { font-size: 20px; margin-top: 32px; }
-  a { color: #A03E10; }
-  .logo { font-weight: 800; font-size: 18px; margin-bottom: 32px; }
-  .back { display: inline-block; margin-bottom: 24px; }
-  .muted { color: #6B6253; font-size: 14px; }
+  :root { --bark:#2B2118; --pulp:#F5F1E8; --sap:#C8531B; --sap-deep:#A03E10; --line:#D8CFBC; --ink-soft:#6B6253; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--pulp); color: var(--bark); line-height: 1.65; max-width: 760px; margin: 0 auto; padding: 0 24px 64px; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; border-bottom: 2px solid var(--bark); margin-bottom: 40px; }
+  .logo { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+  .logo .mark { color: var(--sap); font-size: 20px; }
+  .back { color: var(--bark); text-decoration: none; font-size: 14px; font-weight: 600; border-bottom: 2px solid var(--sap); padding-bottom: 2px; }
+  h1 { font-size: 34px; letter-spacing: -1px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin-top: 36px; letter-spacing: -0.3px; }
+  a { color: var(--sap-deep); }
+  .muted { color: var(--ink-soft); font-size: 14px; }
+  .lead { font-size: 17px; margin-top: 20px; }
+  strong { color: var(--bark); }
+  .box { background: #fff; border: 2px solid var(--bark); padding: 18px 22px; margin-top: 16px; }
+  footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-soft); }
+  footer a { color: var(--ink-soft); margin-right: 16px; }
 </style>
 </head>
 <body>
-  <div class="logo">◣ TreeStorm Leads</div>
-  <a class="back" href="index.html">← Back to home</a>
+  <div class="topbar">
+    <span class="logo"><span class="mark">&#9699;</span> TreeStorm Leads</span>
+    <a class="back" href="/">&larr; Back to home</a>
+  </div>
+
   <h1>Terms of Service</h1>
   <p class="muted">Last updated: June 2026</p>
 
-  <p>By subscribing to TreeStorm Leads, you agree to these terms.</p>
+  <p class="lead">These terms govern your use of TreeStorm Leads. By subscribing, you agree to them. Please read them &mdash; they describe what the service does, how billing works, and how to cancel.</p>
 
-  <h2>The service</h2>
-  <p>TreeStorm Leads monitors public National Weather Service alerts and notifies you, via SMS and/or email, when qualifying severe weather events affect the service area you select. Our alerts identify affected areas based on weather data; they are informational tools to help you prioritize outreach. We do not guarantee that any specific property has damage or that any specific job will result.</p>
+  <h2>What the service does</h2>
+  <p>TreeStorm Leads monitors public National Weather Service alerts and notifies you, by SMS and/or email, when qualifying severe-weather events affect the ZIP codes in your territory. Our alerts rank affected ZIP codes by estimated tree-damage risk, using factors including wind speed and recent rainfall (soil saturation).</p>
+  <p><strong>Our alerts are informational tools to help you prioritize outreach.</strong> They identify areas where storm conditions occurred &mdash; they do not confirm that any specific property has damage, and they do not guarantee that any job, lead, or revenue will result. Tree-damage risk scoring is an estimate, not a measurement of actual damage.</p>
+
+  <h2>Your territory and exclusivity</h2>
+  <p>Your plan includes a set number of ZIP codes ("your territory"), based on the tier you choose. ZIP codes are <strong>exclusive</strong>: while you hold a ZIP code, no other TreeStorm Leads subscriber can claim it. You select your ZIP codes in your dashboard, subject to availability and the radius limits of your plan.</p>
+  <div class="box">
+    <strong>What happens to your ZIPs if you cancel:</strong> when your subscription ends, the ZIP codes you held are released and become available for other contractors to claim. We cannot guarantee a ZIP code will still be available if you later resubscribe.
+  </div>
 
   <h2>Subscription and billing</h2>
-  <p>The service is offered on a recurring monthly subscription, billed through our payment processor. You may cancel at any time; cancellation stops future billing and future alerts. Fees already paid are non-refundable except where required by law.</p>
+  <p>The service is a recurring monthly subscription, billed in advance through our payment processor (Stripe). Your subscription renews automatically each month until you cancel. The price is the amount shown for your plan at signup; we will give notice before any price change.</p>
+
+  <h2>Canceling</h2>
+  <p>You can cancel at any time from your dashboard &mdash; no phone calls, no hoops. When you cancel:</p>
+  <p>Your subscription is set to end at the close of your current paid billing period. <strong>You keep full access and alerts through the end of the period you've already paid for.</strong> At the end of that period, billing stops, alerts stop, and your ZIP codes are released. We do not prorate or refund partial months (see our <a href="/refund.html">Refund Policy</a>).</p>
 
   <h2>SMS alerts</h2>
-  <p>By providing your phone number you consent to receive recurring SMS alerts. Message frequency varies with storm activity. Message and data rates may apply. Reply STOP to unsubscribe at any time, or HELP for assistance.</p>
+  <p>If you provide a phone number, you consent to receive recurring SMS alerts from TreeStorm Leads. Message frequency varies with storm activity. Message and data rates may apply. <strong>Reply STOP to unsubscribe</strong> from texts at any time, or reply HELP for assistance. Opting out of SMS does not cancel your subscription; you can still receive alerts by email.</p>
 
   <h2>Acceptable use</h2>
-  <p>You agree to use alerts for your own legitimate business outreach and to comply with all applicable laws, including those governing solicitation and contractor licensing in your area.</p>
+  <p>You agree to use alerts for your own legitimate business outreach, and to comply with all applicable laws &mdash; including those governing solicitation, door-to-door contact, telemarketing, and contractor licensing in your area. You are responsible for how you contact homeowners. TreeStorm Leads is a lead-prioritization tool; it is not a substitute for proper licensing, insurance, or legal compliance in your trade.</p>
 
   <h2>No warranty</h2>
-  <p>The service is provided "as is." Weather data and alert timing depend on third-party sources (the National Weather Service) and may contain delays or inaccuracies. We are not liable for missed alerts, data errors, or business outcomes resulting from use of the service.</p>
+  <p>The service is provided "as is." Weather data and alert timing depend on third-party sources (primarily the National Weather Service and radar-rainfall data) and may contain delays, gaps, or inaccuracies. We do not warrant that alerts will be timely, complete, or error-free.</p>
+
+  <h2>Limitation of liability</h2>
+  <p>To the fullest extent permitted by law, TreeStorm Leads is not liable for missed or delayed alerts, data errors, lost business, or any indirect or consequential damages arising from use of the service. Our total liability for any claim is limited to the amount you paid us in the three months before the claim.</p>
+
+  <h2>Changes to these terms</h2>
+  <p>We may update these terms as the service evolves. If we make material changes, we'll update the date above and, where appropriate, notify you. Continued use after changes means you accept them.</p>
 
   <h2>Contact</h2>
-  <p><a href="mailto:support@treestormleads.com">support@treestormleads.com</a></p>
+  <p>Questions about these terms: <a href="mailto:support@treestormleads.com">support@treestormleads.com</a></p>
+
+  <footer>
+    <a href="/">Home</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/refund.html">Refund Policy</a>
+    <span>&copy; 2026 TreeStorm Leads</span>
+  </footer>
 </body>
 </html>
