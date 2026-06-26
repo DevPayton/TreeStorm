@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TreeStorm Leads — Storm jobs in your inbox before your competitors wake up</title>
+<style>
+  :root {
+    --bark: #2B2118;        /* deep bark brown — near black, warmer */
+    --bark-2: #3D3023;
+    --pulp: #F5F1E8;        /* raw paper / wood pulp */
+    --pulp-2: #EAE3D4;
+    --sap: #C8531B;         /* storm-warning orange (NWS warning color, owned) */
+    --sap-deep: #A03E10;
+    --leaf: #4A5D3A;        /* muted forest green */
+    --sky: #5B7A99;         /* storm sky blue-grey */
+    --line: #D8CFBC;
+    --ink-soft: #6B6253;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: var(--pulp);
+    color: var(--bark);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* ===== Nav ===== */
+  nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 22px 24px; max-width: 1080px; margin: 0 auto;
+  }
+  .logo { font-weight: 800; font-size: 20px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 9px; }
+  .logo .mark { color: var(--sap); font-size: 22px; }
+  .nav-cta {
+    background: var(--bark); color: var(--pulp); text-decoration: none;
+    padding: 11px 20px; border-radius: 2px; font-weight: 700; font-size: 14px;
+    transition: background .15s;
+  }
+  .nav-cta:hover { background: var(--sap); }
+
+  /* ===== Hero ===== */
+  .hero {
+    padding: 70px 0 64px;
+    border-bottom: 2px solid var(--bark);
+    position: relative;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--sap-deep); margin-bottom: 22px;
+  }
+  .eyebrow .dot {
+    width: 8px; height: 8px; background: var(--sap); border-radius: 50%;
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+  .hero h1 {
+    font-size: clamp(38px, 6vw, 66px); font-weight: 800; line-height: 1.02;
+    letter-spacing: -1.8px; max-width: 14ch; margin-bottom: 24px;
+  }
+  .hero h1 .hl { color: var(--sap); }
+  .hero p.sub {
+    font-size: clamp(17px, 2.2vw, 21px); max-width: 52ch; color: var(--bark-2);
+    margin-bottom: 36px;
+  }
+  .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .btn-primary {
+    background: var(--sap); color: #fff; text-decoration: none;
+    padding: 16px 30px; border-radius: 2px; font-weight: 800; font-size: 16px;
+    box-shadow: 0 2px 0 var(--sap-deep); transition: transform .1s, box-shadow .1s;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 3px 0 var(--sap-deep); }
+  .btn-ghost { color: var(--bark); text-decoration: none; font-weight: 700; font-size: 15px; padding: 16px 8px; border-bottom: 2px solid var(--bark); }
+  .hero-note { margin-top: 18px; font-size: 14px; color: var(--ink-soft); }
+
+  /* ===== Live ticker strip ===== */
+  .ticker {
+    background: var(--bark); color: var(--pulp); padding: 14px 0;
+    font-size: 14px; font-weight: 600; overflow: hidden; white-space: nowrap;
+  }
+  .ticker .wrap { display: flex; align-items: center; gap: 14px; }
+  .ticker .tag { background: var(--sap); color: #fff; padding: 3px 10px; border-radius: 2px; font-size: 12px; font-weight: 800; letter-spacing: .5px; flex-shrink: 0; }
+  .ticker .feed { color: var(--pulp-2); }
+
+  /* ===== Problem ===== */
+  section { padding: 76px 0; }
+  .section-label {
+    font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--sap-deep); margin-bottom: 16px;
+  }
+  h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 800; letter-spacing: -1px; line-height: 1.08; margin-bottom: 22px; max-width: 20ch; }
+  .lead-text { font-size: 18px; color: var(--bark-2); max-width: 56ch; }
+
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 44px; border: 2px solid var(--bark); }
+  .compare > div { padding: 32px; }
+  .compare .them { background: var(--pulp-2); border-right: 2px solid var(--bark); }
+  .compare .us { background: var(--bark); color: var(--pulp); }
+  .compare h3 { font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+  .compare .them h3 { color: var(--sap-deep); }
+  .compare .us h3 { color: var(--sap); }
+  .compare ul { list-style: none; }
+  .compare li { padding: 11px 0; font-size: 15px; display: flex; gap: 11px; align-items: flex-start; border-bottom: 1px solid var(--line); }
+  .compare .us li { border-bottom: 1px solid var(--bark-2); }
+  .compare li:last-child { border-bottom: none; }
+  .compare .x { color: #b5443f; font-weight: 800; flex-shrink: 0; }
+  .compare .check { color: var(--sap); font-weight: 800; flex-shrink: 0; }
+
+  /* ===== How it works ===== */
+  .how { background: var(--bark); color: var(--pulp); }
+  .how .section-label { color: var(--sap); }
+  .how h2 { color: var(--pulp); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 48px; }
+  .step { border-top: 3px solid var(--sap); padding-top: 22px; }
+  .step .num { font-size: 13px; font-weight: 800; color: var(--sap); letter-spacing: 1px; margin-bottom: 12px; }
+  .step h4 { font-size: 20px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.3px; }
+  .step p { font-size: 15px; color: var(--pulp-2); }
+
+  /* ===== Pricing ===== */
+  .pricing { text-align: center; }
+  .price-card {
+    max-width: 440px; margin: 44px auto 0; border: 2px solid var(--bark);
+    background: var(--pulp); text-align: left;
+  }
+  .price-head { background: var(--bark); color: var(--pulp); padding: 26px 32px; }
+  .price-head .plan { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--sap); margin-bottom: 12px; }
+  .price-head .amount { font-size: 52px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+  .price-head .amount span { font-size: 18px; font-weight: 600; color: var(--pulp-2); letter-spacing: 0; }
+  .price-body { padding: 30px 32px; }
+  .price-body ul { list-style: none; margin-bottom: 28px; }
+  .price-body li { padding: 10px 0; font-size: 15px; display: flex; gap: 11px; border-bottom: 1px solid var(--line); }
+  .price-body li:last-child { border-bottom: none; }
+  .price-body .check { color: var(--sap); font-weight: 800; }
+  .price-body .btn-primary { display: block; text-align: center; }
+  .price-foot { text-align: center; font-size: 14px; color: var(--ink-soft); margin-top: 18px; }
+
+  /* ===== Coverage ===== */
+  .coverage { text-align: center; }
+  .states { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
+  .state-chip { border: 2px solid var(--bark); padding: 12px 24px; font-weight: 800; font-size: 16px; letter-spacing: 0.5px; }
+  .state-chip.soon { border-color: var(--line); color: var(--ink-soft); }
+
+  /* ===== CTA ===== */
+  .final { background: var(--sap); color: #fff; text-align: center; }
+  .final h2 { color: #fff; margin: 0 auto 20px; max-width: 22ch; }
+  .final p { font-size: 18px; max-width: 50ch; margin: 0 auto 32px; color: #fff; opacity: .95; }
+  .final .btn-dark { background: var(--bark); color: var(--pulp); text-decoration: none; padding: 17px 36px; font-weight: 800; font-size: 17px; border-radius: 2px; display: inline-block; transition: transform .1s; }
+  .final .btn-dark:hover { transform: translateY(-2px); }
+
+  /* ===== Footer ===== */
+  footer { background: var(--bark); color: var(--pulp-2); padding: 40px 0; font-size: 14px; }
+  footer .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  footer .logo { color: var(--pulp); font-size: 17px; }
+
+  @media (max-width: 720px) {
+    .compare, .steps { grid-template-columns: 1fr; }
+    .compare .them { border-right: none; border-bottom: 2px solid var(--bark); }
+    .ticker { font-size: 12px; }
+    section { padding: 56px 0; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="mark">◣</span> TreeStorm Leads</div>
+  <a href="#pricing" class="nav-cta">Start free trial</a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span> Live storm monitoring · FL · GA · SC · NC · AL</span>
+    <h1>Storm jobs in your inbox <span class="hl">before your competitors wake up.</span></h1>
+    <p class="sub">We watch every severe wind, tornado, and hurricane warning across your service area 24/7. The moment a storm hits a neighborhood you cover, you get an alert — with the hardest-hit zones flagged — so you're knocking on doors while everyone else is still checking the news.</p>
+    <div class="hero-ctas">
+      <a href="#pricing" class="btn-primary">Start 14-day free trial</a>
+      <a href="#how" class="btn-ghost">See how it works →</a>
+    </div>
+    <p class="hero-note">No contract. Cancel anytime. Exclusive to your territory — we don't sell the same area twice.</p>
+  </div>
+</header>
+
+<!-- LIVE TICKER -->
+<div class="ticker">
+  <div class="wrap">
+    <span class="tag">LIVE FEED</span>
+    <span class="feed">Monitoring National Weather Service alerts across 5 states · severe thunderstorm, tornado, high-wind & hurricane warnings · alerts fire the instant a qualifying storm enters your zone</span>
+  </div>
+</div>
+
+<!-- PROBLEM / COMPARE -->
+<section>
+  <div class="wrap">
+    <div class="section-label">The lead problem</div>
+    <h2>You're paying $50–100 a lead to fight four other crews for the same job.</h2>
+    <p class="lead-text">Angi and HomeAdvisor sell the same homeowner to 3–5 contractors, then charge you whether the lead is real or not. After a storm, the work is everywhere — but by the time a shared lead reaches you, the homeowner's already booked someone faster. There's a better way to find storm work: get there first.</p>
+
+    <div class="compare">
+      <div class="them">
+        <h3>Shared lead platforms</h3>
+        <ul>
+          <li><span class="x">✕</span> Same lead sold to 3–5 competitors</li>
+          <li><span class="x">✕</span> $50–100+ per lead, real or fake</li>
+          <li><span class="x">✕</span> You pay even when the lead ghosts</li>
+          <li><span class="x">✕</span> Race to call before four other crews</li>
+          <li><span class="x">✕</span> No storm timing — leads trickle in late</li>
+        </ul>
+      </div>
+      <div class="us">
+        <h3>TreeStorm Leads</h3>
+        <ul>
+          <li><span class="check">✓</span> Exclusive to your territory, never shared</li>
+          <li><span class="check">✓</span> Flat monthly rate — unlimited storm alerts</li>
+          <li><span class="check">✓</span> Real-time: alerted the moment a storm hits</li>
+          <li><span class="check">✓</span> Hardest-hit zones flagged so you target smart</li>
+          <li><span class="check">✓</span> Built only for tree services — no other trades</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="section-label">How it works</div>
+    <h2>From storm to doorstep — automatically.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="num">STEP 01</div>
+        <h4>We watch the sky</h4>
+        <p>Our system monitors National Weather Service alerts across your service area around the clock — every tornado, severe thunderstorm, high-wind, and hurricane warning, the instant it's issued.</p>
+      </div>
+      <div class="step">
+        <div class="num">STEP 02</div>
+        <h4>You get the alert</h4>
+        <p>The moment a qualifying storm enters a ZIP you cover, you get a text and email — with the event, the affected neighborhoods, and a damage score so you know how big the job wave will be.</p>
+      </div>
+      <div class="step">
+        <div class="num">STEP 03</div>
+        <h4>You get there first</h4>
+        <p>While competitors wait for the phone to ring, you're already routing crews to the hardest-hit blocks. First crew on the street wins the work — and the referrals next door.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <div class="section-label">Simple pricing</div>
+    <h2 style="margin-left:auto;margin-right:auto;">One flat rate. Your whole territory. Unlimited alerts.</h2>
+    <div class="price-card">
+      <div class="price-head">
+        <div class="plan">Territory Plan</div>
+        <div class="amount">$99<span>/month</span></div>
+      </div>
+      <div class="price-body">
+        <ul>
+          <li><span class="check">✓</span> 24/7 storm monitoring for your service area</li>
+          <li><span class="check">✓</span> Instant text + email alerts, damage-scored</li>
+          <li><span class="check">✓</span> Hardest-hit neighborhood targeting</li>
+          <li><span class="check">✓</span> Exclusive — your territory is yours alone</li>
+          <li><span class="check">✓</span> Tree-removal permit alerts (where available)</li>
+          <li><span class="check">✓</span> No contract — cancel anytime</li>
+        </ul>
+        <a href="#" class="btn-primary">Start 14-day free trial</a>
+      </div>
+    </div>
+    <p class="price-foot">No credit card for the trial. See real alerts for your area before you pay a cent.</p>
+  </div>
+</section>
+
+<!-- COVERAGE -->
+<section class="coverage">
+  <div class="wrap">
+    <div class="section-label">Coverage</div>
+    <h2 style="margin-left:auto;margin-right:auto;">Live now across the storm belt.</h2>
+    <div class="states">
+      <div class="state-chip">Florida</div>
+      <div class="state-chip">Georgia</div>
+      <div class="state-chip">South Carolina</div>
+      <div class="state-chip">North Carolina</div>
+      <div class="state-chip">Alabama</div>
+    </div>
+    <p class="lead-text" style="margin:32px auto 0;text-align:center;">Don't see your state? We're expanding fast. Start a trial and we'll tell you the day your area goes live.</p>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final">
+  <div class="wrap">
+    <h2>The next storm is coming. Be the first truck on the street.</h2>
+    <p>Set it up once. When the wind blows, you'll already know where the work is.</p>
+    <a href="#pricing" class="btn-dark">Start your free trial →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="logo"><span style="color:var(--sap)">◣</span> TreeStorm Leads</div>
+    <div>Storm-triggered leads for tree service professionals · Built in Florida</div>
+  </div>
+</footer>
+
+</body>
+</html>
