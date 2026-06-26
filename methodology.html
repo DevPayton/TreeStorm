@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How we score tree damage — TreeStorm Leads</title>
+<meta name="description" content="A weather app tells you the wind speed. We tell you whether trees are coming down. Here's how TreeStorm scores tree-damage risk — and why soil saturation changes everything.">
+<style>
+  :root {
+    --bark: #2B2118;
+    --bark-2: #3D3023;
+    --pulp: #F5F1E8;
+    --pulp-2: #EAE3D4;
+    --sap: #C8531B;
+    --sap-deep: #A03E10;
+    --leaf: #4A5D3A;
+    --sky: #5B7A99;
+    --line: #D8CFBC;
+    --ink-soft: #6B6253;
+    --soak: #3A4A5C;       /* saturated-soil slate blue */
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: var(--pulp);
+    color: var(--bark);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---- top bar ---- */
+  .topbar { background: var(--bark); color: var(--pulp); }
+  .topbar .wrap { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; }
+  .brand { font-weight: 800; font-size: 18px; letter-spacing: -0.3px; display: flex; align-items: center; gap: 9px; }
+  .brand .mark { color: var(--sap); font-size: 20px; }
+  .topbar a.back { color: var(--pulp); text-decoration: none; font-size: 14px; font-weight: 600; border-bottom: 2px solid var(--sap); padding-bottom: 2px; }
+
+  /* ---- hero: the thesis ---- */
+  .hero { padding: 72px 0 56px; border-bottom: 2px solid var(--bark); }
+  .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--sap-deep); margin-bottom: 20px; }
+  .hero h1 {
+    font-size: clamp(34px, 6vw, 60px);
+    line-height: 1.04;
+    letter-spacing: -1.5px;
+    font-weight: 800;
+    max-width: 16ch;
+  }
+  .hero h1 em { font-style: normal; color: var(--sap); }
+  .hero .sub { font-size: clamp(17px, 2.4vw, 21px); color: var(--bark-2); max-width: 54ch; margin-top: 24px; }
+
+  /* ---- the signature: same wind, different soil ---- */
+  .signature { padding: 64px 0; border-bottom: 2px solid var(--bark); }
+  .sig-label { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px; }
+  .sig-title { font-size: clamp(24px, 3.5vw, 34px); font-weight: 800; letter-spacing: -0.8px; margin-bottom: 6px; }
+  .sig-intro { font-size: 17px; color: var(--bark-2); max-width: 60ch; margin-bottom: 40px; }
+  .scene-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 2px solid var(--bark); }
+  .scene { padding: 0; position: relative; overflow: hidden; }
+  .scene.dry { background: #fff; border-right: 2px solid var(--bark); }
+  .scene.wet { background: var(--soak); color: var(--pulp); }
+  .scene-head { padding: 20px 24px 14px; }
+  .scene-tag { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; }
+  .scene-soil { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-top: 4px; }
+  .scene-rain { font-size: 13px; margin-top: 2px; opacity: 0.8; }
+  /* the tree illustration area */
+  .scene-art { height: 220px; position: relative; }
+  .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 42px; }
+  .scene.dry .ground { background: repeating-linear-gradient(90deg, #E8DFC9, #E8DFC9 6px, #E0D5BC 6px, #E0D5BC 12px); border-top: 3px solid #C9BD9E; }
+  .scene.wet .ground { background: repeating-linear-gradient(90deg, #2E3B49, #2E3B49 6px, #28333F 6px, #28333F 12px); border-top: 3px solid #4A5D70; }
+  .scene.wet .ground::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(91,122,153,0.35), transparent); }
+  /* DRY: tall tree standing upright, a broken limb on the ground beside it */
+  .tree-stand { position: absolute; bottom: 42px; left: 50%; margin-left: -6px; }
+  .tree-stand .trunk { width: 12px; height: 86px; background: var(--bark); border-radius: 2px; }
+  .tree-stand .canopy { position: absolute; top: -52px; left: -28px; width: 68px; height: 64px; border-radius: 50% 50% 46% 48%; background: var(--leaf); }
+  .broken-limb { position: absolute; bottom: 44px; left: 24%; width: 46px; height: 9px; background: var(--leaf); border-radius: 4px; transform: rotate(-8deg); }
+  .broken-limb::after { content:''; position:absolute; right:-2px; top:1px; width:16px; height:7px; background:var(--bark); border-radius:3px; transform:rotate(22deg); }
+  /* WET: tree uprooted, fallen at a hard angle, root plate lifted out of the soil */
+  .tree-fall { position: absolute; bottom: 46px; left: 42%; transform-origin: bottom left; transform: rotate(58deg); }
+  .tree-fall .trunk { width: 12px; height: 92px; background: #1C1611; border-radius: 2px; }
+  .tree-fall .canopy { position: absolute; top: -46px; left: -30px; width: 70px; height: 64px; border-radius: 50% 50% 46% 48%; background: #3A4D2E; }
+  .root-plate { position: absolute; bottom: 30px; left: 38%; width: 42px; height: 26px; }
+  .root-plate .disk { width: 42px; height: 22px; background: #1C1611; border-radius: 6px 6px 3px 3px; }
+  .root-plate .r { position: absolute; width: 3px; background: #1C1611; border-radius: 2px; top: -10px; }
+  .root-plate .r1 { left: 8px; height: 12px; transform: rotate(-22deg); }
+  .root-plate .r2 { left: 18px; height: 15px; transform: rotate(-4deg); }
+  .root-plate .r3 { left: 28px; height: 11px; transform: rotate(16deg); }
+  /* verdict bar */
+  .verdict { padding: 16px 24px; border-top: 2px solid; font-weight: 700; }
+  .scene.dry .verdict { border-color: var(--bark); }
+  .scene.wet .verdict { border-color: #4A5D70; }
+  .verdict .lvl { font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .scene.dry .verdict .lvl { color: var(--sap); }
+  .scene.wet .verdict .lvl { color: #FF8A4C; }
+  .verdict .desc { font-size: 14px; font-weight: 500; margin-top: 3px; }
+  .scene.dry .verdict .desc { color: var(--ink-soft); }
+  .scene.wet .verdict .desc { color: rgba(245,241,232,0.85); }
+  .same-wind { text-align: center; padding: 18px; font-size: 15px; font-weight: 700; background: var(--bark); color: var(--pulp); border: 2px solid var(--bark); border-top: none; }
+  .same-wind em { color: var(--sap); font-style: normal; }
+
+  /* ---- the inputs section ---- */
+  .inputs { padding: 64px 0; border-bottom: 2px solid var(--bark); }
+  .sec-head { margin-bottom: 40px; }
+  .sec-head .eyebrow { margin-bottom: 12px; }
+  .sec-head h2 { font-size: clamp(26px, 4vw, 38px); font-weight: 800; letter-spacing: -1px; max-width: 18ch; }
+  .factors { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--bark); border: 2px solid var(--bark); }
+  .factor { background: var(--pulp); padding: 28px 26px; }
+  .factor .fnum { font-size: 13px; font-weight: 700; color: var(--sap); letter-spacing: 1px; }
+  .factor h3 { font-size: 20px; font-weight: 800; margin: 8px 0 10px; letter-spacing: -0.4px; }
+  .factor p { font-size: 15px; color: var(--bark-2); }
+  .factor .src { font-size: 12.5px; color: var(--ink-soft); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .factor .src b { color: var(--leaf); }
+
+  /* ---- the wind ladder ---- */
+  .ladder-sec { padding: 64px 0; border-bottom: 2px solid var(--bark); }
+  .ladder { border: 2px solid var(--bark); margin-top: 36px; }
+  .lad-row { display: grid; grid-template-columns: 130px 1fr 1fr; align-items: stretch; border-bottom: 1px solid var(--line); }
+  .lad-row:last-child { border-bottom: none; }
+  .lad-row.head { background: var(--bark); color: var(--pulp); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-bottom: 2px solid var(--bark); }
+  .lad-row.head > div { padding: 13px 18px; }
+  .lad-wind { padding: 18px; font-weight: 800; font-size: 18px; border-right: 1px solid var(--line); display: flex; align-items: center; background: var(--pulp-2); }
+  .lad-cell { padding: 18px; border-right: 1px solid var(--line); }
+  .lad-cell:last-child { border-right: none; }
+  .lad-cell .badge { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 9px; color: #fff; }
+  .b-mod { background: var(--sky); }
+  .b-high { background: var(--sap); }
+  .b-sev { background: var(--sap-deep); }
+  .lad-cell .ct { font-size: 13.5px; color: var(--bark-2); margin-top: 8px; }
+  .lad-col-label { display: flex; align-items: center; gap: 7px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .dot.dry { background: #C9BD9E; } .dot.wet { background: var(--soak); }
+  .ladder-foot { font-size: 13px; color: var(--ink-soft); margin-top: 16px; max-width: 64ch; }
+
+  /* ---- honest section ---- */
+  .honest { padding: 64px 0; border-bottom: 2px solid var(--bark); }
+  .honest h2 { font-size: clamp(24px, 3.5vw, 32px); font-weight: 800; letter-spacing: -0.8px; margin-bottom: 20px; max-width: 20ch; }
+  .honest p { font-size: 16.5px; color: var(--bark-2); max-width: 64ch; margin-bottom: 16px; }
+  .honest p strong { color: var(--bark); }
+
+  /* ---- closing cta ---- */
+  .closer { background: var(--bark); color: var(--pulp); padding: 72px 0; }
+  .closer h2 { font-size: clamp(28px, 4.5vw, 42px); font-weight: 800; letter-spacing: -1px; max-width: 18ch; }
+  .closer h2 em { color: var(--sap); font-style: normal; }
+  .closer p { font-size: 17px; color: rgba(245,241,232,0.8); max-width: 52ch; margin: 20px 0 32px; }
+  .cta { display: inline-block; background: var(--sap); color: var(--pulp); text-decoration: none; font-weight: 800; font-size: 16px; padding: 17px 38px; border: 2px solid var(--sap); transition: background 0.15s; }
+  .cta:hover { background: var(--sap-deep); border-color: var(--sap-deep); }
+  .closer .micro { font-size: 13.5px; color: rgba(245,241,232,0.55); margin-top: 18px; }
+
+  footer { background: var(--bark); border-top: 1px solid var(--bark-2); padding: 28px 0; }
+  footer .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  footer .fl { color: rgba(245,241,232,0.55); font-size: 13px; }
+  footer a { color: rgba(245,241,232,0.75); text-decoration: none; font-size: 13px; margin-left: 18px; }
+  footer a:hover { color: var(--sap); }
+
+  @media (max-width: 720px) {
+    .scene-row { grid-template-columns: 1fr; }
+    .scene.dry { border-right: none; border-bottom: 2px solid var(--bark); }
+    .factors { grid-template-columns: 1fr; }
+    .lad-row { grid-template-columns: 88px 1fr 1fr; }
+    .lad-row.head > div:first-child { padding-left: 12px; }
+    .lad-wind { padding: 14px 10px; font-size: 15px; }
+    .lad-cell { padding: 12px; }
+    .hero { padding: 52px 0 40px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <span class="brand"><span class="mark">&#9699;</span> TreeStorm Leads</span>
+    <a class="back" href="/">&larr; Back to home</a>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">How we score tree damage</div>
+    <h1>A weather app says <em>"60 mph winds."</em> We tell you if trees are coming down.</h1>
+    <p class="sub">Wind speed alone doesn't fell a tree. The ground does. Here's the difference between a storm alert and a tree-damage alert &mdash; and why we measure something nobody else does.</p>
+  </div>
+</header>
+
+<section class="signature reveal">
+  <div class="wrap">
+    <div class="sig-label">The whole idea, in one picture</div>
+    <h2 class="sig-title">Same storm. Same wind. Different ground.</h2>
+    <p class="sig-intro">A 50 mph gust hits two neighborhoods on the same day. One has had a dry month. The other has had two weeks of rain. The wind is identical. The outcome is not.</p>
+
+    <div class="scene-row">
+      <!-- DRY -->
+      <div class="scene dry">
+        <div class="scene-head">
+          <div class="scene-tag">Neighborhood A</div>
+          <div class="scene-soil">Dry ground</div>
+          <div class="scene-rain">0.9" of rain in 14 days</div>
+        </div>
+        <div class="scene-art">
+          <div class="tree-stand"><div class="canopy"></div><div class="trunk"></div></div>
+          <div class="broken-limb"></div>
+          <div class="ground"></div>
+        </div>
+        <div class="verdict">
+          <div class="lvl">Moderate risk</div>
+          <div class="desc">Limbs and branches down. Cleanup work.</div>
+        </div>
+      </div>
+      <!-- WET -->
+      <div class="scene wet">
+        <div class="scene-head">
+          <div class="scene-tag">Neighborhood B</div>
+          <div class="scene-soil">Saturated ground</div>
+          <div class="scene-rain">5.3" of rain in 14 days</div>
+        </div>
+        <div class="scene-art">
+          <div class="tree-fall"><div class="canopy"></div><div class="trunk"></div></div>
+          <div class="root-plate"><div class="disk"></div><div class="r r1"></div><div class="r r2"></div><div class="r r3"></div></div>
+          <div class="ground"></div>
+        </div>
+        <div class="verdict">
+          <div class="lvl">Severe risk</div>
+          <div class="desc">Roots pull free. Whole trees down &mdash; removal jobs.</div>
+        </div>
+      </div>
+    </div>
+    <div class="same-wind">Same <em>50 mph</em> wind. Soaked roots can't hold &mdash; so wet ground turns a cleanup into a removal.</div>
+  </div>
+</section>
+
+<section class="inputs reveal">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">What goes into the score</div>
+      <h2>Two signals, pulled fresh for every storm.</h2>
+    </div>
+    <div class="factors">
+      <div class="factor">
+        <div class="fnum">SIGNAL 01</div>
+        <h3>Wind, tuned for trees</h3>
+        <p>We read the real gust speed from the active storm warning &mdash; not a city-wide forecast. And we score it against tree thresholds, not roof thresholds. Limbs start dropping around 25 mph; trees come down past 40.</p>
+        <div class="src">Source: <b>National Weather Service</b> storm-based warnings, with the gust speed tagged on each one.</div>
+      </div>
+      <div class="factor">
+        <div class="fnum">SIGNAL 02</div>
+        <h3>Soil saturation</h3>
+        <p>We add up the last 14 days of rainfall over the exact storm footprint. Saturated soil loosens its grip on roots &mdash; so the same wind that snaps a limb on dry ground uproots the whole tree on wet ground.</p>
+        <div class="src">Source: <b>radar-estimated rainfall</b> (MRMS), measured over the storm's actual footprint &mdash; not a guess.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ladder-sec reveal">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">How the two combine</div>
+      <h2>The same wind, scored two ways.</h2>
+    </div>
+    <div class="ladder">
+      <div class="lad-row head">
+        <div>Gust</div>
+        <div class="lad-col-label"><span class="dot dry"></span> Dry ground</div>
+        <div class="lad-col-label"><span class="dot wet"></span> Saturated ground</div>
+      </div>
+      <div class="lad-row">
+        <div class="lad-wind">40 mph</div>
+        <div class="lad-cell"><span class="badge b-mod">Moderate</span><div class="ct">Branches and small limbs.</div></div>
+        <div class="lad-cell"><span class="badge b-high">High</span><div class="ct">Leaning trees, lifted roots.</div></div>
+      </div>
+      <div class="lad-row">
+        <div class="lad-wind">55 mph</div>
+        <div class="lad-cell"><span class="badge b-high">High</span><div class="ct">Large limbs, some trees.</div></div>
+        <div class="lad-cell"><span class="badge b-sev">Severe</span><div class="ct">Whole-tree uproots. Removal work.</div></div>
+      </div>
+      <div class="lad-row">
+        <div class="lad-wind">70 mph</div>
+        <div class="lad-cell"><span class="badge b-sev">Severe</span><div class="ct">Trees down even on dry ground.</div></div>
+        <div class="lad-cell"><span class="badge b-sev">Severe</span><div class="ct">Widespread uprooting.</div></div>
+      </div>
+    </div>
+    <p class="ladder-foot">On dry ground, it takes a strong wind to pull a tree. On saturated ground, a moderate wind does it &mdash; which is exactly the job a plain weather alert would tell you to ignore.</p>
+  </div>
+</section>
+
+<section class="honest reveal">
+  <div class="wrap">
+    <h2>What this is &mdash; and what it isn't.</h2>
+    <p>We're not meteorologists, and we don't pretend to be. We don't forecast storms or chase hail. <strong>We watch the National Weather Service for you, and we translate raw storm data into one thing tree contractors actually need: where the tree damage is, ranked by how bad.</strong></p>
+    <p>The soil-saturation layer is the part nobody else does. The big storm-data companies are built for roofers chasing hail &mdash; they think about shingles, not roots. We think about the ground, because that's what decides whether a storm leaves you a pile of branches or a yard full of removal jobs.</p>
+    <p>It's not a crystal ball. A score is a starting point that puts your best ZIPs at the top of the list so you knock the right doors first. The faster you move, the more of those jobs you close.</p>
+  </div>
+</section>
+
+<section class="closer reveal">
+  <div class="wrap">
+    <h2>Stop reacting to <em>weather.</em> Start working <em>damage.</em></h2>
+    <p>One contractor per ZIP. The moment a tree-damaging storm hits your territory, you know &mdash; ranked, with a plan, before your competition does.</p>
+    <a class="cta" href="/#pricing">Claim your territory &rarr;</a>
+    <div class="micro">5 states &middot; Florida, Georgia, South Carolina, North Carolina, Alabama</div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="fl">&copy; 2026 TreeStorm Leads</span>
+    <span>
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </span>
+  </div>
+</footer>
+
+<script>
+  // gentle scroll reveal
+  if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  } else {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+  }
+</script>
+</body>
+</html>
