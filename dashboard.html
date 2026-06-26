@@ -61,6 +61,25 @@
   .live-cond .lc-sky { color: var(--muted-2); }
   .live-strip .lc-pulse { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--moss-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
+  /* subtle system-status line under the stats */
+  .sys-status { max-width: 1240px; margin: 18px auto 0; font-size: 12.5px; color: var(--muted-2); display: flex; align-items: center; gap: 8px; padding-top: 14px; border-top: 1px solid rgba(247,243,236,0.1); }
+  .sys-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--moss-light); flex-shrink: 0; }
+  .sys-status b { color: var(--paper-2); font-weight: 600; }
+
+  /* territory activity panel — storm history + season */
+  .activity-body { padding: 20px; }
+  .act-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  .act-count { font-size: 34px; font-weight: 700; letter-spacing: -1px; font-family: 'Fraunces', serif; line-height: 1; color: var(--bark); }
+  .act-count .lbl { font-size: 13px; color: var(--muted); font-weight: 500; font-family: 'Inter', sans-serif; }
+  .act-spark { display: flex; align-items: flex-end; gap: 3px; height: 36px; margin: 12px 0; }
+  .act-bar { flex: 1; background: var(--paper-2); border-radius: 2px 2px 0 0; min-height: 3px; transition: height 0.3s; }
+  .act-bar.hit { background: linear-gradient(180deg, var(--ember-glow), var(--ember)); }
+  .act-months { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .season-row { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-soft); display: flex; align-items: center; gap: 10px; }
+  .season-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .season-dot.peak { background: var(--ember); } .season-dot.off { background: var(--muted-2); }
+  .season-txt { font-size: 12.5px; color: var(--muted); } .season-txt b { color: var(--bark); }
+
   .stats { display: flex; gap: 0; max-width: 1240px; margin: 22px auto 0; flex-wrap: wrap; }
   .stat { flex: 1; min-width: 150px; padding: 4px 24px; border-left: 1px solid rgba(247,243,236,0.15); }
   .stat:first-child { padding-left: 0; border-left: none; }
@@ -236,6 +255,7 @@
       <div class="live-strip" id="live-strip" style="display:none;"></div>
     </div>
     <div class="stats" id="stats"></div>
+    <div class="sys-status" id="sys-status" style="display:none;"></div>
   </div>
 
   <div class="wrap">
@@ -284,6 +304,22 @@
             <div class="account-actions">
               <button class="acct-link" onclick="openChangeHome()">Change home base</button>
               <button class="acct-link danger" onclick="openCancel()">Cancel subscription</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TERRITORY ACTIVITY: storm history + season -->
+        <div class="card side-card" id="activity-card" style="display:none;">
+          <div class="card-head"><h2>Territory activity</h2></div>
+          <div class="activity-body">
+            <div class="act-top">
+              <div class="act-count"><span id="storm-count">—</span> <span class="lbl">storms in the last 12 months</span></div>
+            </div>
+            <div class="act-spark" id="act-spark"></div>
+            <div class="act-months" id="act-months"></div>
+            <div class="season-row">
+              <span class="season-dot" id="season-dot"></span>
+              <span class="season-txt" id="season-txt"></span>
             </div>
           </div>
         </div>
@@ -480,6 +516,57 @@
     renderNudge();
     renderLiveConditions();
     renderCancelBanner();
+    renderSysStatus();
+    renderActivity();
+  }
+
+  // ---------- subtle system-status line (live proof) ----------
+  function renderSysStatus() {
+    const el = document.getElementById('sys-status');
+    if (!myZips.size) { el.style.display='none'; return; }
+    el.style.display='flex';
+    const hh = hhTotal(myZips).toLocaleString();
+    el.innerHTML = '<span class="dot"></span>Actively monitoring <b>' + hh + ' households</b> across <b>' + myZips.size + ' ZIP' + (myZips.size===1?'':'s') + '</b> &middot; checking NWS storm feeds every few minutes &middot; last swept just now';
+  }
+
+  // ---------- territory activity: storm history + season ----------
+  function renderActivity() {
+    const card = document.getElementById('activity-card');
+    if (!myZips.size) { card.style.display='none'; return; }
+    card.style.display='block';
+    // storm history: use real backend data if present (subscriber.stormHistory = [{month, count}...]), else show season-only
+    const hist = subscriber.stormHistory || null;
+    const sparkEl = document.getElementById('act-spark');
+    const monthsEl = document.getElementById('act-months');
+    if (hist && hist.length) {
+      const total = hist.reduce((s,m)=>s+(m.count||0),0);
+      document.getElementById('storm-count').textContent = total;
+      const max = Math.max(1, ...hist.map(m=>m.count||0));
+      sparkEl.innerHTML = hist.map(m => '<div class="act-bar' + ((m.count||0)>0?' hit':'') + '" style="height:' + Math.max(8, ((m.count||0)/max)*100) + '%" title="' + (m.label||'') + ': ' + (m.count||0) + '"></div>').join('');
+      monthsEl.innerHTML = hist.length>=12 ? '<span>' + (hist[0].label||'') + '</span><span>' + (hist[Math.floor(hist.length/2)].label||'') + '</span><span>' + (hist[hist.length-1].label||'') + '</span>' : '';
+    } else {
+      // no history data yet — show a clean "building" state rather than fake bars
+      document.getElementById('storm-count').textContent = '0';
+      sparkEl.innerHTML = '';
+      monthsEl.innerHTML = '<span style="color:var(--muted-2)">Storm history builds as we monitor your territory</span>';
+    }
+    renderSeason();
+  }
+
+  // ---------- seasonal context ----------
+  function renderSeason() {
+    const m = new Date().getMonth(); // 0=Jan
+    const dot = document.getElementById('season-dot');
+    const txt = document.getElementById('season-txt');
+    // peak storm/hurricane season in the Southeast: June (5) - November (10)
+    const isPeak = m >= 5 && m <= 10;
+    if (isPeak) {
+      dot.className = 'season-dot peak';
+      txt.innerHTML = '<b>Peak storm season.</b> June\u2013November is when tree-damage work surges. You\u2019re covered.';
+    } else {
+      dot.className = 'season-dot off';
+      txt.innerHTML = 'Off-peak season. Peak runs <b>June\u2013November</b> \u2014 storms can still hit, and you\u2019ll know first.';
+    }
   }
 
   // ---------- live conditions strip (proves real-time data) ----------
@@ -487,21 +574,23 @@
     const strip = document.getElementById('live-strip');
     const zips = [...myZips].slice(0, 3); // show up to 3 to keep it clean
     if (!zips.length) { strip.style.display='none'; strip.innerHTML=''; return; }
-    // build the conditions first; only show the strip if we actually got live data
-    const conds = [];
-    for (const z of zips) {
+    // show the strip immediately with the Live pulse, then fill ZIPs as they resolve
+    strip.style.display='flex';
+    strip.innerHTML = '<span class="lc-pulse"><span class="live-dot"></span>Live</span>';
+    let gotAny = false;
+    await Promise.all(zips.map(async z => {
       try {
         const r = await fetch(API + '/conditions/' + z);
-        if (!r.ok) continue;
+        if (!r.ok) return;
         const c = await r.json();
-        if (c.temp == null) continue;
-        conds.push({ zip: z, temp: c.temp, sky: c.sky||'' });
+        if (c.temp == null) return;
+        gotAny = true;
+        const el = document.createElement('div'); el.className='live-cond';
+        el.innerHTML = '<span class="lc-zip">' + z + '</span><span class="lc-temp">' + Math.round(c.temp) + '°</span><span class="lc-sky">' + escapeHtml(c.sky||'') + '</span>';
+        strip.appendChild(el);
       } catch {}
-    }
-    if (!conds.length) { strip.style.display='none'; strip.innerHTML=''; return; }
-    strip.style.display='flex';
-    strip.innerHTML = '<span class="lc-pulse"><span class="live-dot"></span>Live</span>' +
-      conds.map(c => '<div class="live-cond"><span class="lc-zip">' + c.zip + '</span><span class="lc-temp">' + Math.round(c.temp) + '°</span><span class="lc-sky">' + escapeHtml(c.sky) + '</span></div>').join('');
+    }));
+    if (!gotAny) { strip.style.display='none'; strip.innerHTML=''; }
   }
 
   function renderCoverage() {
