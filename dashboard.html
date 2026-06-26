@@ -340,8 +340,22 @@
   const API = 'https://api.treestormleads.com';
   const HH_PER_ZIP = 3500;
   let map, geoLayer, zipLayers = {}, myZips = new Set(), takenZips = {}, subscriber = null;
+  let zipData = {}, radiusCircle = null, homeMarker = null;
   let sessionToken = localStorage.getItem('tsl_session') || null;
   let lastSavedAt = 0; const COOLDOWN_MS = 30 * 60 * 1000;
+
+  // client-side haversine (miles) for instant radius feedback — backend is still the source of truth
+  function milesBetween(a, b) {
+    const za = zipData[a], zb = zipData[b];
+    if (!za || !zb || za.lat==null || zb.lat==null) return Infinity;
+    const toRad = d => d*Math.PI/180, R = 3958.8;
+    const dLat = toRad(zb.lat-za.lat), dLng = toRad(zb.lng-za.lng);
+    const h = Math.sin(dLat/2)**2 + Math.cos(toRad(za.lat))*Math.cos(toRad(zb.lat))*Math.sin(dLng/2)**2;
+    return 2*R*Math.asin(Math.sqrt(h));
+  }
+  // the home base anchor: explicit homeZip, else the first claimed ZIP
+  function homeZip() { return (subscriber && subscriber.homeZip) || [...myZips][0] || null; }
+  function radiusMiles() { return (subscriber && subscriber.radius) || 50; }
 
   window.addEventListener('DOMContentLoaded', async () => {
     const t = new URLSearchParams(location.search).get('token');
@@ -381,6 +395,7 @@
       if (!r.ok) return false;
       const d = await r.json();
       subscriber = d.subscriber; myZips = new Set(d.subscriber.zips || []); takenZips = d.takenZips || {};
+      zipData = d.zipData || {};
       render();
       await initMap(d.subscriber.state);
       return true;
@@ -453,9 +468,10 @@
     const fill = document.getElementById('cap-fill');
     fill.style.width = pct + '%'; fill.classList.toggle('near', myZips.size >= cap);
     const note = document.getElementById('cap-note');
-    if (myZips.size === 0) note.textContent = 'Pick ZIPs on the map to build your territory.';
+    const hz = homeZip();
+    if (myZips.size === 0) note.textContent = 'Click any ZIP to start. Your first pick sets your home base — the rest of your territory must be within ' + radiusMiles() + ' miles of it.';
     else if (myZips.size >= cap) note.innerHTML = 'You\'ve used all <b>' + cap + '</b> ZIPs on your plan. Release one to swap, or upgrade for more.';
-    else note.textContent = (cap - myZips.size) + ' ZIP' + (cap-myZips.size===1?'':'s') + ' left on your plan.';
+    else note.innerHTML = (cap - myZips.size) + ' ZIP' + (cap-myZips.size===1?'':'s') + ' left' + (hz ? ' &middot; within ' + radiusMiles() + ' mi of <b>' + hz + '</b>' : '') + '.';
     const list = document.getElementById('zip-list'); list.innerHTML='';
     [...myZips].sort().forEach(z => { const c=document.createElement('div'); c.className='zchip'; c.innerHTML=z + ' <button onclick="toggleZip(\'' + z + '\')" title="Release">&times;</button>'; list.appendChild(c); });
   }
@@ -559,8 +575,13 @@
         }
       }).addTo(map);
       if (myZips.size) {
+        drawRadius();
         const grp = L.featureGroup([...myZips].map(z=>zipLayers[z]).filter(Boolean));
-        if (grp.getLayers().length) map.fitBounds(grp.getBounds().pad(0.4));
+        if (grp.getLayers().length) {
+          // fit to the radius circle if present (shows the whole reachable area), else to claimed ZIPs
+          if (radiusCircle) map.fitBounds(radiusCircle.getBounds().pad(0.1));
+          else map.fitBounds(grp.getBounds().pad(0.4));
+        }
       } else {
         map.fitBounds(geoLayer.getBounds());
       }
@@ -574,6 +595,9 @@
     const zip = f.properties.zip;
     if (myZips.has(zip)) return { color:'#7DA862', weight:2.5, fillColor:'#4E6B3E', fillOpacity:0.6, className:'mine-zone' };
     if (takenZips[zip])  return { color:'#E8703A', weight:2, fillColor:'#B23A2E', fillOpacity:0.45, dashArray:'4,3' };
+    // out-of-range ZIPs: visibly recessed so the reachable area is obvious
+    const hz = homeZip();
+    if (hz && zip !== hz && milesBetween(hz, zip) > radiusMiles()) return { color:'#C9BFAE', weight:0.4, fillColor:'#B8AE9C', fillOpacity:0.06 };
     return { color:'#9B8F7C', weight:0.7, fillColor:'#ffffff', fillOpacity:0.18 };
   }
   function tipFor(zip) { if (myZips.has(zip)) return 'ZIP ' + zip + ' — yours'; if (takenZips[zip]) return 'ZIP ' + zip + ' — taken by ' + takenZips[zip]; return 'ZIP ' + zip + ' — available'; }
@@ -581,9 +605,24 @@
   function toggleZip(zip) {
     if (takenZips[zip]) { toast('ZIP ' + zip + ' is already taken by ' + takenZips[zip] + '.', 'err'); return; }
     const cap = subscriber.zipCap || 4;
-    if (!myZips.has(zip) && myZips.size >= cap) { toast('You\'re at your ' + cap + '-ZIP limit. Release one or upgrade.', 'err'); return; }
+    const adding = !myZips.has(zip);
+    // radius guardrail — block out-of-range ZIPs the instant they're clicked (not at save)
+    if (adding) {
+      const hz = homeZip();
+      if (hz && hz !== zip) {
+        const dist = milesBetween(hz, zip);
+        if (dist > radiusMiles()) {
+          toast('ZIP ' + zip + ' is ' + Math.round(dist) + ' mi from your home base (' + hz + '). Your ' + (subscriber.tierName||'plan') + ' reaches ' + radiusMiles() + ' mi.', 'err');
+          return;
+        }
+      }
+    }
+    if (adding && myZips.size >= cap) { toast('You\'re at your ' + cap + '-ZIP limit. Release one or upgrade.', 'err'); return; }
+    const wasEmpty = myZips.size === 0;
     if (myZips.has(zip)) myZips.delete(zip); else myZips.add(zip);
     if (zipLayers[zip]) { zipLayers[zip].setStyle(styleZip({properties:{zip}})); }
+    // if this was the first ZIP (becomes home base), draw the radius circle
+    if (wasEmpty && myZips.size === 1) drawRadius();
     renderCoverage();
     const cap2 = subscriber.zipCap || 4;
     const statEls = document.querySelectorAll('.stat');
@@ -593,6 +632,20 @@
     renderValue();
     renderCert();
     renderNudge();
+  }
+
+  // draw the visible territory radius from the home base
+  function drawRadius() {
+    const hz = homeZip();
+    if (!map || !hz || !zipData[hz]) return;
+    const center = [zipData[hz].lat, zipData[hz].lng];
+    const meters = radiusMiles() * 1609.34;
+    if (radiusCircle) { map.removeLayer(radiusCircle); radiusCircle = null; }
+    if (homeMarker) { map.removeLayer(homeMarker); homeMarker = null; }
+    radiusCircle = L.circle(center, { radius: meters, color: '#C8531B', weight: 1.5, fillColor: '#C8531B', fillOpacity: 0.04, dashArray: '6,5', interactive: false }).addTo(map);
+    homeMarker = L.marker(center, { icon: L.divIcon({ className: 'home-pin', html: '<div style="background:#1A1512;color:#E8703A;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #E8703A;box-shadow:0 1px 4px rgba(0,0,0,0.4)">&#9733;</div>', iconSize:[24,24], iconAnchor:[12,12] }), interactive: false }).addTo(map);
+    // restyle all ZIPs so out-of-range ones dim relative to the (possibly new) home base
+    if (geoLayer) geoLayer.eachLayer(l => { const z=l.feature&&l.feature.properties&&l.feature.properties.zip; if(z) l.setStyle(styleZip({properties:{zip:z}})); });
   }
 
   async function saveTerritory() {
@@ -607,6 +660,10 @@
       const d = await r.json();
       if (d.ok) { lastSavedAt = Date.now(); toast('Saved — ' + myZips.size + ' ZIP' + (myZips.size===1?'':'s') + ' locked in.', 'ok'); }
       else if (d.error === 'over_cap') { toast('That\'s over your ' + d.cap + '-ZIP plan limit.', 'err'); }
+      else if (d.error === 'OUT_OF_RANGE') {
+        const bad = (d.badZips||[]).join(', ');
+        toast((d.badZips&&d.badZips.length>1?'These ZIPs are':'This ZIP is') + ' too far from your home base (' + d.homeZip + '): ' + bad + '. Your ' + (subscriber.tierName||'plan') + ' covers ' + d.radius + ' miles.', 'err');
+      }
       else if (d.error === 'cooldown') { toast('Changes limited to once every 30 min. Try again soon.', 'err'); }
       else if (d.taken) { d.taken.forEach(t=>{ myZips.delete(t.zip); takenZips[t.zip]=t.takenBy; if(zipLayers[t.zip]) zipLayers[t.zip].setStyle(styleZip({properties:{zip:t.zip}})); }); renderCoverage(); toast('Some ZIPs were just claimed by others and removed.', 'err'); }
       else toast('Could not save. Try again.', 'err');
