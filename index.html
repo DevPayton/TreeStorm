@@ -83,8 +83,18 @@
     font-size: 14px; font-weight: 600; overflow: hidden; white-space: nowrap;
   }
   .ticker .wrap { display: flex; align-items: center; gap: 14px; }
-  .ticker .tag { background: var(--sap); color: #fff; padding: 3px 10px; border-radius: 2px; font-size: 12px; font-weight: 800; letter-spacing: .5px; flex-shrink: 0; }
-  .ticker .feed { color: var(--pulp-2); }
+  .ticker .tag { background: var(--sap); color: #fff; padding: 3px 10px; border-radius: 2px; font-size: 12px; font-weight: 800; letter-spacing: .5px; flex-shrink: 0; z-index: 2; }
+  /* viewport that clips the scrolling text; fade edges so it reads as a feed */
+  .ticker .marquee { position: relative; flex: 1; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 40px), transparent); }
+  .ticker .marquee-track { display: inline-flex; white-space: nowrap; will-change: transform; animation: ticker-scroll 38s linear infinite; }
+  .ticker .marquee-track .feed { color: var(--pulp-2); padding-right: 48px; }
+  .ticker:hover .marquee-track { animation-play-state: paused; }
+  @keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker .marquee-track { animation: none; }
+    .ticker .marquee { -webkit-mask-image: none; mask-image: none; }
+    .ticker .marquee-track .feed:nth-child(2) { display: none; }
+  }
 
   /* ===== Problem ===== */
   section { padding: 76px 0; }
@@ -199,6 +209,7 @@
 <nav>
   <div class="logo"><span class="mark">◣</span> TreeStorm Leads</div>
   <div style="display:flex;align-items:center;gap:18px;">
+    <a href="methodology.html" style="color:var(--bark);text-decoration:none;font-weight:600;font-size:15px;">How we score</a>
     <a href="dashboard.html" style="color:var(--bark);text-decoration:none;font-weight:600;font-size:15px;">Log in</a>
     <a href="#pricing" class="nav-cta">Start free trial</a>
   </div>
@@ -222,7 +233,12 @@
 <div class="ticker">
   <div class="wrap">
     <span class="tag">LIVE FEED</span>
-    <span class="feed">Monitoring National Weather Service alerts across 5 states · severe thunderstorm, tornado, high-wind & hurricane warnings · alerts fire the instant a qualifying storm enters your zone</span>
+    <div class="marquee">
+      <div class="marquee-track">
+        <span class="feed">Monitoring National Weather Service alerts across 5 states · severe thunderstorm, tornado, high-wind &amp; hurricane warnings · alerts fire the instant a qualifying storm enters your zone</span>
+        <span class="feed" aria-hidden="true">Monitoring National Weather Service alerts across 5 states · severe thunderstorm, tornado, high-wind &amp; hurricane warnings · alerts fire the instant a qualifying storm enters your zone</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -371,7 +387,8 @@
       <button class="btn-primary" id="subscribe-btn" onclick="startCheckout()" style="margin-top:14px;width:100%;">Start 14-day free trial</button>
       <p style="text-align:center;margin-top:8px;font-size:12px;color:var(--ink-soft);">Card required. Free for 14 days — cancel anytime before then and you won't be charged. You'll pick your exact ZIP codes right after signup.</p>
       <p id="checkout-msg" style="text-align:center;margin-top:12px;font-size:14px;color:var(--sap-deep);display:none;"></p>
-      <p style="margin-top:14px;font-size:12px;color:var(--ink-soft);line-height:1.5;">By providing your phone number and subscribing, you agree to receive recurring SMS storm-alert notifications from TreeStorm Leads at the number provided. Consent is not a condition of purchase. Message frequency varies by storm activity. Msg &amp; data rates may apply. Reply STOP to unsubscribe, HELP for help. See our <a href="terms.html" style="color:var(--sap-deep);">Terms</a> and <a href="privacy.html" style="color:var(--sap-deep);">Privacy Policy</a>.</p>
+      <p style="margin-top:14px;font-size:12px;color:var(--ink-soft);line-height:1.5;">By providing your phone number and subscribing, you agree to receive recurring SMS storm-alert notifications from TreeStorm Leads at the number provided. Consent is not a condition of purchase. Message frequency varies by storm activity. Msg &amp; data rates may apply. Reply STOP to unsubscribe, HELP for help.</p>
+      <p style="margin-top:8px;font-size:12px;color:var(--ink-soft);line-height:1.5;">By starting a subscription you agree to our <a href="terms.html" style="color:var(--sap-deep);">Terms of Service</a>, <a href="privacy.html" style="color:var(--sap-deep);">Privacy Policy</a>, and <a href="refund.html" style="color:var(--sap-deep);">Refund Policy</a>.</p>
     </div>
 
     <p class="price-foot">All plans: 14 days free, cancel anytime before day 14 and you won't be charged. One contractor per ZIP — when a ZIP's taken, it's gone.</p>
@@ -406,7 +423,7 @@
 <footer>
   <div class="wrap">
     <div class="logo"><span style="color:var(--sap)">◣</span> TreeStorm Leads</div>
-    <div>Storm-triggered leads for tree service professionals · Built in Florida · <a href="terms.html" style="color:var(--pulp);">Terms</a> · <a href="privacy.html" style="color:var(--pulp);">Privacy</a></div>
+    <div>Storm-triggered leads for tree service professionals · Built in Florida · <a href="terms.html" style="color:var(--pulp);">Terms</a> · <a href="privacy.html" style="color:var(--pulp);">Privacy</a> · <a href="refund.html" style="color:var(--pulp);">Refunds</a></div>
   </div>
 </footer>
 
@@ -447,9 +464,9 @@
       box.style.background='#F5F0E6'; box.style.color='var(--ink-soft)'; box.style.border='1px solid var(--line)';
       box.textContent='Checking what\u2019s open near ' + zip + '\u2026';
       try {
-        const r = await fetch(BILLING_URL + '/check-availability', {
+        const r = await fetch(BILLING_URL + '/availability-near', {
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ zip, tier: selectedTier })
+          body: JSON.stringify({ homeZip: zip, tier: selectedTier })
         });
         const d = await r.json();
         if (d && typeof d.open === 'number') {
