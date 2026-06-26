@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TreeStorm Leads — Your Territory</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --bark: #2B2118; --bark-2: #3D3023; --pulp: #F5F1E8; --pulp-2: #EAE3D4;
+    --sap: #C8531B; --sap-deep: #A03E10; --leaf: #4A5D3A; --sky: #5B7A99;
+    --line: #D8CFBC; --ink-soft: #6B6253; --claimed: #4A5D3A; --taken: #9A9085;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--pulp); color: var(--bark); line-height: 1.5; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 28px; background: var(--bark); color: var(--pulp); }
+  .logo { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+  .logo .mark { color: var(--sap); }
+  .topbar .who { font-size: 14px; color: var(--pulp-2); }
+  .topbar .who b { color: var(--pulp); }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px; }
+
+  /* login gate */
+  #login { max-width: 420px; margin: 80px auto; background: #fff; border: 2px solid var(--bark); padding: 36px; }
+  #login h1 { font-size: 26px; letter-spacing: -0.5px; margin-bottom: 8px; }
+  #login p { color: var(--ink-soft); font-size: 15px; margin-bottom: 24px; }
+  #login input { width: 100%; padding: 13px; border: 2px solid var(--bark); font-size: 15px; margin-bottom: 14px; font-family: inherit; }
+  .btn { background: var(--sap); color: #fff; border: none; padding: 14px 24px; font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: 0 2px 0 var(--sap-deep); font-family: inherit; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-block { display: block; width: 100%; text-align: center; }
+
+  /* dashboard */
+  #dash { display: none; }
+  .dash-head { margin-bottom: 24px; }
+  .dash-head h1 { font-size: 30px; letter-spacing: -1px; }
+  .dash-head p { color: var(--ink-soft); margin-top: 4px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel { background: #fff; border: 2px solid var(--bark); }
+  .panel-head { background: var(--bark); color: var(--pulp); padding: 14px 20px; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+  .panel-head .sap { color: var(--sap); }
+  .panel-body { padding: 0; }
+
+  #map { height: 520px; width: 100%; }
+  .map-legend { padding: 14px 20px; display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; border-top: 2px solid var(--line); }
+  .legend-item { display: flex; align-items: center; gap: 7px; }
+  .swatch { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--bark); }
+  .sw-claimed { background: var(--claimed); }
+  .sw-open { background: #fff; }
+  .sw-taken { background: var(--taken); }
+
+  /* territory panel */
+  .terr-body { padding: 20px; }
+  .terr-count { font-size: 42px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+  .terr-count span { font-size: 15px; font-weight: 600; color: var(--ink-soft); letter-spacing: 0; }
+  .zip-list { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; max-height: 180px; overflow-y: auto; }
+  .zip-chip { background: var(--leaf); color: #fff; padding: 5px 11px; font-size: 13px; font-weight: 700; border-radius: 2px; display: flex; align-items: center; gap: 6px; }
+  .zip-chip button { background: none; border: none; color: #fff; cursor: pointer; font-size: 15px; line-height: 1; opacity: 0.7; }
+  .zip-chip button:hover { opacity: 1; }
+  .terr-actions { margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--line); }
+  .hint { font-size: 13px; color: var(--ink-soft); margin-top: 10px; }
+  .save-msg { font-size: 14px; margin-top: 12px; font-weight: 600; display: none; }
+
+  /* alert history */
+  .history { margin-top: 24px; }
+  .alert-row { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; gap: 14px; align-items: flex-start; }
+  .alert-row:last-child { border-bottom: none; }
+  .alert-tier { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 2px; color: #fff; flex-shrink: 0; }
+  .tier-HOT { background: var(--sap); }
+  .tier-WARM { background: #B8821F; }
+  .alert-detail { flex: 1; font-size: 14px; }
+  .alert-detail .ev { font-weight: 700; }
+  .alert-detail .meta { color: var(--ink-soft); font-size: 13px; margin-top: 2px; }
+  .empty { padding: 40px 20px; text-align: center; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><span class="mark">◣</span> TreeStorm Leads</div>
+  <div class="who" id="topbar-who"></div>
+</div>
+
+<!-- LOGIN GATE -->
+<div id="login">
+  <h1>Your territory</h1>
+  <p>Enter the email on your subscription to view and manage your storm-alert territory.</p>
+  <input type="email" id="login-email" placeholder="you@yourcompany.com" />
+  <button class="btn btn-block" id="login-btn" onclick="login()">View my territory →</button>
+  <p class="save-msg" id="login-msg" style="color:var(--sap-deep);"></p>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash">
+  <div class="wrap">
+    <div class="dash-head">
+      <h1 id="dash-company">Your Territory</h1>
+      <p>Click ZIP markers on the map to add or remove them from your coverage. Storm alerts fire the moment severe weather hits a ZIP you cover.</p>
+    </div>
+
+    <div class="grid">
+      <!-- MAP -->
+      <div class="panel">
+        <div class="panel-head"><span>Service area map</span> <span class="sap" id="map-state-label"></span></div>
+        <div class="panel-body">
+          <div id="map"></div>
+          <div class="map-legend">
+            <div class="legend-item"><span class="swatch sw-claimed"></span> Your ZIPs</div>
+            <div class="legend-item"><span class="swatch sw-open"></span> Available</div>
+            <div class="legend-item"><span class="swatch sw-taken"></span> Taken by another contractor</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TERRITORY CONTROLS -->
+      <div>
+        <div class="panel">
+          <div class="panel-head"><span>Your coverage</span></div>
+          <div class="terr-body">
+            <div class="terr-count"><span id="zip-count">0</span> <span>ZIPs covered</span></div>
+            <div class="zip-list" id="zip-list"></div>
+            <div class="terr-actions">
+              <button class="btn btn-block" id="save-btn" onclick="saveTerritory()">Save territory changes</button>
+              <p class="hint">Each ZIP is exclusive to one contractor. Taken ZIPs can't be selected.</p>
+              <p class="save-msg" id="save-msg"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ALERT HISTORY -->
+        <div class="panel history">
+          <div class="panel-head"><span>Recent storm alerts</span></div>
+          <div class="panel-body" id="history-body">
+            <div class="empty">No storm alerts yet. When severe weather hits your territory, alerts appear here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const API = 'https://api.treestormleads.com';
+  let map, zipMarkers = {}, myZips = new Set(), takenZips = {}, allZipData = {}, subscriber = null;
+
+  // ---- login: look up subscriber by email ----
+  async function login() {
+    const email = document.getElementById('login-email').value.trim();
+    const msg = document.getElementById('login-msg');
+    if (!email) { msg.textContent = 'Enter your email.'; msg.style.display = 'block'; return; }
+    const btn = document.getElementById('login-btn');
+    btn.disabled = true; btn.textContent = 'Loading…';
+    try {
+      const res = await fetch(API + '/dashboard-data', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (res.status === 404) { msg.textContent = 'No subscription found for that email.'; msg.style.display = 'block'; btn.disabled = false; btn.textContent = 'View my territory →'; return; }
+      const data = await res.json();
+      subscriber = data.subscriber;
+      myZips = new Set(data.subscriber.zips || []);
+      takenZips = data.takenZips || {};       // { zip: company } claimed by OTHERS
+      allZipData = data.zipData || {};         // { zip: {lat,lng,state} } for the subscriber's state
+      showDashboard();
+    } catch (e) {
+      msg.textContent = 'Something went wrong. Try again.'; msg.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'View my territory →';
+      console.error(e);
+    }
+  }
+
+  function showDashboard() {
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('dash').style.display = 'block';
+    document.getElementById('dash-company').textContent = subscriber.company || 'Your Territory';
+    document.getElementById('topbar-who').innerHTML = `<b>${subscriber.company || subscriber.email}</b>`;
+    document.getElementById('map-state-label').textContent = subscriber.state || '';
+    initMap();
+    renderZipList();
+    renderHistory();
+  }
+
+  // ---- map ----
+  function initMap() {
+    // center on the subscriber's ZIPs, or their state
+    const zips = Object.keys(allZipData);
+    let clat = 30.33, clng = -81.66; // default Jacksonville
+    if (myZips.size) {
+      const mine = [...myZips].map(z => allZipData[z]).filter(Boolean);
+      if (mine.length) { clat = mine.reduce((s,z)=>s+z.lat,0)/mine.length; clng = mine.reduce((s,z)=>s+z.lng,0)/mine.length; }
+    } else if (zips.length) {
+      clat = allZipData[zips[0]].lat; clng = allZipData[zips[0]].lng;
+    }
+    map = L.map('map').setView([clat, clng], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap', maxZoom: 18
+    }).addTo(map);
+
+    // plot every ZIP centroid in the subscriber's state as a clickable marker
+    for (const [zip, z] of Object.entries(allZipData)) {
+      const isMine = myZips.has(zip);
+      const isTaken = !!takenZips[zip];
+      const marker = L.circleMarker([z.lat, z.lng], markerStyle(zip));
+      marker.bindTooltip(`${zip}${isTaken ? ' — taken by '+takenZips[zip] : ''}`, { direction: 'top' });
+      marker.on('click', () => toggleZip(zip));
+      marker.addTo(map);
+      zipMarkers[zip] = marker;
+    }
+  }
+
+  function markerStyle(zip) {
+    const isMine = myZips.has(zip);
+    const isTaken = !!takenZips[zip];
+    if (isMine)  return { radius: 7, color: '#2B2118', weight: 2, fillColor: '#4A5D3A', fillOpacity: 0.95 };
+    if (isTaken) return { radius: 5, color: '#2B2118', weight: 1, fillColor: '#9A9085', fillOpacity: 0.6 };
+    return         { radius: 5, color: '#2B2118', weight: 1, fillColor: '#ffffff', fillOpacity: 0.9 };
+  }
+
+  function toggleZip(zip) {
+    if (takenZips[zip]) return; // can't select a taken ZIP
+    if (myZips.has(zip)) myZips.delete(zip); else myZips.add(zip);
+    zipMarkers[zip].setStyle(markerStyle(zip));
+    renderZipList();
+  }
+
+  function renderZipList() {
+    document.getElementById('zip-count').textContent = myZips.size;
+    const list = document.getElementById('zip-list');
+    list.innerHTML = '';
+    [...myZips].sort().forEach(zip => {
+      const chip = document.createElement('div');
+      chip.className = 'zip-chip';
+      chip.innerHTML = `${zip} <button onclick="toggleZip('${zip}')">×</button>`;
+      list.appendChild(chip);
+    });
+  }
+
+  // ---- save territory (respects exclusivity server-side) ----
+  async function saveTerritory() {
+    const btn = document.getElementById('save-btn');
+    const msg = document.getElementById('save-msg');
+    btn.disabled = true; btn.textContent = 'Saving…'; msg.style.display = 'none';
+    try {
+      const res = await fetch(API + '/update-territory', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: subscriber.email, zips: [...myZips] })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        msg.textContent = `Saved — ${myZips.size} ZIPs covered.`; msg.style.color = 'var(--leaf)';
+      } else if (data.taken) {
+        // some got taken since load; reflect it
+        msg.textContent = `Some ZIPs were just claimed by others: ${data.taken.map(t=>t.zip).join(', ')}. Removed them.`;
+        msg.style.color = 'var(--sap-deep)';
+        data.taken.forEach(t => { myZips.delete(t.zip); takenZips[t.zip] = t.takenBy; zipMarkers[t.zip] && zipMarkers[t.zip].setStyle(markerStyle(t.zip)); });
+        renderZipList();
+      } else {
+        msg.textContent = 'Could not save. Try again.'; msg.style.color = 'var(--sap-deep)';
+      }
+      msg.style.display = 'block';
+    } catch (e) {
+      msg.textContent = 'Something went wrong saving.'; msg.style.color = 'var(--sap-deep)'; msg.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = 'Save territory changes';
+  }
+
+  // ---- alert history ----
+  function renderHistory() {
+    const body = document.getElementById('history-body');
+    const history = subscriber.alertHistory || [];
+    if (!history.length) return; // keep the empty state
+    body.innerHTML = '';
+    history.slice(0, 20).forEach(a => {
+      const row = document.createElement('div');
+      row.className = 'alert-row';
+      row.innerHTML = `
+        <span class="alert-tier tier-${a.tier || 'HOT'}">${a.tier || 'HOT'}</span>
+        <div class="alert-detail">
+          <div class="ev">${a.event || 'Storm'} — ${(a.zips||[]).join(', ')}</div>
+          <div class="meta">Damage score ${a.score || '—'}/100 · ${a.sentAt ? new Date(a.sentAt).toLocaleString() : ''}</div>
+        </div>`;
+      body.appendChild(row);
+    });
+  }
+
+  // allow Enter to submit login
+  document.getElementById('login-email').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+</script>
+</body>
+</html>
