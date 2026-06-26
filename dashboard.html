@@ -427,20 +427,22 @@
   async function renderLiveConditions() {
     const strip = document.getElementById('live-strip');
     const zips = [...myZips].slice(0, 3); // show up to 3 to keep it clean
-    if (!zips.length) { strip.style.display='none'; return; }
-    strip.style.display='flex';
-    strip.innerHTML = '<span class="lc-pulse"><span class="live-dot"></span>Live</span>';
+    if (!zips.length) { strip.style.display='none'; strip.innerHTML=''; return; }
+    // build the conditions first; only show the strip if we actually got live data
+    const conds = [];
     for (const z of zips) {
       try {
         const r = await fetch(API + '/conditions/' + z);
         if (!r.ok) continue;
         const c = await r.json();
         if (c.temp == null) continue;
-        const el = document.createElement('div'); el.className='live-cond';
-        el.innerHTML = '<span class="lc-zip">' + z + '</span><span class="lc-temp">' + Math.round(c.temp) + '°</span><span class="lc-sky">' + escapeHtml(c.sky||'') + '</span>';
-        strip.appendChild(el);
+        conds.push({ zip: z, temp: c.temp, sky: c.sky||'' });
       } catch {}
     }
+    if (!conds.length) { strip.style.display='none'; strip.innerHTML=''; return; }
+    strip.style.display='flex';
+    strip.innerHTML = '<span class="lc-pulse"><span class="live-dot"></span>Live</span>' +
+      conds.map(c => '<div class="live-cond"><span class="lc-zip">' + c.zip + '</span><span class="lc-temp">' + Math.round(c.temp) + '°</span><span class="lc-sky">' + escapeHtml(c.sky) + '</span></div>').join('');
   }
 
   function renderCoverage() {
