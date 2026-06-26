@@ -61,6 +61,19 @@
   .live-cond .lc-sky { color: var(--muted-2); }
   .live-strip .lc-pulse { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--moss-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
   .live-strip .lc-more { font-size: 12px; color: var(--muted-2); font-weight: 500; padding: 7px 4px; }
+  /* live wind speed pill inside each conditions bubble, colored by tree-damage potential */
+  .lc-wind { font-weight: 700; font-size: 12.5px; padding: 1px 6px; border-radius: 3px; }
+  .lc-wind.w-calm { color: var(--muted-2); }
+  .lc-wind.w-breezy { color: var(--paper); }
+  .lc-wind.w-high { color: #fff; background: var(--ember); }
+  .lc-wind.w-severe { color: #fff; background: var(--danger); }
+  /* wind-threat banner — the headline when wind is felling-trees territory */
+  .wind-threat { max-width: 1240px; margin: 14px auto 0; display: flex; align-items: center; gap: 11px; padding: 12px 16px; border-radius: 5px; font-size: 14px; }
+  .wind-threat.high { background: rgba(200,83,27,0.15); border: 1px solid rgba(232,112,58,0.4); }
+  .wind-threat.severe { background: rgba(178,58,46,0.2); border: 1px solid rgba(212,104,92,0.5); }
+  .wind-threat .wt-icon { font-size: 20px; line-height: 1; }
+  .wind-threat .wt-txt { color: var(--paper); line-height: 1.4; }
+  .wind-threat .wt-txt b { color: var(--ember-glow); }
 
   /* subtle system-status line under the stats */
   .sys-status { max-width: 1240px; margin: 18px auto 0; font-size: 12.5px; color: var(--muted-2); display: flex; align-items: center; gap: 8px; padding-top: 14px; border-top: 1px solid rgba(247,243,236,0.1); }
@@ -254,6 +267,7 @@
       <div class="greeting serif" id="greeting">Welcome</div>
       <div class="greeting-sub" id="greeting-sub">Loading your territory&hellip;</div>
       <div class="live-strip" id="live-strip" style="display:none;"></div>
+      <div class="wind-threat" id="wind-threat" style="display:none;"></div>
     </div>
     <div class="stats" id="stats"></div>
     <div class="sys-status" id="sys-status" style="display:none;"></div>
@@ -574,16 +588,15 @@
   async function renderLiveConditions() {
     const strip = document.getElementById('live-strip');
     const all = [...myZips];
-    if (!all.length) { strip.style.display='none'; strip.innerHTML=''; return; }
+    if (!all.length) { strip.style.display='none'; strip.innerHTML=''; renderWindThreat([]); return; }
     const SHOW = 5;
     const zips = all.slice(0, SHOW);
     const moreCount = all.length - zips.length;
-    // show the strip immediately with the Live pulse, then fill ZIPs as they resolve
     strip.style.display='flex';
     strip.innerHTML = '<span class="lc-pulse"><span class="live-dot"></span>Live</span>';
     let gotAny = false;
-    // fetch in parallel but preserve order by building placeholders first
     const slots = {};
+    const windReadings = [];
     zips.forEach(z => { const el=document.createElement('div'); el.className='live-cond'; el.style.opacity='0.4'; el.innerHTML='<span class="lc-zip">'+z+'</span><span class="lc-temp">…</span>'; strip.appendChild(el); slots[z]=el; });
     await Promise.all(zips.map(async z => {
       try {
@@ -592,12 +605,44 @@
         const c = await r.json();
         if (c.temp == null) { slots[z].remove(); return; }
         gotAny = true;
+        const wind = (c.windMph != null) ? Math.round(c.windMph) : null;
+        if (wind != null) windReadings.push({ zip: z, wind });
+        const windHtml = wind != null ? '<span class="lc-wind ' + windClass(wind) + '">' + wind + ' mph</span>' : '';
         slots[z].style.opacity='1';
-        slots[z].innerHTML = '<span class="lc-zip">' + z + '</span><span class="lc-temp">' + Math.round(c.temp) + '°</span><span class="lc-sky">' + escapeHtml(c.sky||'') + '</span>';
+        slots[z].innerHTML = '<span class="lc-zip">' + z + '</span><span class="lc-temp">' + Math.round(c.temp) + '°</span>' + windHtml + '<span class="lc-sky">' + escapeHtml(c.sky||'') + '</span>';
       } catch { slots[z].remove(); }
     }));
     if (moreCount > 0 && gotAny) { const m=document.createElement('div'); m.className='lc-more'; m.textContent='+' + moreCount + ' more'; strip.appendChild(m); }
     if (!gotAny) { strip.style.display='none'; strip.innerHTML=''; }
+    renderWindThreat(windReadings);
+  }
+
+  // wind → tree-damage class: calm <15, breezy 15-24, limb-drop 25-39, tree-fall 40+
+  function windClass(mph) {
+    if (mph >= 40) return 'w-severe';
+    if (mph >= 25) return 'w-high';
+    if (mph >= 15) return 'w-breezy';
+    return 'w-calm';
+  }
+  function windLabel(mph) {
+    if (mph >= 40) return 'tree-toppling winds';
+    if (mph >= 25) return 'limb-dropping winds';
+    if (mph >= 15) return 'breezy';
+    return 'calm';
+  }
+
+  // wind-threat banner — surfaces elevated wind in the territory (the thing that fells trees)
+  function renderWindThreat(readings) {
+    const el = document.getElementById('wind-threat');
+    if (!el) return;
+    const elevated = readings.filter(r => r.wind >= 25).sort((a,b)=>b.wind-a.wind);
+    if (!elevated.length) { el.style.display='none'; el.innerHTML=''; return; }
+    const top = elevated[0];
+    const sev = top.wind >= 40;
+    el.style.display='flex';
+    el.className = 'wind-threat ' + (sev ? 'severe' : 'high');
+    const others = elevated.length > 1 ? ' &middot; +' + (elevated.length-1) + ' more ZIP' + (elevated.length-1===1?'':'s') : '';
+    el.innerHTML = '<span class="wt-icon">&#127786;</span><span class="wt-txt"><b>' + top.wind + ' mph in ' + top.zip + '</b> &mdash; ' + windLabel(top.wind) + ' right now' + others + '. Expect downed limbs' + (sev?' and trees':'') + '.</span>';
   }
 
   function renderCoverage() {
