@@ -94,6 +94,19 @@
   .season-dot.peak { background: var(--ember); } .season-dot.off { background: var(--muted-2); }
   .season-txt { font-size: 12.5px; color: var(--muted); } .season-txt b { color: var(--bark); }
 
+  /* recent storms list — wind front and center */
+  .recent-storms { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+  .rs-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
+  .rs-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; }
+  .rs-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .rs-dot.sev { background: var(--danger); } .rs-dot.high { background: var(--ember); } .rs-dot.mod { background: var(--gold); }
+  .rs-info { flex: 1; min-width: 0; }
+  .rs-ev { font-size: 13px; font-weight: 600; color: var(--bark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rs-meta { font-size: 11.5px; color: var(--muted); }
+  .rs-wind { font-weight: 700; font-size: 12px; padding: 2px 7px; border-radius: 3px; flex-shrink: 0; }
+  .rs-wind.w-calm { color: var(--muted); } .rs-wind.w-breezy { color: var(--bark); }
+  .rs-wind.w-high { color: #fff; background: var(--ember); } .rs-wind.w-severe { color: #fff; background: var(--danger); }
+
   .stats { display: flex; gap: 0; max-width: 1240px; margin: 22px auto 0; flex-wrap: wrap; }
   .stat { flex: 1; min-width: 150px; padding: 4px 24px; border-left: 1px solid rgba(247,243,236,0.15); }
   .stat:first-child { padding-left: 0; border-left: none; }
@@ -336,6 +349,7 @@
               <span class="season-dot" id="season-dot"></span>
               <span class="season-txt" id="season-txt"></span>
             </div>
+            <div class="recent-storms" id="recent-storms" style="display:none;"></div>
           </div>
         </div>
 
@@ -549,7 +563,6 @@
     const card = document.getElementById('activity-card');
     if (!myZips.size) { card.style.display='none'; return; }
     card.style.display='block';
-    // storm history: use real backend data if present (subscriber.stormHistory = [{month, count}...]), else show season-only
     const hist = subscriber.stormHistory || null;
     const sparkEl = document.getElementById('act-spark');
     const monthsEl = document.getElementById('act-months');
@@ -557,15 +570,30 @@
       const total = hist.reduce((s,m)=>s+(m.count||0),0);
       document.getElementById('storm-count').textContent = total;
       const max = Math.max(1, ...hist.map(m=>m.count||0));
-      sparkEl.innerHTML = hist.map(m => '<div class="act-bar' + ((m.count||0)>0?' hit':'') + '" style="height:' + Math.max(8, ((m.count||0)/max)*100) + '%" title="' + (m.label||'') + ': ' + (m.count||0) + '"></div>').join('');
+      sparkEl.innerHTML = hist.map(m => '<div class="act-bar' + ((m.count||0)>0?' hit':'') + '" style="height:' + Math.max(8, ((m.count||0)/max)*100) + '%" title="' + (m.label||'') + ': ' + (m.count||0) + ' storm' + ((m.count||0)===1?'':'s') + '"></div>').join('');
       monthsEl.innerHTML = hist.length>=12 ? '<span>' + (hist[0].label||'') + '</span><span>' + (hist[Math.floor(hist.length/2)].label||'') + '</span><span>' + (hist[hist.length-1].label||'') + '</span>' : '';
     } else {
-      // no history data yet — show a clean "building" state rather than fake bars
       document.getElementById('storm-count').textContent = '0';
       sparkEl.innerHTML = '';
       monthsEl.innerHTML = '<span style="color:var(--muted-2)">Storm history builds as we monitor your territory</span>';
     }
+    renderRecentStorms();
     renderSeason();
+  }
+
+  // recent storms with wind speeds (wind front and center, like live conditions)
+  function renderRecentStorms() {
+    const wrap = document.getElementById('recent-storms');
+    if (!wrap) return;
+    const storms = subscriber.recentStorms || [];
+    if (!storms.length) { wrap.style.display='none'; wrap.innerHTML=''; return; }
+    wrap.style.display='block';
+    wrap.innerHTML = '<div class="rs-head">Recent storms in your territory</div>' + storms.slice(0,5).map(s => {
+      const when = s.issue ? new Date(s.issue).toLocaleDateString(undefined,{month:'short',day:'numeric'}) : '';
+      const windPill = (s.wind != null) ? '<span class="rs-wind ' + windClass(s.wind) + '">' + s.wind + ' mph</span>' : '';
+      const riskDot = s.risk === 'SEVERE' ? 'sev' : s.risk === 'HIGH' ? 'high' : 'mod';
+      return '<div class="rs-row"><span class="rs-dot ' + riskDot + '"></span><div class="rs-info"><div class="rs-ev">' + escapeHtml(s.event||'Storm') + '</div><div class="rs-meta">' + s.zip + ' &middot; ' + when + '</div></div>' + windPill + '</div>';
+    }).join('');
   }
 
   // ---------- seasonal context ----------
