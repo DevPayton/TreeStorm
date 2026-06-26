@@ -3,151 +3,231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TreeStorm Leads — Your Territory</title>
+<title>TreeStorm Leads — Territory Command</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bark: #2B2118; --bark-2: #3D3023; --pulp: #F5F1E8; --pulp-2: #EAE3D4;
-    --sap: #C8531B; --sap-deep: #A03E10; --leaf: #4A5D3A; --sky: #5B7A99;
-    --line: #D8CFBC; --ink-soft: #6B6253; --claimed: #4A5D3A; --taken: #9A9085;
+    --ink: #1A1512; --ink-2: #2D2620; --bark: #2B2118; --bark-soft: #4A3D30;
+    --paper: #F7F3EC; --paper-2: #EFE9DD; --card: #FFFFFF;
+    --ember: #C8531B; --ember-deep: #A03E10; --ember-glow: #E8703A;
+    --moss: #3E5235; --moss-light: #5A7049;
+    --danger: #B23A2E; --danger-soft: #D4685C;
+    --line: #DDD4C4; --line-soft: #EAE3D6; --muted: #7A6F5E; --muted-2: #9B8F7C;
+    --gold: #B8862F;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--pulp); color: var(--bark); line-height: 1.5; }
-  .topbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 28px; background: var(--bark); color: var(--pulp); }
-  .logo { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px; }
-  .logo .mark { color: var(--sap); }
-  .topbar .who { font-size: 14px; color: var(--pulp-2); }
-  .topbar .who b { color: var(--pulp); }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--paper); color: var(--ink); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .serif { font-family: 'Fraunces', Georgia, serif; }
 
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 32px; background: var(--ink); color: var(--paper); border-bottom: 3px solid var(--ember); }
+  .brand { font-weight: 700; font-size: 17px; letter-spacing: -0.3px; display: flex; align-items: center; gap: 9px; }
+  .brand .mk { color: var(--ember); font-size: 19px; }
+  .topbar-right { display: flex; align-items: center; gap: 20px; font-size: 14px; }
+  .topbar-right .co { color: var(--paper-2); }
+  .topbar-right .co b { color: #fff; font-weight: 600; }
+  .topbar-right a { color: var(--muted-2); text-decoration: none; transition: color 0.15s; }
+  .topbar-right a:hover { color: #fff; }
 
-  /* login gate */
-  #login { max-width: 420px; margin: 80px auto; background: #fff; border: 2px solid var(--bark); padding: 36px; }
-  #login h1 { font-size: 26px; letter-spacing: -0.5px; margin-bottom: 8px; }
-  #login p { color: var(--ink-soft); font-size: 15px; margin-bottom: 24px; }
-  #login input { width: 100%; padding: 13px; border: 2px solid var(--bark); font-size: 15px; margin-bottom: 14px; font-family: inherit; }
-  .btn { background: var(--sap); color: #fff; border: none; padding: 14px 24px; font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: 0 2px 0 var(--sap-deep); font-family: inherit; }
-  .btn:hover { transform: translateY(-1px); }
+  .gate { max-width: 440px; margin: 7vh auto; background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 44px 40px; box-shadow: 0 1px 3px rgba(26,21,18,0.06), 0 12px 40px rgba(26,21,18,0.08); }
+  .gate .eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--ember); margin-bottom: 14px; }
+  .gate h1 { font-size: 30px; letter-spacing: -1px; margin-bottom: 10px; font-weight: 600; }
+  .gate p { color: var(--muted); font-size: 15px; margin-bottom: 26px; }
+  .gate input { width: 100%; padding: 14px 15px; border: 1.5px solid var(--line); border-radius: 3px; font-size: 15px; font-family: inherit; margin-bottom: 14px; transition: border-color 0.15s; }
+  .gate input:focus { outline: none; border-color: var(--ember); }
+  .btn { background: var(--ember); color: #fff; border: none; padding: 14px 26px; font-weight: 600; font-size: 15px; cursor: pointer; border-radius: 3px; font-family: inherit; transition: background 0.15s, transform 0.1s; }
+  .btn:hover { background: var(--ember-deep); }
+  .btn:active { transform: translateY(1px); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-block { display: block; width: 100%; text-align: center; }
+  .btn-wide { width: 100%; }
+  .gate-msg { font-size: 14px; margin-top: 14px; color: var(--ember-deep); display: none; }
+  .gate-center { text-align: center; }
+  .gate-center .icon { font-size: 38px; margin-bottom: 14px; }
 
-  /* dashboard */
   #dash { display: none; }
-  .dash-head { margin-bottom: 24px; }
-  .dash-head h1 { font-size: 30px; letter-spacing: -1px; }
-  .dash-head p { color: var(--ink-soft); margin-top: 4px; }
+  .hero { background: linear-gradient(135deg, var(--ink) 0%, var(--bark-soft) 100%); color: var(--paper); padding: 30px 32px 26px; }
+  .hero-inner { max-width: 1240px; margin: 0 auto; }
+  .greeting { font-size: 28px; font-weight: 600; letter-spacing: -0.8px; }
+  .greeting .accent { color: var(--ember-glow); }
+  .greeting-sub { color: var(--muted-2); font-size: 14.5px; margin-top: 5px; }
 
-  .grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
-  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .stats { display: flex; gap: 0; max-width: 1240px; margin: 22px auto 0; flex-wrap: wrap; }
+  .stat { flex: 1; min-width: 150px; padding: 4px 24px; border-left: 1px solid rgba(247,243,236,0.15); }
+  .stat:first-child { padding-left: 0; border-left: none; }
+  .stat .v { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; font-family: 'Fraunces', serif; }
+  .stat .v .of { font-size: 15px; color: var(--muted-2); font-weight: 500; }
+  .stat .k { font-size: 12px; color: var(--muted-2); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+  .stat.warn .v { color: var(--ember-glow); }
 
-  .panel { background: #fff; border: 2px solid var(--bark); }
-  .panel-head { background: var(--bark); color: var(--pulp); padding: 14px 20px; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
-  .panel-head .sap { color: var(--sap); }
-  .panel-body { padding: 0; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 26px 32px 60px; }
+  .layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+  @media (max-width: 920px) { .layout { grid-template-columns: 1fr; } }
 
-  #map { height: 520px; width: 100%; }
-  .map-legend { padding: 14px 20px; display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; border-top: 2px solid var(--line); }
-  .legend-item { display: flex; align-items: center; gap: 7px; }
-  .swatch { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--bark); }
-  .sw-claimed { background: var(--claimed); }
-  .sw-open { background: #fff; }
-  .sw-taken { background: var(--taken); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 5px; overflow: hidden; box-shadow: 0 1px 2px rgba(26,21,18,0.04); }
+  .card-head { padding: 16px 20px; border-bottom: 1px solid var(--line-soft); display: flex; justify-content: space-between; align-items: center; }
+  .card-head h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--bark); }
+  .card-head .meta { font-size: 13px; color: var(--muted); }
+  .card-head .meta b { color: var(--ember-deep); }
 
-  /* territory panel */
+  #map { height: 560px; width: 100%; background: var(--paper-2); }
+  .leaflet-container { font-family: 'Inter', sans-serif; }
+  .map-foot { padding: 13px 20px; border-top: 1px solid var(--line-soft); display: flex; gap: 22px; flex-wrap: wrap; align-items: center; }
+  .lg { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--bark); }
+  .sw { width: 15px; height: 15px; border-radius: 3px; border: 1.5px solid; }
+  .sw-mine { background: rgba(62,82,53,0.55); border-color: var(--moss); }
+  .sw-open { background: rgba(255,255,255,0.4); border-color: var(--muted); }
+  .sw-taken { background: rgba(178,58,46,0.4); border-color: var(--danger); }
+  .map-hint { margin-left: auto; font-size: 12.5px; color: var(--muted); }
+
+  .side-card { margin-bottom: 22px; }
   .terr-body { padding: 20px; }
-  .terr-count { font-size: 42px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
-  .terr-count span { font-size: 15px; font-weight: 600; color: var(--ink-soft); letter-spacing: 0; }
-  .zip-list { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; max-height: 180px; overflow-y: auto; }
-  .zip-chip { background: var(--leaf); color: #fff; padding: 5px 11px; font-size: 13px; font-weight: 700; border-radius: 2px; display: flex; align-items: center; gap: 6px; }
-  .zip-chip button { background: none; border: none; color: #fff; cursor: pointer; font-size: 15px; line-height: 1; opacity: 0.7; }
-  .zip-chip button:hover { opacity: 1; }
-  .terr-actions { margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--line); }
-  .hint { font-size: 13px; color: var(--ink-soft); margin-top: 10px; }
-  .save-msg { font-size: 14px; margin-top: 12px; font-weight: 600; display: none; }
+  .terr-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+  .terr-count { font-size: 38px; font-weight: 700; letter-spacing: -1.5px; font-family: 'Fraunces', serif; line-height: 1; }
+  .terr-count .cap { font-size: 17px; color: var(--muted); font-weight: 500; }
+  .terr-label { font-size: 13px; color: var(--muted); }
+  .cap-bar { height: 7px; background: var(--paper-2); border-radius: 4px; margin: 14px 0 6px; overflow: hidden; }
+  .cap-fill { height: 100%; background: linear-gradient(90deg, var(--moss-light), var(--moss)); border-radius: 4px; transition: width 0.3s; }
+  .cap-fill.near { background: linear-gradient(90deg, var(--ember-glow), var(--ember)); }
+  .cap-note { font-size: 12px; color: var(--muted); }
+  .zip-list { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 7px; max-height: 150px; overflow-y: auto; }
+  .zchip { background: var(--moss); color: #fff; padding: 5px 10px; font-size: 12.5px; font-weight: 600; border-radius: 3px; display: flex; align-items: center; gap: 6px; }
+  .zchip button { background: none; border: none; color: rgba(255,255,255,0.75); cursor: pointer; font-size: 15px; line-height: 1; padding: 0; }
+  .zchip button:hover { color: #fff; }
+  .terr-actions { margin-top: 18px; }
+  .save-msg { font-size: 13.5px; margin-top: 11px; font-weight: 500; display: none; }
+  .cooldown-note { font-size: 12px; color: var(--muted); margin-top: 10px; display: none; }
 
-  /* alert history */
-  .history { margin-top: 24px; }
-  .alert-row { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; gap: 14px; align-items: flex-start; }
+  .plan-body { padding: 20px; }
+  .plan-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; font-size: 14px; border-bottom: 1px solid var(--line-soft); }
+  .plan-row:last-of-type { border-bottom: none; }
+  .plan-row .lbl { color: var(--muted); }
+  .plan-row .val { font-weight: 600; color: var(--bark); }
+  .plan-badge { display: inline-block; background: var(--ink); color: var(--paper); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 4px 11px; border-radius: 3px; }
+  .plan-badge.pro { background: var(--ember); }
+  .plan-badge.empire { background: var(--gold); }
+  .upgrade-link { display: block; text-align: center; margin-top: 14px; font-size: 13.5px; color: var(--ember-deep); text-decoration: none; font-weight: 600; padding: 11px; border: 1.5px dashed var(--line); border-radius: 3px; transition: border-color 0.15s, background 0.15s; }
+  .upgrade-link:hover { border-color: var(--ember); background: rgba(200,83,27,0.04); }
+
+  .alerts-body { max-height: 420px; overflow-y: auto; }
+  .alert-row { padding: 15px 20px; border-bottom: 1px solid var(--line-soft); }
   .alert-row:last-child { border-bottom: none; }
-  .alert-tier { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 2px; color: #fff; flex-shrink: 0; }
-  .tier-HOT { background: var(--sap); }
-  .tier-WARM { background: #B8821F; }
-  .alert-detail { flex: 1; font-size: 14px; }
-  .alert-detail .ev { font-weight: 700; }
-  .alert-detail .meta { color: var(--ink-soft); font-size: 13px; margin-top: 2px; }
-  .empty { padding: 40px 20px; text-align: center; color: var(--ink-soft); }
+  .alert-top { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
+  .alert-tier { font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 3px; color: #fff; letter-spacing: 0.5px; }
+  .t-HOT { background: var(--ember); } .t-WARM { background: var(--gold); }
+  .alert-ev { font-weight: 600; font-size: 14px; }
+  .alert-meta { font-size: 12.5px; color: var(--muted); }
+  .alert-zips { font-size: 12.5px; color: var(--bark); margin-top: 3px; }
+  .empty { padding: 44px 24px; text-align: center; }
+  .empty .e-icon { font-size: 30px; margin-bottom: 10px; opacity: 0.6; }
+  .empty .e-title { font-weight: 600; font-size: 15px; color: var(--bark); margin-bottom: 5px; }
+  .empty .e-sub { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(26,21,18,0.55); z-index: 1000; align-items: center; justify-content: center; padding: 24px; }
+  .modal { background: var(--card); border-radius: 6px; max-width: 480px; width: 100%; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .modal h3 { font-size: 21px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .modal p { font-size: 14px; color: var(--muted); margin-bottom: 18px; }
+  .modal-zips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; max-height: 200px; overflow-y: auto; }
+  .mz { padding: 7px 12px; border: 1.5px solid var(--line); border-radius: 3px; font-size: 13px; font-weight: 600; cursor: pointer; user-select: none; }
+  .mz.keep { background: var(--moss); color: #fff; border-color: var(--moss); }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-ghost { background: none; border: 1.5px solid var(--line); color: var(--bark); padding: 12px 20px; border-radius: 3px; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+  .toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: #fff; padding: 13px 22px; border-radius: 4px; font-size: 14px; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 1100; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.ok { border-left: 3px solid var(--moss-light); }
+  .toast.err { border-left: 3px solid var(--danger-soft); }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="logo"><span class="mark">◣</span> TreeStorm Leads</div>
-  <div class="who" id="topbar-who"></div>
+  <div class="brand"><span class="mk">&#9699;</span> TreeStorm Leads</div>
+  <div class="topbar-right" id="topbar-right"></div>
 </div>
 
-<!-- LOGIN GATE -->
-<div id="login">
-  <h1>Your territory</h1>
-  <p>Enter the email on your subscription. We'll send you a secure login link — no password needed.</p>
-  <input type="email" id="login-email" placeholder="you@yourcompany.com" />
-  <button class="btn btn-block" id="login-btn" onclick="requestLink()">Send me a login link →</button>
-  <p class="save-msg" id="login-msg" style="color:var(--sap-deep);"></p>
+<div class="gate" id="login">
+  <div class="eyebrow">Territory Command</div>
+  <h1 class="serif">Sign in</h1>
+  <p>Enter the email on your subscription. We'll send a secure sign-in link &mdash; no password to remember.</p>
+  <input type="email" id="login-email" placeholder="you@yourcompany.com" autocomplete="email" />
+  <button class="btn btn-wide" id="login-btn" onclick="requestLink()">Send sign-in link</button>
+  <p class="gate-msg" id="login-msg"></p>
 </div>
 
-<!-- "check your email" state -->
-<div id="link-sent" style="display:none;max-width:420px;margin:80px auto;background:#fff;border:2px solid var(--bark);padding:36px;text-align:center;">
-  <div style="font-size:40px;margin-bottom:12px;">✉</div>
-  <h1 style="font-size:24px;letter-spacing:-0.5px;margin-bottom:10px;">Check your email</h1>
-  <p style="color:var(--ink-soft);font-size:15px;">We sent a login link to <b id="sent-to"></b>. Click it to access your territory. The link expires in 15 minutes.</p>
+<div class="gate gate-center" id="link-sent" style="display:none;">
+  <div class="icon">&#9993;</div>
+  <h1 class="serif" style="font-size:24px;">Check your email</h1>
+  <p style="margin-bottom:0;">We sent a sign-in link to <b id="sent-to"></b>. It's good for 15 minutes.</p>
 </div>
 
-<!-- verifying state -->
-<div id="verifying" style="display:none;max-width:420px;margin:120px auto;text-align:center;color:var(--ink-soft);">
-  <p>Logging you in…</p>
+<div class="gate gate-center" id="verifying" style="display:none;">
+  <p style="margin-bottom:0;">Signing you in&hellip;</p>
 </div>
 
-<!-- DASHBOARD -->
 <div id="dash">
-  <div class="wrap">
-    <div class="dash-head">
-      <h1 id="dash-company">Your Territory</h1>
-      <p>Click ZIP markers on the map to add or remove them from your coverage. Storm alerts fire the moment severe weather hits a ZIP you cover.</p>
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="greeting serif" id="greeting">Welcome</div>
+      <div class="greeting-sub" id="greeting-sub">Loading your territory&hellip;</div>
     </div>
+    <div class="stats" id="stats"></div>
+  </div>
 
-    <div class="grid">
-      <!-- MAP -->
-      <div class="panel">
-        <div class="panel-head"><span>Service area map</span> <span class="sap" id="map-state-label"></span></div>
-        <div class="panel-body">
-          <div id="map"></div>
-          <div class="map-legend">
-            <div class="legend-item"><span class="swatch sw-claimed"></span> Your ZIPs</div>
-            <div class="legend-item"><span class="swatch sw-open"></span> Available</div>
-            <div class="legend-item"><span class="swatch sw-taken"></span> Taken by another contractor</div>
-          </div>
+  <div class="wrap">
+    <div class="layout">
+      <div class="card">
+        <div class="card-head">
+          <h2>Your territory map</h2>
+          <div class="meta" id="map-state-meta"></div>
+        </div>
+        <div id="map"></div>
+        <div class="map-foot">
+          <div class="lg"><span class="sw sw-mine"></span> Yours</div>
+          <div class="lg"><span class="sw sw-open"></span> Available</div>
+          <div class="lg"><span class="sw sw-taken"></span> Taken</div>
+          <div class="map-hint">Click a ZIP to claim or release it</div>
         </div>
       </div>
 
-      <!-- TERRITORY CONTROLS -->
       <div>
-        <div class="panel">
-          <div class="panel-head"><span>Your coverage</span></div>
+        <div class="card side-card">
+          <div class="card-head"><h2>Coverage</h2></div>
           <div class="terr-body">
-            <div class="terr-count"><span id="zip-count">0</span> <span>ZIPs covered</span></div>
+            <div class="terr-top">
+              <div class="terr-count"><span id="zip-count">0</span><span class="cap"> / <span id="zip-cap">4</span></span></div>
+              <div class="terr-label">ZIPs claimed</div>
+            </div>
+            <div class="cap-bar"><div class="cap-fill" id="cap-fill" style="width:0%"></div></div>
+            <div class="cap-note" id="cap-note">Pick ZIPs on the map to build your territory.</div>
             <div class="zip-list" id="zip-list"></div>
             <div class="terr-actions">
-              <button class="btn btn-block" id="save-btn" onclick="saveTerritory()">Save territory changes</button>
-              <p class="hint">Each ZIP is exclusive to one contractor. Taken ZIPs can't be selected.</p>
+              <button class="btn btn-wide" id="save-btn" onclick="saveTerritory()">Save territory</button>
               <p class="save-msg" id="save-msg"></p>
+              <p class="cooldown-note" id="cooldown-note"></p>
             </div>
           </div>
         </div>
 
-        <!-- ALERT HISTORY -->
-        <div class="panel history">
-          <div class="panel-head"><span>Recent storm alerts</span></div>
-          <div class="panel-body" id="history-body">
-            <div class="empty">No storm alerts yet. When severe weather hits your territory, alerts appear here.</div>
+        <div class="card side-card">
+          <div class="card-head"><h2>Your plan</h2></div>
+          <div class="plan-body">
+            <div class="plan-row"><span class="lbl">Plan</span><span class="val"><span class="plan-badge" id="plan-badge">&mdash;</span></span></div>
+            <div class="plan-row"><span class="lbl">ZIP allowance</span><span class="val" id="plan-allow">&mdash;</span></div>
+            <div class="plan-row"><span class="lbl">Monitoring</span><span class="val" style="color:var(--moss-light);">&#9679; Active 24/7</span></div>
+            <a class="upgrade-link" id="upgrade-link" href="#">Need more ZIPs? Upgrade your plan &rarr;</a>
+          </div>
+        </div>
+
+        <div class="card side-card">
+          <div class="card-head"><h2>Recent storm alerts</h2></div>
+          <div class="alerts-body" id="alerts-body">
+            <div class="empty">
+              <div class="e-icon">&#128737;</div>
+              <div class="e-title">All quiet right now</div>
+              <div class="e-sub">We're watching your territory around the clock. The moment a storm hits a ZIP you cover, the alert lands here and on your phone.</div>
+            </div>
           </div>
         </div>
       </div>
@@ -155,216 +235,236 @@
   </div>
 </div>
 
+<div class="modal-bg" id="downgrade-modal">
+  <div class="modal">
+    <h3 class="serif">Choose the ZIPs to keep</h3>
+    <p id="downgrade-text">Your new plan covers fewer ZIPs. Pick which ones to keep &mdash; the rest will be released and become available to other contractors.</p>
+    <div class="modal-zips" id="modal-zips"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeDowngrade()">Cancel</button>
+      <button class="btn" id="confirm-downgrade" onclick="confirmDowngrade()">Keep selected ZIPs</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   const API = 'https://api.treestormleads.com';
-  let map, zipMarkers = {}, myZips = new Set(), takenZips = {}, allZipData = {}, subscriber = null;
+  const HH_PER_ZIP = 3500;
+  let map, geoLayer, zipLayers = {}, myZips = new Set(), takenZips = {}, subscriber = null;
   let sessionToken = localStorage.getItem('tsl_session') || null;
+  let lastSavedAt = 0; const COOLDOWN_MS = 30 * 60 * 1000;
 
-  // ---- on load: if there's a ?token=, verify it; if we have a session, auto-load ----
   window.addEventListener('DOMContentLoaded', async () => {
-    const params = new URLSearchParams(window.location.search);
-    const loginToken = params.get('token');
-    if (loginToken) {
-      // verify the magic-link token -> get a session
+    const t = new URLSearchParams(location.search).get('token');
+    if (t) {
       show('verifying');
       try {
-        const res = await fetch(API + '/auth/verify', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: loginToken })
-        });
-        const data = await res.json();
-        if (data.ok && data.sessionToken) {
-          sessionToken = data.sessionToken;
-          localStorage.setItem('tsl_session', sessionToken);
-          // clean the token out of the URL
-          window.history.replaceState({}, '', window.location.pathname);
-          await loadDashboard();
-        } else {
-          show('login');
-          setMsg('login-msg', 'That login link is invalid or expired. Request a new one.');
-        }
-      } catch (e) { show('login'); setMsg('login-msg', 'Could not log in. Try again.'); }
+        const r = await fetch(API + '/auth/verify', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token: t }) });
+        const d = await r.json();
+        if (d.ok && d.sessionToken) {
+          sessionToken = d.sessionToken; localStorage.setItem('tsl_session', sessionToken);
+          history.replaceState({}, '', location.pathname);
+          if (!(await loadDashboard())) fail();
+        } else fail('That sign-in link expired. Request a new one.');
+      } catch { fail(); }
       return;
     }
-    // no token in URL — if we have a saved session, try to load
-    if (sessionToken) {
-      const ok = await loadDashboard();
-      if (!ok) { localStorage.removeItem('tsl_session'); sessionToken = null; show('login'); }
-    } else {
-      show('login');
-    }
+    if (sessionToken) { if (!(await loadDashboard())) { localStorage.removeItem('tsl_session'); show('login'); } }
+    else show('login');
   });
+  function fail(msg) { show('login'); if (msg) setMsg('login-msg', msg); }
+  function show(which) { ['login','link-sent','verifying','dash'].forEach(id => { const e=document.getElementById(id); if(e) e.style.display = id===which?'block':'none'; }); }
+  function setMsg(id, t) { const m=document.getElementById(id); if(m){ m.textContent=t; m.style.display='block'; } }
 
-  function show(which) {
-    ['login','link-sent','verifying','dash'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = (id === which) ? (id === 'dash' ? 'block' : 'block') : 'none';
-    });
-  }
-  function setMsg(id, text) { const m = document.getElementById(id); if (m) { m.textContent = text; m.style.display = 'block'; } }
-
-  // ---- request a magic link ----
   async function requestLink() {
     const email = document.getElementById('login-email').value.trim();
-    if (!email) { setMsg('login-msg', 'Enter your email.'); return; }
-    const btn = document.getElementById('login-btn');
-    btn.disabled = true; btn.textContent = 'Sending…';
+    if (!email) { setMsg('login-msg','Enter your email.'); return; }
+    const b = document.getElementById('login-btn'); b.disabled=true; b.textContent='Sending…';
     try {
-      await fetch(API + '/auth/request', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      // always show "check your email" (don't reveal whether the email is a subscriber)
-      document.getElementById('sent-to').textContent = email;
-      show('link-sent');
-    } catch (e) {
-      setMsg('login-msg', 'Something went wrong. Try again.');
-      btn.disabled = false; btn.textContent = 'Send me a login link →';
-    }
+      await fetch(API + '/auth/request', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email }) });
+      document.getElementById('sent-to').textContent = email; show('link-sent');
+    } catch { setMsg('login-msg','Something went wrong. Try again.'); b.disabled=false; b.textContent='Send sign-in link'; }
   }
 
-  // ---- load dashboard using the session token ----
   async function loadDashboard() {
     try {
-      const res = await fetch(API + '/dashboard-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
-        body: JSON.stringify({})
-      });
-      if (res.status === 401) return false; // session invalid/expired
-      if (!res.ok) return false;
-      const data = await res.json();
-      subscriber = data.subscriber;
-      myZips = new Set(data.subscriber.zips || []);
-      takenZips = data.takenZips || {};
-      allZipData = data.zipData || {};
-      showDashboard();
+      const r = await fetch(API + '/dashboard-data', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body:'{}' });
+      if (!r.ok) return false;
+      const d = await r.json();
+      subscriber = d.subscriber; myZips = new Set(d.subscriber.zips || []); takenZips = d.takenZips || {};
+      render();
+      await initMap(d.subscriber.state);
       return true;
     } catch (e) { console.error(e); return false; }
   }
 
-  function showDashboard() {
+  function timeGreeting() {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    if (h < 21) return 'Good evening';
+    return 'Working late';
+  }
+
+  function render() {
     show('dash');
-    document.getElementById('dash-company').textContent = subscriber.company || 'Your Territory';
-    document.getElementById('topbar-who').innerHTML = `<b>${subscriber.company || subscriber.email}</b> · <a href="#" onclick="logout();return false;" style="color:var(--pulp-2);">Log out</a>`;
-    document.getElementById('map-state-label').textContent = subscriber.state || '';
-    initMap();
-    renderZipList();
-    renderHistory();
+    const name = subscriber.company || subscriber.email.split('@')[0];
+    document.getElementById('greeting').innerHTML = timeGreeting() + ', <span class="accent">' + escapeHtml(name) + '</span>';
+    const cap = subscriber.zipCap || 4;
+    document.getElementById('greeting-sub').textContent = myZips.size
+      ? 'You\'re covering ' + myZips.size + ' ZIP' + (myZips.size===1?'':'s') + ' across ' + subscriber.state + '. We\'re watching every one.'
+      : 'Let\'s lock in your territory. Claim your ZIPs on the map below.';
+    document.getElementById('topbar-right').innerHTML = '<span class="co"><b>' + escapeHtml(subscriber.company||subscriber.email) + '</b></span> <a href="#" onclick="logout();return false;">Sign out</a>';
+    document.getElementById('map-state-meta').innerHTML = '<b>' + subscriber.state + '</b>';
+
+    const storms = (subscriber.alertHistory||[]).filter(a => { const d=new Date(a.sentAt||0); const now=new Date(); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); }).length;
+    const hh = (myZips.size * HH_PER_ZIP).toLocaleString();
+    document.getElementById('stats').innerHTML =
+      '<div class="stat ' + (myZips.size>=cap?'warn':'') + '"><div class="v">' + myZips.size + '<span class="of"> / ' + cap + '</span></div><div class="k">ZIPs claimed</div></div>' +
+      '<div class="stat"><div class="v">' + storms + '</div><div class="k">Storms this month</div></div>' +
+      '<div class="stat"><div class="v">~' + hh + '</div><div class="k">Households watched</div></div>' +
+      '<div class="stat"><div class="v" style="color:var(--moss-light)">&#9679;</div><div class="k">Monitoring active</div></div>';
+
+    renderCoverage();
+    renderPlan();
+    renderAlerts();
   }
 
-  function logout() {
-    localStorage.removeItem('tsl_session');
-    sessionToken = null;
-    window.location.reload();
-  }
-
-  // ---- map ----
-  function initMap() {
-    // center on the subscriber's ZIPs, or their state
-    const zips = Object.keys(allZipData);
-    let clat = 30.33, clng = -81.66; // default Jacksonville
-    if (myZips.size) {
-      const mine = [...myZips].map(z => allZipData[z]).filter(Boolean);
-      if (mine.length) { clat = mine.reduce((s,z)=>s+z.lat,0)/mine.length; clng = mine.reduce((s,z)=>s+z.lng,0)/mine.length; }
-    } else if (zips.length) {
-      clat = allZipData[zips[0]].lat; clng = allZipData[zips[0]].lng;
-    }
-    map = L.map('map').setView([clat, clng], 9);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap', maxZoom: 18
-    }).addTo(map);
-
-    // plot every ZIP centroid in the subscriber's state as a clickable marker
-    for (const [zip, z] of Object.entries(allZipData)) {
-      const isMine = myZips.has(zip);
-      const isTaken = !!takenZips[zip];
-      const marker = L.circleMarker([z.lat, z.lng], markerStyle(zip));
-      marker.bindTooltip(`${zip}${isTaken ? ' — taken by '+takenZips[zip] : ''}`, { direction: 'top' });
-      marker.on('click', () => toggleZip(zip));
-      marker.addTo(map);
-      zipMarkers[zip] = marker;
-    }
-  }
-
-  function markerStyle(zip) {
-    const isMine = myZips.has(zip);
-    const isTaken = !!takenZips[zip];
-    if (isMine)  return { radius: 7, color: '#2B2118', weight: 2, fillColor: '#4A5D3A', fillOpacity: 0.95 };
-    if (isTaken) return { radius: 5, color: '#2B2118', weight: 1, fillColor: '#9A9085', fillOpacity: 0.6 };
-    return         { radius: 5, color: '#2B2118', weight: 1, fillColor: '#ffffff', fillOpacity: 0.9 };
-  }
-
-  function toggleZip(zip) {
-    if (takenZips[zip]) return; // can't select a taken ZIP
-    if (myZips.has(zip)) myZips.delete(zip); else myZips.add(zip);
-    zipMarkers[zip].setStyle(markerStyle(zip));
-    renderZipList();
-  }
-
-  function renderZipList() {
+  function renderCoverage() {
+    const cap = subscriber.zipCap || 4;
     document.getElementById('zip-count').textContent = myZips.size;
-    const list = document.getElementById('zip-list');
-    list.innerHTML = '';
-    [...myZips].sort().forEach(zip => {
-      const chip = document.createElement('div');
-      chip.className = 'zip-chip';
-      chip.innerHTML = `${zip} <button onclick="toggleZip('${zip}')">×</button>`;
-      list.appendChild(chip);
-    });
+    document.getElementById('zip-cap').textContent = cap;
+    const pct = Math.min(100, (myZips.size/cap)*100);
+    const fill = document.getElementById('cap-fill');
+    fill.style.width = pct + '%'; fill.classList.toggle('near', myZips.size >= cap);
+    const note = document.getElementById('cap-note');
+    if (myZips.size === 0) note.textContent = 'Pick ZIPs on the map to build your territory.';
+    else if (myZips.size >= cap) note.innerHTML = 'You\'ve used all <b>' + cap + '</b> ZIPs on your plan. Release one to swap, or upgrade for more.';
+    else note.textContent = (cap - myZips.size) + ' ZIP' + (cap-myZips.size===1?'':'s') + ' left on your plan.';
+    const list = document.getElementById('zip-list'); list.innerHTML='';
+    [...myZips].sort().forEach(z => { const c=document.createElement('div'); c.className='zchip'; c.innerHTML=z + ' <button onclick="toggleZip(\'' + z + '\')" title="Release">&times;</button>'; list.appendChild(c); });
   }
 
-  // ---- save territory (respects exclusivity server-side) ----
-  async function saveTerritory() {
-    const btn = document.getElementById('save-btn');
-    const msg = document.getElementById('save-msg');
-    btn.disabled = true; btn.textContent = 'Saving…'; msg.style.display = 'none';
-    try {
-      const res = await fetch(API + '/update-territory', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
-        body: JSON.stringify({ zips: [...myZips] })
-      });
-      const data = await res.json();
-      if (data.ok) {
-        msg.textContent = `Saved — ${myZips.size} ZIPs covered.`; msg.style.color = 'var(--leaf)';
-      } else if (data.taken) {
-        // some got taken since load; reflect it
-        msg.textContent = `Some ZIPs were just claimed by others: ${data.taken.map(t=>t.zip).join(', ')}. Removed them.`;
-        msg.style.color = 'var(--sap-deep)';
-        data.taken.forEach(t => { myZips.delete(t.zip); takenZips[t.zip] = t.takenBy; zipMarkers[t.zip] && zipMarkers[t.zip].setStyle(markerStyle(t.zip)); });
-        renderZipList();
-      } else {
-        msg.textContent = 'Could not save. Try again.'; msg.style.color = 'var(--sap-deep)';
-      }
-      msg.style.display = 'block';
-    } catch (e) {
-      msg.textContent = 'Something went wrong saving.'; msg.style.color = 'var(--sap-deep)'; msg.style.display = 'block';
-    }
-    btn.disabled = false; btn.textContent = 'Save territory changes';
+  function renderPlan() {
+    const tk = (subscriber.tierKey||'starter');
+    const tname = subscriber.tierName || 'Starter';
+    const cap = subscriber.zipCap || 4;
+    const badge = document.getElementById('plan-badge');
+    badge.textContent = tname; badge.className = 'plan-badge ' + (tk==='pro'?'pro':tk==='empire'?'empire':'');
+    document.getElementById('plan-allow').textContent = 'Up to ' + cap + ' ZIPs';
+    const up = document.getElementById('upgrade-link');
+    if (tk === 'empire') { up.style.display='none'; }
+    else { up.textContent = tk==='starter' ? 'Need more ground? See Pro & Empire →' : 'Ready to go regional? See Empire →'; up.href = 'https://treestormleads.com/#pricing'; }
   }
 
-  // ---- alert history ----
-  function renderHistory() {
-    const body = document.getElementById('history-body');
-    const history = subscriber.alertHistory || [];
-    if (!history.length) return; // keep the empty state
+  function renderAlerts() {
+    const body = document.getElementById('alerts-body');
+    const hist = subscriber.alertHistory || [];
+    if (!hist.length) return;
     body.innerHTML = '';
-    history.slice(0, 20).forEach(a => {
-      const row = document.createElement('div');
-      row.className = 'alert-row';
-      row.innerHTML = `
-        <span class="alert-tier tier-${a.tier || 'HOT'}">${a.tier || 'HOT'}</span>
-        <div class="alert-detail">
-          <div class="ev">${a.event || 'Storm'} — ${(a.zips||[]).join(', ')}</div>
-          <div class="meta">Damage score ${a.score || '—'}/100 · ${a.sentAt ? new Date(a.sentAt).toLocaleString() : ''}</div>
-        </div>`;
+    hist.slice(0,25).forEach(a => {
+      const row=document.createElement('div'); row.className='alert-row';
+      const when = a.sentAt ? new Date(a.sentAt).toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ' · ' + new Date(a.sentAt).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}) : '';
+      row.innerHTML = '<div class="alert-top"><span class="alert-tier t-' + (a.tier||'HOT') + '">' + (a.tier||'HOT') + '</span><span class="alert-ev">' + escapeHtml(a.event||'Storm') + '</span></div>' +
+        '<div class="alert-meta">Damage ' + (a.score||'—') + '/100 · ' + when + '</div>' +
+        '<div class="alert-zips">Your ZIPs hit: ' + ((a.zips||[]).join(', ')||'—') + '</div>';
       body.appendChild(row);
     });
   }
 
-  // allow Enter to submit login
-  document.getElementById('login-email').addEventListener('keydown', e => { if (e.key === 'Enter') requestLink(); });
+  async function initMap(state) {
+    if (map) { map.remove(); zipLayers = {}; }
+    map = L.map('map', { zoomControl: true, scrollWheelZoom: true }).setView([30.33,-81.66], 8);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap © CARTO', maxZoom: 19, subdomains: 'abcd'
+    }).addTo(map);
+
+    try {
+      const r = await fetch(API + '/boundaries/' + encodeURIComponent(state));
+      if (!r.ok) throw new Error('no boundaries');
+      const geo = await r.json();
+      geoLayer = L.geoJSON(geo, {
+        style: styleZip,
+        onEachFeature: (f, layer) => {
+          const zip = f.properties.zip;
+          zipLayers[zip] = layer;
+          layer.on('click', () => toggleZip(zip));
+          layer.on('mouseover', () => { layer.bindTooltip(tipFor(zip), { sticky: true }).openTooltip(); if (!myZips.has(zip) && !takenZips[zip]) layer.setStyle({ weight: 2, fillOpacity: 0.4 }); });
+          layer.on('mouseout', () => geoLayer.resetStyle(layer));
+        }
+      }).addTo(map);
+      if (myZips.size) {
+        const grp = L.featureGroup([...myZips].map(z=>zipLayers[z]).filter(Boolean));
+        if (grp.getLayers().length) map.fitBounds(grp.getBounds().pad(0.4));
+      } else {
+        map.fitBounds(geoLayer.getBounds());
+      }
+    } catch (e) {
+      console.error('boundary load failed', e);
+      document.getElementById('map').innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">Map boundaries unavailable. Try refreshing.</div>';
+    }
+  }
+
+  function styleZip(f) {
+    const zip = f.properties.zip;
+    if (myZips.has(zip)) return { color:'#3E5235', weight:2, fillColor:'#3E5235', fillOpacity:0.55 };
+    if (takenZips[zip])  return { color:'#B23A2E', weight:1, fillColor:'#B23A2E', fillOpacity:0.35 };
+    return { color:'#9B8F7C', weight:0.8, fillColor:'#ffffff', fillOpacity:0.25 };
+  }
+  function tipFor(zip) { if (myZips.has(zip)) return 'ZIP ' + zip + ' — yours'; if (takenZips[zip]) return 'ZIP ' + zip + ' — taken by ' + takenZips[zip]; return 'ZIP ' + zip + ' — available'; }
+
+  function toggleZip(zip) {
+    if (takenZips[zip]) { toast('ZIP ' + zip + ' is already taken by ' + takenZips[zip] + '.', 'err'); return; }
+    const cap = subscriber.zipCap || 4;
+    if (!myZips.has(zip) && myZips.size >= cap) { toast('You\'re at your ' + cap + '-ZIP limit. Release one or upgrade.', 'err'); return; }
+    if (myZips.has(zip)) myZips.delete(zip); else myZips.add(zip);
+    if (zipLayers[zip]) { zipLayers[zip].setStyle(styleZip({properties:{zip}})); }
+    renderCoverage();
+    const cap2 = subscriber.zipCap || 4;
+    const statEls = document.querySelectorAll('.stat');
+    statEls[0].querySelector('.v').innerHTML = myZips.size + '<span class="of"> / ' + cap2 + '</span>';
+    statEls[0].classList.toggle('warn', myZips.size>=cap2);
+    statEls[2].querySelector('.v').textContent = '~' + (myZips.size*HH_PER_ZIP).toLocaleString();
+  }
+
+  async function saveTerritory() {
+    const since = Date.now() - lastSavedAt;
+    if (lastSavedAt && since < COOLDOWN_MS) {
+      const mins = Math.ceil((COOLDOWN_MS - since)/60000);
+      toast('Territory changes are limited to once every 30 minutes. Try again in ' + mins + ' min.', 'err'); return;
+    }
+    const b = document.getElementById('save-btn'); b.disabled=true; b.textContent='Saving…';
+    try {
+      const r = await fetch(API + '/update-territory', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body: JSON.stringify({ zips:[...myZips] }) });
+      const d = await r.json();
+      if (d.ok) { lastSavedAt = Date.now(); toast('Saved — ' + myZips.size + ' ZIP' + (myZips.size===1?'':'s') + ' locked in.', 'ok'); }
+      else if (d.error === 'over_cap') { toast('That\'s over your ' + d.cap + '-ZIP plan limit.', 'err'); }
+      else if (d.error === 'cooldown') { toast('Changes limited to once every 30 min. Try again soon.', 'err'); }
+      else if (d.taken) { d.taken.forEach(t=>{ myZips.delete(t.zip); takenZips[t.zip]=t.takenBy; if(zipLayers[t.zip]) zipLayers[t.zip].setStyle(styleZip({properties:{zip:t.zip}})); }); renderCoverage(); toast('Some ZIPs were just claimed by others and removed.', 'err'); }
+      else toast('Could not save. Try again.', 'err');
+    } catch { toast('Something went wrong saving.', 'err'); }
+    b.disabled=false; b.textContent='Save territory';
+  }
+
+  let pendingKeep = new Set();
+  function openDowngrade(newCap) {
+    pendingKeep = new Set([...myZips].slice(0, newCap));
+    document.getElementById('downgrade-text').textContent = 'Your new plan covers ' + newCap + ' ZIPs, but you have ' + myZips.size + ' claimed. Pick the ' + newCap + ' to keep — the rest are released.';
+    const box = document.getElementById('modal-zips'); box.innerHTML='';
+    [...myZips].sort().forEach(z => { const el=document.createElement('div'); el.className='mz'+(pendingKeep.has(z)?' keep':''); el.textContent=z; el.onclick=()=>{ if(pendingKeep.has(z)) pendingKeep.delete(z); else { if(pendingKeep.size>=newCap){ toast('Only ' + newCap + ' ZIPs on the new plan.','err'); return; } pendingKeep.add(z); } el.classList.toggle('keep'); }; box.appendChild(el); });
+    document.getElementById('downgrade-modal').style.display='flex';
+  }
+  function closeDowngrade(){ document.getElementById('downgrade-modal').style.display='none'; }
+  async function confirmDowngrade(){ myZips = new Set(pendingKeep); closeDowngrade(); await saveTerritory(); render(); }
+
+  function logout(){ localStorage.removeItem('tsl_session'); sessionToken=null; location.reload(); }
+  function toast(msg, kind){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+(kind||''); clearTimeout(t._h); t._h=setTimeout(()=>t.className='toast '+(kind||''),3800); }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  document.getElementById('login-email').addEventListener('keydown', e => { if (e.key==='Enter') requestLink(); });
 </script>
 </body>
 </html>
