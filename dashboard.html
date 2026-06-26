@@ -53,6 +53,14 @@
   .greeting .accent { color: var(--ember-glow); }
   .greeting-sub { color: var(--muted-2); font-size: 14.5px; margin-top: 5px; }
 
+  /* live conditions strip — proves the system is pulling real-time data */
+  .live-strip { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+  .live-cond { display: flex; align-items: center; gap: 8px; padding: 7px 13px; background: rgba(247,243,236,0.06); border: 1px solid rgba(247,243,236,0.1); border-radius: 20px; font-size: 13px; }
+  .live-cond .lc-zip { color: var(--muted-2); font-weight: 600; }
+  .live-cond .lc-temp { color: var(--paper); font-weight: 700; font-family: 'Fraunces', serif; }
+  .live-cond .lc-sky { color: var(--muted-2); }
+  .live-strip .lc-pulse { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--moss-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
   .stats { display: flex; gap: 0; max-width: 1240px; margin: 22px auto 0; flex-wrap: wrap; }
   .stat { flex: 1; min-width: 150px; padding: 4px 24px; border-left: 1px solid rgba(247,243,236,0.15); }
   .stat:first-child { padding-left: 0; border-left: none; }
@@ -140,13 +148,12 @@
   .toast.err { border-left: 3px solid var(--danger-soft); }
 
   /* ---------- war board: live pulsing indicators ---------- */
-  @keyframes pulse-dot { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(90,112,73,0.7); } 50% { opacity: 0.75; box-shadow: 0 0 0 5px rgba(90,112,73,0); } }
-  .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--moss-light); margin-right: 7px; animation: pulse-dot 2s infinite; }
-  .live-dot.amber { background: var(--ember-glow); animation-name: pulse-dot-amber; }
-  @keyframes pulse-dot-amber { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(232,112,58,0.7); } 50% { opacity: 0.7; box-shadow: 0 0 0 5px rgba(232,112,58,0); } }
+  .live-dot { position: relative; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--moss-light); margin-right: 9px; vertical-align: middle; }
+  .live-dot::after { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; border-radius: 50%; background: var(--moss-light); transform: translate(-50%,-50%); animation: ring 1.8s ease-out infinite; }
+  .live-dot.amber { background: var(--ember-glow); }
+  .live-dot.amber::after { background: var(--ember-glow); }
+  @keyframes ring { 0% { opacity: 0.7; transform: translate(-50%,-50%) scale(1); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(3.2); } }
   @keyframes terr-breathe { 0%,100% { fill-opacity: 0.5; } 50% { fill-opacity: 0.68; } }
-
-  /* map territory glow overlays drawn via SVG filter */
   .leaflet-interactive.mine-zone { animation: terr-breathe 3s ease-in-out infinite; }
 
   /* ---------- value estimator (the money panel) ---------- */
@@ -218,6 +225,7 @@
     <div class="hero-inner">
       <div class="greeting serif" id="greeting">Welcome</div>
       <div class="greeting-sub" id="greeting-sub">Loading your territory&hellip;</div>
+      <div class="live-strip" id="live-strip" style="display:none;"></div>
     </div>
     <div class="stats" id="stats"></div>
   </div>
@@ -404,7 +412,7 @@
       '<div class="stat ' + (myZips.size>=cap?'warn':'') + '"><div class="v">' + myZips.size + '<span class="of"> / ' + cap + '</span></div><div class="k">ZIPs claimed</div></div>' +
       '<div class="stat"><div class="v">' + storms + '</div><div class="k">Storms this month</div></div>' +
       '<div class="stat"><div class="v">~' + hh + '</div><div class="k">Households watched</div></div>' +
-      '<div class="stat"><div class="v" style="color:var(--moss-light)">&#9679;</div><div class="k">Monitoring active</div></div>';
+      '<div class="stat"><div class="v"><span class="live-dot"></span></div><div class="k">Monitoring active</div></div>';
 
     renderCoverage();
     renderPlan();
@@ -412,6 +420,27 @@
     renderValue();
     renderCert();
     renderNudge();
+    renderLiveConditions();
+  }
+
+  // ---------- live conditions strip (proves real-time data) ----------
+  async function renderLiveConditions() {
+    const strip = document.getElementById('live-strip');
+    const zips = [...myZips].slice(0, 3); // show up to 3 to keep it clean
+    if (!zips.length) { strip.style.display='none'; return; }
+    strip.style.display='flex';
+    strip.innerHTML = '<span class="lc-pulse"><span class="live-dot"></span>Live</span>';
+    for (const z of zips) {
+      try {
+        const r = await fetch(API + '/conditions/' + z);
+        if (!r.ok) continue;
+        const c = await r.json();
+        if (c.temp == null) continue;
+        const el = document.createElement('div'); el.className='live-cond';
+        el.innerHTML = '<span class="lc-zip">' + z + '</span><span class="lc-temp">' + Math.round(c.temp) + '°</span><span class="lc-sky">' + escapeHtml(c.sky||'') + '</span>';
+        strip.appendChild(el);
+      } catch {}
+    }
   }
 
   function renderCoverage() {
