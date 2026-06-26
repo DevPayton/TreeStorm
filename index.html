@@ -137,6 +137,37 @@
   .price-body .btn-primary { display: block; text-align: center; }
   .price-foot { text-align: center; font-size: 14px; color: var(--ink-soft); margin-top: 18px; }
 
+  /* three-tier selector */
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; max-width: 920px; margin: 44px auto 0; text-align: left; }
+  @media (max-width: 820px) { .tiers { grid-template-columns: 1fr; max-width: 440px; } }
+  .tier { border: 2px solid var(--bark); background: #fff; cursor: pointer; transition: transform 0.12s, box-shadow 0.12s; position: relative; display: flex; flex-direction: column; }
+  .tier:hover { transform: translateY(-3px); box-shadow: 0 6px 0 var(--bark); }
+  .tier.selected { box-shadow: 0 6px 0 var(--sap); transform: translateY(-3px); }
+  .tier.selected .tier-head { background: var(--sap); }
+  .tier.featured { border-color: var(--sap); }
+  .tier-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--sap); color: #fff; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 4px 14px; white-space: nowrap; }
+  .tier-head { background: var(--bark); color: var(--pulp); padding: 22px 22px 18px; transition: background 0.12s; }
+  .tier-name { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--pulp); }
+  .tier.selected .tier-name { color: #fff; }
+  .tier-price { font-size: 40px; font-weight: 800; letter-spacing: -2px; line-height: 1; margin-top: 10px; }
+  .tier-price span { font-size: 15px; font-weight: 600; color: var(--pulp-2); letter-spacing: 0; }
+  .tier.selected .tier-price span { color: rgba(255,255,255,0.85); }
+  .tier-zips { font-size: 14px; color: var(--pulp-2); margin-top: 8px; font-weight: 600; }
+  .tier.selected .tier-zips { color: #fff; }
+  .tier-body { padding: 20px 22px; flex: 1; }
+  .tier-body ul { list-style: none; }
+  .tier-body li { padding: 7px 0; font-size: 13.5px; display: flex; gap: 9px; color: var(--bark); }
+  .tier-body .check { color: var(--sap); font-weight: 800; flex-shrink: 0; }
+  .tier-perzip { font-size: 12px; color: var(--ink-soft); padding: 12px 22px; border-top: 1px solid var(--line); font-weight: 600; }
+  .tier-select-btn { padding: 12px; text-align: center; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; background: var(--pulp-2); color: var(--bark); border-top: 2px solid var(--bark); }
+  .tier.selected .tier-select-btn { background: var(--sap); color: #fff; }
+  .tier.selected .tier-select-btn::after { content: " ✓"; }
+
+  .signup-box { max-width: 440px; margin: 36px auto 0; border: 2px solid var(--bark); background: var(--pulp); padding: 28px; text-align: left; }
+  .signup-box h3 { font-size: 18px; margin-bottom: 4px; }
+  .signup-box .chosen { font-size: 14px; color: var(--ink-soft); margin-bottom: 18px; }
+  .signup-box .chosen b { color: var(--sap-deep); }
+
   /* ===== Coverage ===== */
   .coverage { text-align: center; }
   .states { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
@@ -255,43 +286,93 @@
 <!-- PRICING -->
 <section class="pricing" id="pricing">
   <div class="wrap">
-    <div class="section-label">Simple pricing</div>
-    <h2 style="margin-left:auto;margin-right:auto;">One flat rate. Your whole territory. Unlimited alerts.</h2>
-    <div class="price-card">
-      <div class="price-head">
-        <div class="plan">Territory Plan</div>
-        <div class="amount">$99<span>/month</span></div>
-      </div>
-      <div class="price-body">
-        <ul>
-          <li><span class="check">✓</span> 24/7 storm monitoring for your service area</li>
-          <li><span class="check">✓</span> Instant text + email alerts, damage-scored</li>
-          <li><span class="check">✓</span> Hardest-hit neighborhood targeting</li>
-          <li><span class="check">✓</span> Exclusive — your territory is yours alone</li>
-          <li><span class="check">✓</span> Tree-removal permit alerts (where available)</li>
-          <li><span class="check">✓</span> No contract — cancel anytime</li>
-        </ul>
-        <div id="signup-form" style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
-          <input id="f-company" type="text" placeholder="Company name" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
-          <input id="f-email" type="email" placeholder="Email" required style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
-          <input id="f-phone" type="tel" placeholder="Cell phone (for storm text alerts)" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
-          <select id="f-state" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;background:#fff;">
-            <option value="">Your state…</option>
-            <option value="FL">Florida</option>
-            <option value="GA">Georgia</option>
-            <option value="SC">South Carolina</option>
-            <option value="NC">North Carolina</option>
-            <option value="AL">Alabama</option>
-          </select>
-          <input id="f-counties" type="text" placeholder="Counties you cover (e.g. Duval, Clay, St. Johns)" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
+    <div class="section-label">Pick your territory</div>
+    <h2 style="margin-left:auto;margin-right:auto;">Lock your ZIPs. One contractor per ZIP. First come, first served.</h2>
+
+    <div class="tiers">
+      <!-- STARTER -->
+      <div class="tier" data-tier="starter" onclick="selectTier('starter')">
+        <div class="tier-head">
+          <div class="tier-name">Starter</div>
+          <div class="tier-price">$99<span>/mo</span></div>
+          <div class="tier-zips">Up to 4 ZIP codes</div>
         </div>
-        <button class="btn-primary" id="subscribe-btn" onclick="startCheckout()" style="margin-top:14px;">Start 14-day free trial</button>
-        <p style="text-align:center;margin-top:8px;font-size:12px;color:var(--ink-soft);">Card required. Free for 14 days — cancel anytime before then and you won't be charged.</p>
-        <p id="checkout-msg" style="text-align:center;margin-top:12px;font-size:14px;color:var(--sap-deep);display:none;"></p>
-        <p style="margin-top:14px;font-size:12px;color:var(--ink-soft);line-height:1.5;">By providing your phone number and subscribing, you agree to receive recurring SMS storm-alert notifications from TreeStorm Leads at the number provided. Consent is not a condition of purchase. Message frequency varies by storm activity. Msg &amp; data rates may apply. Reply STOP to unsubscribe, HELP for help. See our <a href="terms.html" style="color:var(--sap-deep);">Terms</a> and <a href="privacy.html" style="color:var(--sap-deep);">Privacy Policy</a>.</p>
+        <div class="tier-body">
+          <ul>
+            <li><span class="check">✓</span> 24/7 storm monitoring</li>
+            <li><span class="check">✓</span> Instant text + email alerts</li>
+            <li><span class="check">✓</span> Damage-scored, ranked by ZIP</li>
+            <li><span class="check">✓</span> Your ZIPs, exclusively yours</li>
+          </ul>
+        </div>
+        <div class="tier-perzip">$24.75 per ZIP</div>
+        <div class="tier-select-btn">Select</div>
+      </div>
+
+      <!-- PRO (featured) -->
+      <div class="tier featured" data-tier="pro" onclick="selectTier('pro')">
+        <div class="tier-badge">Most popular</div>
+        <div class="tier-head">
+          <div class="tier-name">Pro</div>
+          <div class="tier-price">$199<span>/mo</span></div>
+          <div class="tier-zips">Up to 10 ZIP codes</div>
+        </div>
+        <div class="tier-body">
+          <ul>
+            <li><span class="check">✓</span> Everything in Starter</li>
+            <li><span class="check">✓</span> Cover a full metro area</li>
+            <li><span class="check">✓</span> Hardest-hit neighborhood targeting</li>
+            <li><span class="check">✓</span> Priority storm alerts</li>
+          </ul>
+        </div>
+        <div class="tier-perzip">$19.90 per ZIP — better rate</div>
+        <div class="tier-select-btn">Select</div>
+      </div>
+
+      <!-- EMPIRE -->
+      <div class="tier" data-tier="empire" onclick="selectTier('empire')">
+        <div class="tier-head">
+          <div class="tier-name">Empire</div>
+          <div class="tier-price">$399<span>/mo</span></div>
+          <div class="tier-zips">Up to 25 ZIP codes</div>
+        </div>
+        <div class="tier-body">
+          <ul>
+            <li><span class="check">✓</span> Everything in Pro</li>
+            <li><span class="check">✓</span> Regional, multi-crew coverage</li>
+            <li><span class="check">✓</span> Lock down whole counties</li>
+            <li><span class="check">✓</span> Best per-ZIP rate</li>
+          </ul>
+        </div>
+        <div class="tier-perzip">$15.96 per ZIP — best value</div>
+        <div class="tier-select-btn">Select</div>
       </div>
     </div>
-    <p class="price-foot">14 days free, then $99/month. Cancel anytime before day 14 and you won't be charged.</p>
+
+    <!-- SIGNUP FORM (appears after a tier is chosen) -->
+    <div class="signup-box" id="signup-box" style="display:none;">
+      <h3>Start your free trial</h3>
+      <p class="chosen">Selected plan: <b id="chosen-plan">—</b></p>
+      <div id="signup-form" style="display:flex;flex-direction:column;gap:10px;">
+        <input id="f-company" type="text" placeholder="Company name" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
+        <input id="f-email" type="email" placeholder="Email" required style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
+        <input id="f-phone" type="tel" placeholder="Cell phone (for storm text alerts)" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;">
+        <select id="f-state" style="padding:12px;border:2px solid var(--bark);border-radius:2px;font-size:15px;font-family:inherit;background:#fff;">
+          <option value="">Your state…</option>
+          <option value="FL">Florida</option>
+          <option value="GA">Georgia</option>
+          <option value="SC">South Carolina</option>
+          <option value="NC">North Carolina</option>
+          <option value="AL">Alabama</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="subscribe-btn" onclick="startCheckout()" style="margin-top:14px;width:100%;">Start 14-day free trial</button>
+      <p style="text-align:center;margin-top:8px;font-size:12px;color:var(--ink-soft);">Card required. Free for 14 days — cancel anytime before then and you won't be charged. You'll pick your exact ZIP codes right after signup.</p>
+      <p id="checkout-msg" style="text-align:center;margin-top:12px;font-size:14px;color:var(--sap-deep);display:none;"></p>
+      <p style="margin-top:14px;font-size:12px;color:var(--ink-soft);line-height:1.5;">By providing your phone number and subscribing, you agree to receive recurring SMS storm-alert notifications from TreeStorm Leads at the number provided. Consent is not a condition of purchase. Message frequency varies by storm activity. Msg &amp; data rates may apply. Reply STOP to unsubscribe, HELP for help. See our <a href="terms.html" style="color:var(--sap-deep);">Terms</a> and <a href="privacy.html" style="color:var(--sap-deep);">Privacy Policy</a>.</p>
+    </div>
+
+    <p class="price-foot">All plans: 14 days free, cancel anytime before day 14 and you won't be charged. One contractor per ZIP — when a ZIP's taken, it's gone.</p>
   </div>
 </section>
 
@@ -331,23 +412,42 @@
   // Points at your live billing server on the VPS (via Cloudflare tunnel)
   const BILLING_URL = 'https://api.treestormleads.com';
 
+  const TIER_LABELS = {
+    starter: 'Starter — $99/mo, up to 4 ZIPs',
+    pro:     'Pro — $199/mo, up to 10 ZIPs',
+    empire:  'Empire — $399/mo, up to 25 ZIPs'
+  };
+  let selectedTier = null;
+
+  function selectTier(tier) {
+    selectedTier = tier;
+    // highlight the chosen card
+    document.querySelectorAll('.tier').forEach(el => {
+      el.classList.toggle('selected', el.getAttribute('data-tier') === tier);
+    });
+    // reveal + fill the signup form
+    document.getElementById('chosen-plan').textContent = TIER_LABELS[tier];
+    const box = document.getElementById('signup-box');
+    box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
   async function startCheckout() {
     const btn = document.getElementById('subscribe-btn');
     const msg = document.getElementById('checkout-msg');
+
+    function showErr(t){ msg.textContent = t; msg.style.display = 'block'; }
+    if (!selectedTier) { showErr('Please pick a plan above first.'); return; }
 
     // collect the form
     const company = document.getElementById('f-company').value.trim();
     const email = document.getElementById('f-email').value.trim();
     const phone = document.getElementById('f-phone').value.trim();
     const state = document.getElementById('f-state').value;
-    const counties = document.getElementById('f-counties').value
-      .split(',').map(c => c.trim()).filter(Boolean);
 
     // basic validation
-    function showErr(t){ msg.textContent = t; msg.style.display = 'block'; }
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showErr('Please enter a valid email.'); return; }
     if (!state) { showErr('Please select your state.'); return; }
-    if (counties.length === 0) { showErr('Please enter at least one county you cover.'); return; }
 
     btn.disabled = true;
     btn.textContent = 'Loading checkout…';
@@ -356,7 +456,7 @@
       const res = await fetch(BILLING_URL + '/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ company, email, phone, state, counties })
+        body: JSON.stringify({ company, email, phone, state, tier: selectedTier })
       });
       const data = await res.json();
       if (data.url) {
