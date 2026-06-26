@@ -88,10 +88,22 @@
 <!-- LOGIN GATE -->
 <div id="login">
   <h1>Your territory</h1>
-  <p>Enter the email on your subscription to view and manage your storm-alert territory.</p>
+  <p>Enter the email on your subscription. We'll send you a secure login link — no password needed.</p>
   <input type="email" id="login-email" placeholder="you@yourcompany.com" />
-  <button class="btn btn-block" id="login-btn" onclick="login()">View my territory →</button>
+  <button class="btn btn-block" id="login-btn" onclick="requestLink()">Send me a login link →</button>
   <p class="save-msg" id="login-msg" style="color:var(--sap-deep);"></p>
+</div>
+
+<!-- "check your email" state -->
+<div id="link-sent" style="display:none;max-width:420px;margin:80px auto;background:#fff;border:2px solid var(--bark);padding:36px;text-align:center;">
+  <div style="font-size:40px;margin-bottom:12px;">✉</div>
+  <h1 style="font-size:24px;letter-spacing:-0.5px;margin-bottom:10px;">Check your email</h1>
+  <p style="color:var(--ink-soft);font-size:15px;">We sent a login link to <b id="sent-to"></b>. Click it to access your territory. The link expires in 15 minutes.</p>
+</div>
+
+<!-- verifying state -->
+<div id="verifying" style="display:none;max-width:420px;margin:120px auto;text-align:center;color:var(--ink-soft);">
+  <p>Logging you in…</p>
 </div>
 
 <!-- DASHBOARD -->
@@ -147,42 +159,105 @@
 <script>
   const API = 'https://api.treestormleads.com';
   let map, zipMarkers = {}, myZips = new Set(), takenZips = {}, allZipData = {}, subscriber = null;
+  let sessionToken = localStorage.getItem('tsl_session') || null;
 
-  // ---- login: look up subscriber by email ----
-  async function login() {
+  // ---- on load: if there's a ?token=, verify it; if we have a session, auto-load ----
+  window.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const loginToken = params.get('token');
+    if (loginToken) {
+      // verify the magic-link token -> get a session
+      show('verifying');
+      try {
+        const res = await fetch(API + '/auth/verify', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: loginToken })
+        });
+        const data = await res.json();
+        if (data.ok && data.sessionToken) {
+          sessionToken = data.sessionToken;
+          localStorage.setItem('tsl_session', sessionToken);
+          // clean the token out of the URL
+          window.history.replaceState({}, '', window.location.pathname);
+          await loadDashboard();
+        } else {
+          show('login');
+          setMsg('login-msg', 'That login link is invalid or expired. Request a new one.');
+        }
+      } catch (e) { show('login'); setMsg('login-msg', 'Could not log in. Try again.'); }
+      return;
+    }
+    // no token in URL — if we have a saved session, try to load
+    if (sessionToken) {
+      const ok = await loadDashboard();
+      if (!ok) { localStorage.removeItem('tsl_session'); sessionToken = null; show('login'); }
+    } else {
+      show('login');
+    }
+  });
+
+  function show(which) {
+    ['login','link-sent','verifying','dash'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = (id === which) ? (id === 'dash' ? 'block' : 'block') : 'none';
+    });
+  }
+  function setMsg(id, text) { const m = document.getElementById(id); if (m) { m.textContent = text; m.style.display = 'block'; } }
+
+  // ---- request a magic link ----
+  async function requestLink() {
     const email = document.getElementById('login-email').value.trim();
-    const msg = document.getElementById('login-msg');
-    if (!email) { msg.textContent = 'Enter your email.'; msg.style.display = 'block'; return; }
+    if (!email) { setMsg('login-msg', 'Enter your email.'); return; }
     const btn = document.getElementById('login-btn');
-    btn.disabled = true; btn.textContent = 'Loading…';
+    btn.disabled = true; btn.textContent = 'Sending…';
     try {
-      const res = await fetch(API + '/dashboard-data', {
+      await fetch(API + '/auth/request', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
-      if (res.status === 404) { msg.textContent = 'No subscription found for that email.'; msg.style.display = 'block'; btn.disabled = false; btn.textContent = 'View my territory →'; return; }
-      const data = await res.json();
-      subscriber = data.subscriber;
-      myZips = new Set(data.subscriber.zips || []);
-      takenZips = data.takenZips || {};       // { zip: company } claimed by OTHERS
-      allZipData = data.zipData || {};         // { zip: {lat,lng,state} } for the subscriber's state
-      showDashboard();
+      // always show "check your email" (don't reveal whether the email is a subscriber)
+      document.getElementById('sent-to').textContent = email;
+      show('link-sent');
     } catch (e) {
-      msg.textContent = 'Something went wrong. Try again.'; msg.style.display = 'block';
-      btn.disabled = false; btn.textContent = 'View my territory →';
-      console.error(e);
+      setMsg('login-msg', 'Something went wrong. Try again.');
+      btn.disabled = false; btn.textContent = 'Send me a login link →';
     }
   }
 
+  // ---- load dashboard using the session token ----
+  async function loadDashboard() {
+    try {
+      const res = await fetch(API + '/dashboard-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
+        body: JSON.stringify({})
+      });
+      if (res.status === 401) return false; // session invalid/expired
+      if (!res.ok) return false;
+      const data = await res.json();
+      subscriber = data.subscriber;
+      myZips = new Set(data.subscriber.zips || []);
+      takenZips = data.takenZips || {};
+      allZipData = data.zipData || {};
+      showDashboard();
+      return true;
+    } catch (e) { console.error(e); return false; }
+  }
+
   function showDashboard() {
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('dash').style.display = 'block';
+    show('dash');
     document.getElementById('dash-company').textContent = subscriber.company || 'Your Territory';
-    document.getElementById('topbar-who').innerHTML = `<b>${subscriber.company || subscriber.email}</b>`;
+    document.getElementById('topbar-who').innerHTML = `<b>${subscriber.company || subscriber.email}</b> · <a href="#" onclick="logout();return false;" style="color:var(--pulp-2);">Log out</a>`;
     document.getElementById('map-state-label').textContent = subscriber.state || '';
     initMap();
     renderZipList();
     renderHistory();
+  }
+
+  function logout() {
+    localStorage.removeItem('tsl_session');
+    sessionToken = null;
+    window.location.reload();
   }
 
   // ---- map ----
@@ -247,8 +322,8 @@
     btn.disabled = true; btn.textContent = 'Saving…'; msg.style.display = 'none';
     try {
       const res = await fetch(API + '/update-territory', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: subscriber.email, zips: [...myZips] })
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
+        body: JSON.stringify({ zips: [...myZips] })
       });
       const data = await res.json();
       if (data.ok) {
@@ -289,7 +364,7 @@
   }
 
   // allow Enter to submit login
-  document.getElementById('login-email').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  document.getElementById('login-email').addEventListener('keydown', e => { if (e.key === 'Enter') requestLink(); });
 </script>
 </body>
 </html>
