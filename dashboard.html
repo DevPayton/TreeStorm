@@ -377,7 +377,11 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   const API = 'https://api.treestormleads.com';
-  const HH_PER_ZIP = 3500;
+  const HH_PER_ZIP = 3500; // fallback only, for ZIPs missing real data
+  // real household count for a ZIP from zipData; falls back to the average if unknown
+  function hhForZip(zip) { const z = zipData[zip]; return (z && typeof z.hh === 'number') ? z.hh : HH_PER_ZIP; }
+  // sum real households across a set of ZIPs
+  function hhTotal(zips) { return [...zips].reduce((sum, z) => sum + hhForZip(z), 0); }
   let map, geoLayer, zipLayers = {}, myZips = new Set(), takenZips = {}, subscriber = null;
   let zipData = {}, radiusCircle = null, homeMarker = null;
   let sessionToken = localStorage.getItem('tsl_session') || null;
@@ -461,7 +465,7 @@
     document.getElementById('map-state-meta').innerHTML = '<b>' + subscriber.state + '</b>';
 
     const storms = (subscriber.alertHistory||[]).filter(a => { const d=new Date(a.sentAt||0); const now=new Date(); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); }).length;
-    const hh = (myZips.size * HH_PER_ZIP).toLocaleString();
+    const hh = hhTotal(myZips).toLocaleString();
     document.getElementById('stats').innerHTML =
       '<div class="stat ' + (myZips.size>=cap?'warn':'') + '"><div class="v">' + myZips.size + '<span class="of"> / ' + cap + '</span></div><div class="k">ZIPs claimed</div></div>' +
       '<div class="stat"><div class="v">' + storms + '</div><div class="k">Storms this month</div></div>' +
@@ -555,7 +559,7 @@
     const n = myZips.size;
     if (!n) { card.style.display='none'; return; }
     card.style.display='block';
-    const households = n * HH_PER_ZIP;
+    const households = hhTotal(myZips);
     // conservative: 1.5% of households need tree work after a damaging storm, avg job $1,200
     const DAMAGE_RATE = 0.015, AVG_JOB = 1200;
     const leadsPerStorm = Math.round(households * DAMAGE_RATE);
@@ -589,7 +593,7 @@
       ? 'High-value ZIPs bordering your territory. Upgrade to claim more ground.'
       : 'High-value ZIPs bordering your territory — still unclaimed.';
     document.getElementById('nudge-list').innerHTML = list.map(z => {
-      const hh = HH_PER_ZIP.toLocaleString();
+      const hh = hhForZip(z).toLocaleString();
       const btn = atCap
         ? '<button onclick="location.href=\'https://treestormleads.com/#pricing\'">Upgrade</button>'
         : '<button onclick="claimAdjacent(\'' + z + '\')">Claim</button>';
@@ -650,7 +654,13 @@
     if (hz && zip !== hz && milesBetween(hz, zip) > radiusMiles()) return { color:'#C9BFAE', weight:0.4, fillColor:'#B8AE9C', fillOpacity:0.06 };
     return { color:'#9B8F7C', weight:0.7, fillColor:'#ffffff', fillOpacity:0.18 };
   }
-  function tipFor(zip) { if (myZips.has(zip)) return 'ZIP ' + zip + ' — yours'; if (takenZips[zip]) return 'ZIP ' + zip + ' — taken by ' + takenZips[zip]; return 'ZIP ' + zip + ' — available'; }
+  function tipFor(zip) {
+    const z = zipData[zip];
+    const hh = (z && typeof z.hh === 'number') ? ' · ~' + z.hh.toLocaleString() + ' households' : '';
+    if (myZips.has(zip)) return 'ZIP ' + zip + ' — yours' + hh;
+    if (takenZips[zip]) return 'ZIP ' + zip + ' — taken by ' + takenZips[zip];
+    return 'ZIP ' + zip + ' — available' + hh;
+  }
 
   function toggleZip(zip) {
     if (takenZips[zip]) { toast('ZIP ' + zip + ' is already taken by ' + takenZips[zip] + '.', 'err'); return; }
@@ -678,7 +688,7 @@
     const statEls = document.querySelectorAll('.stat');
     statEls[0].querySelector('.v').innerHTML = myZips.size + '<span class="of"> / ' + cap2 + '</span>';
     statEls[0].classList.toggle('warn', myZips.size>=cap2);
-    statEls[2].querySelector('.v').textContent = '~' + (myZips.size*HH_PER_ZIP).toLocaleString();
+    statEls[2].querySelector('.v').textContent = '~' + hhTotal(myZips).toLocaleString();
     renderValue();
     renderCert();
     renderNudge();
