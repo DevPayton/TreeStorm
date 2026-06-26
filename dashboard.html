@@ -509,7 +509,12 @@
     fill.style.width = pct + '%'; fill.classList.toggle('near', myZips.size >= cap);
     const note = document.getElementById('cap-note');
     const hz = homeZip();
-    if (myZips.size === 0) note.textContent = 'Click any ZIP to start. Your first pick sets your home base — the rest of your territory must be within ' + radiusMiles() + ' miles of it.';
+    const hasHome = subscriber && subscriber.homeZip;
+    if (myZips.size === 0) {
+      note.innerHTML = hasHome
+        ? 'Your home base is <b>' + subscriber.homeZip + '</b>. Claim ZIPs within ' + radiusMiles() + ' miles of it.'
+        : 'Click any ZIP to start. Your first pick sets your home base \u2014 the rest of your territory must be within ' + radiusMiles() + ' miles of it.';
+    }
     else if (myZips.size >= cap) note.innerHTML = 'You\'ve used all <b>' + cap + '</b> ZIPs on your plan. Release one to swap, or upgrade for more.';
     else note.innerHTML = (cap - myZips.size) + ' ZIP' + (cap-myZips.size===1?'':'s') + ' left' + (hz ? ' &middot; within ' + radiusMiles() + ' mi of <b>' + hz + '</b>' : '') + '.';
     const list = document.getElementById('zip-list'); list.innerHTML='';
@@ -622,6 +627,11 @@
           if (radiusCircle) map.fitBounds(radiusCircle.getBounds().pad(0.1));
           else map.fitBounds(grp.getBounds().pad(0.4));
         }
+      } else if (subscriber && subscriber.homeZip && zipData[subscriber.homeZip]) {
+        // home base exists but no ZIPs claimed yet — still show their reachable area
+        drawRadius();
+        if (radiusCircle) map.fitBounds(radiusCircle.getBounds().pad(0.1));
+        else map.fitBounds(geoLayer.getBounds());
       } else {
         map.fitBounds(geoLayer.getBounds());
       }
