@@ -202,6 +202,29 @@
   .empty .e-title { font-weight: 600; font-size: 15px; color: var(--bark); margin-bottom: 5px; }
   .empty .e-sub { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
 
+  /* ---------- DIRECT JOBS (Job Center) — homeowner-submitted leads ---------- */
+  .jobs-body { max-height: 460px; overflow-y: auto; }
+  .job-card { padding: 16px 20px; border-bottom: 1px solid var(--line-soft); }
+  .job-card:last-child { border-bottom: none; }
+  .job-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .job-zip { font-weight: 700; font-size: 14.5px; color: var(--bark); }
+  .job-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; padding: 3px 8px; border-radius: 3px; flex-shrink: 0; }
+  .job-tag.yours { background: var(--moss); color: #fff; }
+  .job-tag.claimed { background: rgba(62,82,53,0.12); color: var(--moss); border: 1px solid rgba(62,82,53,0.3); }
+  .job-tag.pool { background: var(--ember); color: #fff; }
+  .job-when { font-size: 12px; color: var(--muted); margin-bottom: 9px; }
+  .job-desc { font-size: 13.5px; color: var(--bark); line-height: 1.5; margin-bottom: 10px; }
+  .job-contact { font-size: 13px; color: var(--bark); line-height: 1.5; margin-bottom: 4px; padding: 10px 12px; background: var(--paper-2); border-radius: 4px; }
+  .job-contact .jc-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 3px; }
+  .job-contact b { color: var(--ink); }
+  .job-claim { width: 100%; background: var(--ember); color: #fff; border: none; padding: 10px; border-radius: 4px; font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .job-claim:hover { background: var(--ember-deep); }
+  .job-claim:disabled { opacity: 0.55; cursor: not-allowed; }
+  .job-claim.pool { background: var(--bark); }
+  .job-claim.pool:hover { background: var(--ember); }
+  .jobs-section-label { padding: 11px 20px 4px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted-2); }
+  .job-countdown { font-size: 11.5px; color: var(--ember-deep); font-weight: 600; margin-top: 6px; }
+
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(26,21,18,0.55); z-index: 1000; align-items: center; justify-content: center; padding: 24px; }
   .modal { background: var(--card); border-radius: 6px; max-width: 480px; width: 100%; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
   .modal h3 { font-size: 21px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.5px; }
@@ -383,6 +406,15 @@
               <div class="e-sub">We're watching your territory around the clock. The moment a storm hits a ZIP you cover, the alert lands here and on your phone.</div>
             </div>
           </div>
+        </div>
+
+        <!-- DIRECT JOBS — homeowner-submitted leads routed to your territory -->
+        <div class="card side-card" id="jobs-card" style="display:none;">
+          <div class="card-head">
+            <h2>Direct jobs</h2>
+            <div class="meta" id="jobs-meta"></div>
+          </div>
+          <div class="jobs-body" id="jobs-body"></div>
         </div>
 
         <!-- VALUE ESTIMATOR (the money panel) -->
@@ -568,6 +600,7 @@
     renderCancelBanner();
     renderSysStatus();
     renderActivity();
+    loadJobs();
   }
 
   // ---------- subtle system-status line (live proof) ----------
@@ -772,6 +805,125 @@
     const h = hits[i]; if (!h || !h.target || !map) return;
     map.setView([h.target.lat, h.target.lng], 13, { animate: true });
     document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // ---------- DIRECT JOBS (Job Center) ----------
+  // Homeowner-submitted leads: pending (in your territory, yours to claim first),
+  // claimed (yours, contact revealed), and pool (lapsed elsewhere, any sub can grab).
+  let jobsData = { pending: [], claimed: [], pool: [] };
+
+  async function loadJobs() {
+    try {
+      const r = await fetch(API + '/my-jobs', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body:'{}' });
+      if (!r.ok) { renderJobs(); return; }
+      const d = await r.json();
+      jobsData = { pending: d.pending || [], claimed: d.claimed || [], pool: d.pool || [] };
+    } catch (e) { console.error('jobs load failed', e); }
+    renderJobs();
+  }
+
+  function jobWhen(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ' · ' + d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+  }
+  // hours left in the 24h exclusive window before a pending job falls to the pool
+  function claimWindowLeft(iso) {
+    if (!iso) return null;
+    const elapsed = Date.now() - new Date(iso).getTime();
+    const left = 24*3600*1000 - elapsed;
+    if (left <= 0) return null;
+    const hrs = Math.floor(left/3600000);
+    const mins = Math.floor((left%3600000)/60000);
+    return hrs >= 1 ? hrs + 'h ' + mins + 'm' : mins + 'm';
+  }
+
+  function renderJobs() {
+    const card = document.getElementById('jobs-card');
+    const body = document.getElementById('jobs-body');
+    const meta = document.getElementById('jobs-meta');
+    if (!card || !body) return;
+    const { pending, claimed, pool } = jobsData;
+    const total = pending.length + claimed.length + pool.length;
+    if (!total) {
+      // keep the panel hidden entirely when there's nothing — storm alerts already carry the "all quiet" message
+      card.style.display = 'none';
+      return;
+    }
+    card.style.display = 'block';
+    const open = pending.length + pool.length;
+    meta.innerHTML = open ? '<b>' + open + '</b> to claim' : claimed.length + ' claimed';
+
+    let html = '';
+
+    // PENDING — in your territory, yours first
+    if (pending.length) {
+      html += '<div class="jobs-section-label">In your territory — claim first</div>';
+      pending.forEach(j => {
+        const left = claimWindowLeft(j.createdAt);
+        html += '<div class="job-card">' +
+          '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span><span class="job-tag yours">Yours first</span></div>' +
+          '<div class="job-when">' + jobWhen(j.createdAt) + '</div>' +
+          '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
+          (left ? '<div class="job-countdown">' + left + ' left before it opens to other crews</div>' : '') +
+          '<button class="job-claim" onclick="claimJobLead(\'' + escapeHtml(j.id) + '\',this)">Claim this job</button>' +
+          '</div>';
+      });
+    }
+
+    // POOL — lapsed elsewhere, open to any crew (contact hidden until claimed)
+    if (pool.length) {
+      html += '<div class="jobs-section-label">Open jobs — first to claim wins</div>';
+      pool.forEach(j => {
+        html += '<div class="job-card">' +
+          '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span><span class="job-tag pool">Open</span></div>' +
+          '<div class="job-when">' + jobWhen(j.createdAt) + '</div>' +
+          '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
+          '<button class="job-claim pool" onclick="claimJobLead(\'' + escapeHtml(j.id) + '\',this)">Claim this job</button>' +
+          '</div>';
+      });
+    }
+
+    // CLAIMED — yours, contact revealed
+    if (claimed.length) {
+      html += '<div class="jobs-section-label">Claimed — yours to call</div>';
+      claimed.forEach(j => {
+        html += '<div class="job-card">' +
+          '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span><span class="job-tag claimed">Claimed</span></div>' +
+          '<div class="job-when">' + jobWhen(j.claimedAt || j.createdAt) + '</div>' +
+          '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
+          '<div class="job-contact"><span class="jc-label">Contact the homeowner</span>' +
+            (j.name ? '<b>' + escapeHtml(j.name) + '</b><br>' : '') +
+            escapeHtml(j.contact || '') + '</div>' +
+          '</div>';
+      });
+    }
+
+    body.innerHTML = html;
+  }
+
+  async function claimJobLead(jobId, btn) {
+    if (btn) { btn.disabled = true; btn.textContent = 'Claiming…'; }
+    try {
+      const r = await fetch(API + '/claim-job', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body: JSON.stringify({ jobId }) });
+      const d = await r.json();
+      if (d.ok) {
+        toast('Job claimed — the homeowner has been notified you\u2019re on it.', 'ok');
+        await loadJobs(); // reload so it moves into "Claimed" with contact details
+      } else if (d.error === 'already_claimed') {
+        toast('Another crew just claimed that one.', 'err');
+        await loadJobs();
+      } else if (d.error === 'not_your_territory') {
+        toast('That job is still in its owner\u2019s exclusive window.', 'err');
+        await loadJobs();
+      } else {
+        toast('Could not claim that job. Try again.', 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Claim this job'; }
+      }
+    } catch {
+      toast('Something went wrong claiming the job.', 'err');
+      if (btn) { btn.disabled = false; btn.textContent = 'Claim this job'; }
+    }
   }
 
   // ---------- territory potential (the money math) ----------

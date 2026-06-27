@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get a Local Tree Pro — TreeStorm Leads</title>
+<meta name="description" content="Storm damage or a tree that needs to come down? Tell us what you need and we'll connect you with a vetted local tree-service pro who covers your area.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1A1512; --ink-2: #2D2620; --bark: #2B2118; --bark-soft: #4A3D30;
+    --paper: #F7F3EC; --paper-2: #EFE9DD; --card: #FFFFFF;
+    --ember: #C8531B; --ember-deep: #A03E10; --ember-glow: #E8703A;
+    --moss: #3E5235; --moss-light: #5A7049;
+    --danger: #B23A2E;
+    --line: #DDD4C4; --line-soft: #EAE3D6; --muted: #7A6F5E; --muted-2: #9B8F7C;
+    --gold: #B8862F;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--paper); color: var(--ink); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .serif { font-family: 'Fraunces', Georgia, serif; }
+
+  .topbar { display: flex; justify-content: center; align-items: center; padding: 16px 24px; background: var(--ink); color: var(--paper); border-bottom: 3px solid var(--ember); }
+  .brand { font-weight: 700; font-size: 17px; letter-spacing: -0.3px; display: flex; align-items: center; gap: 9px; }
+  .brand .mk { color: var(--ember); font-size: 19px; }
+
+  .page { max-width: 600px; margin: 0 auto; padding: 0 20px 60px; }
+
+  /* hero — speaks to a stressed homeowner, not a contractor */
+  .hero { text-align: center; padding: 48px 8px 32px; }
+  .hero .eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--ember); margin-bottom: 16px; }
+  .hero h1 { font-family: 'Fraunces', serif; font-size: 38px; line-height: 1.1; letter-spacing: -1.2px; font-weight: 600; margin-bottom: 14px; }
+  .hero p { font-size: 17px; color: var(--bark-soft); max-width: 480px; margin: 0 auto; line-height: 1.55; }
+
+  /* trust row — honest, no fake numbers */
+  .trust { display: flex; justify-content: center; gap: 26px; flex-wrap: wrap; margin: 26px 0 4px; }
+  .trust-item { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--muted); }
+  .trust-item .ti-ic { color: var(--moss); font-size: 16px; line-height: 1; }
+
+  /* form card */
+  .form-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 32px 28px; margin-top: 28px; box-shadow: 0 1px 3px rgba(26,21,18,0.06), 0 14px 44px rgba(26,21,18,0.08); }
+  .form-card h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .form-card .sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--bark); margin-bottom: 7px; }
+  .field label .opt { color: var(--muted-2); font-weight: 500; }
+  .field input, .field textarea { width: 100%; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 15px; font-family: inherit; color: var(--ink); transition: border-color 0.15s; background: var(--card); }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--ember); }
+  .field textarea { resize: vertical; min-height: 110px; line-height: 1.5; }
+  .field .hint { font-size: 12.5px; color: var(--muted-2); margin-top: 6px; }
+  .field.err input, .field.err textarea { border-color: var(--danger); }
+  .field .err-msg { font-size: 12.5px; color: var(--danger); margin-top: 6px; display: none; font-weight: 500; }
+  .field.err .err-msg { display: block; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 480px) { .row2 { grid-template-columns: 1fr; } }
+
+  .btn { width: 100%; background: var(--ember); color: #fff; border: none; padding: 16px 26px; font-weight: 700; font-size: 16px; cursor: pointer; border-radius: 5px; font-family: inherit; transition: background 0.15s, transform 0.1s; margin-top: 6px; }
+  .btn:hover { background: var(--ember-deep); }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .form-foot { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: 16px; line-height: 1.5; }
+
+  /* the contractor whose link sent them here (ref attribution) */
+  .ref-banner { display: none; align-items: center; gap: 11px; background: rgba(62,82,53,0.07); border: 1px solid rgba(62,82,53,0.18); border-radius: 6px; padding: 13px 16px; margin-bottom: 22px; font-size: 13.5px; color: var(--bark); }
+  .ref-banner .rb-ic { color: var(--moss); font-size: 18px; line-height: 1; flex-shrink: 0; }
+  .ref-banner b { color: var(--moss); }
+
+  /* how it works — 3 quick steps, reassuring */
+  .how { margin-top: 44px; }
+  .how h3 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; text-align: center; margin-bottom: 22px; color: var(--bark); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 480px) { .steps { grid-template-columns: 1fr; gap: 14px; } }
+  .step { text-align: center; padding: 4px; }
+  .step .s-num { width: 32px; height: 32px; margin: 0 auto 11px; border-radius: 50%; background: var(--ink); color: var(--ember-glow); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; font-family: 'Fraunces', serif; }
+  .step .s-t { font-size: 14px; font-weight: 600; color: var(--bark); margin-bottom: 4px; }
+  .step .s-d { font-size: 13px; color: var(--muted); line-height: 1.45; }
+
+  /* success state */
+  .success { display: none; text-align: center; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 48px 32px; margin-top: 28px; box-shadow: 0 1px 3px rgba(26,21,18,0.06), 0 14px 44px rgba(26,21,18,0.08); }
+  .success .s-seal { width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 50%; background: var(--moss); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 32px; box-shadow: 0 0 0 6px rgba(62,82,53,0.12); }
+  .success h2 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600; letter-spacing: -0.6px; margin-bottom: 12px; }
+  .success p { font-size: 15.5px; color: var(--bark-soft); max-width: 420px; margin: 0 auto 8px; line-height: 1.6; }
+  .success .s-note { font-size: 13.5px; color: var(--muted); margin-top: 18px; }
+
+  .footer { text-align: center; font-size: 12.5px; color: var(--muted-2); margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line-soft); }
+  .footer a { color: var(--muted); text-decoration: none; }
+  .footer a:hover { color: var(--bark); }
+
+  .toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: #fff; padding: 13px 22px; border-radius: 4px; font-size: 14px; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 1100; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.err { border-left: 3px solid var(--danger); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="mk">&#9699;</span> TreeStorm Leads</div>
+</div>
+
+<div class="page">
+  <div id="form-view">
+    <div class="hero">
+      <div class="eyebrow">Free &middot; No obligation</div>
+      <h1 class="serif">Tree down? Get a local pro on it.</h1>
+      <p>Tell us what you need. We'll connect you with a vetted tree-service crew that covers your area &mdash; one that's ready to work, not a call center.</p>
+      <div class="trust">
+        <div class="trust-item"><span class="ti-ic">&#10003;</span> Local, vetted crews</div>
+        <div class="trust-item"><span class="ti-ic">&#10003;</span> No fee to you</div>
+        <div class="trust-item"><span class="ti-ic">&#10003;</span> Fast callback</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="ref-banner" id="ref-banner">
+        <span class="rb-ic">&#9733;</span>
+        <span>You were referred to <b id="ref-name">a local crew</b>. Your request goes straight to them.</span>
+      </div>
+
+      <h2 class="serif">Tell us about the job</h2>
+      <div class="sub">Takes about a minute. A local pro will reach out to you directly.</div>
+
+      <div class="field" id="f-name">
+        <label for="in-name">Your name</label>
+        <input type="text" id="in-name" placeholder="First and last name" autocomplete="name" maxlength="120">
+        <div class="err-msg">Please enter your name.</div>
+      </div>
+
+      <div class="row2">
+        <div class="field" id="f-phone">
+          <label for="in-phone">Phone number</label>
+          <input type="tel" id="in-phone" placeholder="(904) 555-0123" autocomplete="tel" inputmode="tel" maxlength="40">
+          <div class="err-msg">Enter a phone number so a pro can reach you.</div>
+        </div>
+        <div class="field" id="f-zip">
+          <label for="in-zip">ZIP code</label>
+          <input type="text" id="in-zip" placeholder="32046" autocomplete="postal-code" inputmode="numeric" maxlength="5">
+          <div class="err-msg">Enter your 5-digit ZIP.</div>
+        </div>
+      </div>
+
+      <div class="field" id="f-email">
+        <label for="in-email">Email <span class="opt">(optional)</span></label>
+        <input type="email" id="in-email" placeholder="you@email.com" autocomplete="email" maxlength="200">
+      </div>
+
+      <div class="field" id="f-desc">
+        <label for="in-desc">What do you need done?</label>
+        <textarea id="in-desc" placeholder="Example: A large oak came down across my driveway in the storm last night. Needs to be cut up and hauled away. There's also a big limb hanging over the roof I'm worried about." maxlength="2000"></textarea>
+        <div class="hint">The more detail, the better a crew can help &mdash; size of the tree, where it is, anything urgent.</div>
+        <div class="err-msg">Tell us a little about the job.</div>
+      </div>
+
+      <button class="btn" id="submit-btn" onclick="submitJob()">Get my local pro</button>
+      <div class="form-foot">By submitting, you agree a local tree-service pro may contact you about your request. We don't sell your information.</div>
+    </div>
+
+    <div class="how">
+      <h3 class="serif">How it works</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="s-num">1</div>
+          <div class="s-t">Tell us the job</div>
+          <div class="s-d">Describe what you need and where you are.</div>
+        </div>
+        <div class="step">
+          <div class="s-num">2</div>
+          <div class="s-t">We route it locally</div>
+          <div class="s-d">It goes to a vetted crew that covers your ZIP.</div>
+        </div>
+        <div class="step">
+          <div class="s-num">3</div>
+          <div class="s-t">They reach out</div>
+          <div class="s-d">A local pro contacts you to set it up.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="success" id="success-view">
+    <div class="s-seal">&#10003;</div>
+    <h2 class="serif">You're all set.</h2>
+    <p id="success-msg">Your request is in. A local tree-service pro who covers your area will reach out to you directly &mdash; usually within a day.</p>
+    <p class="s-note">Keep an eye on your phone. If you don't hear back soon, you can submit again or call around locally.</p>
+  </div>
+
+  <div class="footer">
+    TreeStorm Leads &middot; <a href="https://treestormleads.com">treestormleads.com</a><br>
+    Connecting homeowners with local tree-service professionals.
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'https://api.treestormleads.com';
+  // contractor referral, if they arrived via a personal link (?ref=sub_xxx)
+  const REF = new URLSearchParams(location.search).get('ref') || null;
+
+  // if a ref is present, show the banner (the name is cosmetic until we wire a lookup; generic is fine)
+  if (REF) {
+    const rb = document.getElementById('ref-banner');
+    if (rb) rb.style.display = 'flex';
+  }
+
+  function clearErr(id){ const f=document.getElementById(id); if(f) f.classList.remove('err'); }
+  function setErr(id){ const f=document.getElementById(id); if(f){ f.classList.add('err'); const inp=f.querySelector('input,textarea'); if(inp) inp.focus(); } }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function toast(msg, kind){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+(kind||''); clearTimeout(t._h); t._h=setTimeout(()=>t.className='toast '+(kind||''),3800); }
+
+  // clear field errors as the user types
+  ['name','phone','zip','email','desc'].forEach(k => {
+    const inp = document.getElementById('in-'+k);
+    if (inp) inp.addEventListener('input', () => clearErr('f-'+k));
+  });
+
+  async function submitJob() {
+    const name  = document.getElementById('in-name').value.trim();
+    const phone = document.getElementById('in-phone').value.trim();
+    const zip   = document.getElementById('in-zip').value.trim();
+    const email = document.getElementById('in-email').value.trim();
+    const desc  = document.getElementById('in-desc').value.trim();
+
+    // validate — clear all first
+    ['f-name','f-phone','f-zip','f-desc'].forEach(clearErr);
+    let bad = null;
+    if (!desc) { setErr('f-desc'); bad = bad||'f-desc'; }
+    if (!/^\d{5}$/.test(zip)) { setErr('f-zip'); bad = bad||'f-zip'; }
+    if (!phone || phone.replace(/\D/g,'').length < 7) { setErr('f-phone'); bad = bad||'f-phone'; }
+    if (!name) { setErr('f-name'); bad = bad||'f-name'; }
+    if (bad) { return; }
+
+    // contact = phone, with email appended if provided (backend stores a single contact string)
+    const contact = email ? (phone + ' · ' + email) : phone;
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      const r = await fetch(API + '/submit-job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, contact, zip, description: desc, ref: REF })
+      });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok && d.ok) {
+        // tailor the success message by routing outcome
+        const msg = document.getElementById('success-msg');
+        if (d.routed === 'waitlist') {
+          msg.innerHTML = 'Your request is in. We don\u2019t have a crew covering ' + escapeHtml(zip) + ' just yet &mdash; we\u2019ll connect you with a local pro as soon as one does. In the meantime, it may be worth calling around locally too.';
+        } else {
+          msg.innerHTML = 'Your request is in. A local tree-service pro who covers ' + escapeHtml(zip) + ' will reach out to you directly &mdash; usually within a day.';
+        }
+        document.getElementById('form-view').style.display = 'none';
+        document.getElementById('success-view').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (d.error === 'duplicate') {
+        toast('Looks like you just sent this — give it a moment.', 'err');
+        btn.disabled = false; btn.textContent = 'Get my local pro';
+      } else {
+        toast('Something went wrong sending your request. Please try again.', 'err');
+        btn.disabled = false; btn.textContent = 'Get my local pro';
+      }
+    } catch {
+      toast('Couldn\u2019t send your request. Check your connection and try again.', 'err');
+      btn.disabled = false; btn.textContent = 'Get my local pro';
+    }
+  }
+</script>
+</body>
+</html>
