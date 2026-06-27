@@ -222,6 +222,11 @@
   .job-claim:disabled { opacity: 0.55; cursor: not-allowed; }
   .job-claim.pool { background: var(--bark); }
   .job-claim.pool:hover { background: var(--ember); }
+  .job-actions { display: flex; gap: 8px; }
+  .job-actions .job-claim { flex: 1; }
+  .job-decline { background: var(--ink); color: var(--paper); border: none; padding: 10px 16px; border-radius: 4px; font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; flex-shrink: 0; }
+  .job-decline:hover { background: #000; }
+  .job-decline:disabled { opacity: 0.55; cursor: not-allowed; }
   .jobs-section-label { padding: 11px 20px 4px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted-2); }
   .job-countdown { font-size: 11.5px; color: var(--ember-deep); font-weight: 600; margin-top: 6px; }
 
@@ -866,7 +871,8 @@
           '<div class="job-when">' + jobWhen(j.createdAt) + '</div>' +
           '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
           (left ? '<div class="job-countdown">' + left + ' left before it opens to other crews</div>' : '') +
-          '<button class="job-claim" onclick="claimJobLead(\'' + escapeHtml(j.id) + '\',this)">Claim this job</button>' +
+          '<div class="job-actions"><button class="job-claim" onclick="claimJobLead(\'' + escapeHtml(j.id) + '\',this)">Claim this job</button>' +
+          '<button class="job-decline" onclick="declineJobLead(\'' + escapeHtml(j.id) + '\',this)">Decline</button></div>' +
           '</div>';
       });
     }
@@ -923,6 +929,24 @@
     } catch {
       toast('Something went wrong claiming the job.', 'err');
       if (btn) { btn.disabled = false; btn.textContent = 'Claim this job'; }
+    }
+  }
+
+  async function declineJobLead(jobId, btn) {
+    if (btn) { btn.disabled = true; btn.textContent = 'Declining…'; }
+    try {
+      const r = await fetch(API + '/decline-job', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body: JSON.stringify({ jobId }) });
+      const d = await r.json();
+      if (d.ok) {
+        toast('Declined — it\u2019s now open to other crews.', 'ok');
+        await loadJobs(); // reload so it leaves your list
+      } else {
+        toast('Could not decline that job. Try again.', 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Decline'; }
+      }
+    } catch {
+      toast('Something went wrong. Try again.', 'err');
+      if (btn) { btn.disabled = false; btn.textContent = 'Decline'; }
     }
   }
 
