@@ -56,6 +56,16 @@
   .feeds h2 { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-1px; max-width:22ch; margin-bottom:10px; }
   .feeds .lead { font-size:17px; color:rgba(245,241,232,0.75); max-width:62ch; margin-bottom:40px; }
   .feed-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:rgba(245,241,232,0.12); border:1px solid rgba(245,241,232,0.12); }
+  .engine { margin-top:40px; padding:32px; border:1px solid rgba(245,241,232,0.14); background:rgba(245,241,232,0.03); border-radius:4px; }
+  .engine-label { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--sap-glow); margin-bottom:22px; display:flex; align-items:center; gap:9px; }
+  .engine-label::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--signal); box-shadow:0 0 0 0 rgba(79,179,106,0.6); animation:pulse 2s infinite; flex-shrink:0; }
+  .engine-steps { list-style:none; counter-reset:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0; }
+  .engine-steps li { display:flex; gap:16px; align-items:flex-start; padding:16px 0; border-bottom:1px solid rgba(245,241,232,0.08); }
+  .engine-steps li:last-child { border-bottom:none; }
+  .es-n { flex-shrink:0; width:26px; height:26px; border-radius:50%; border:1.5px solid var(--sap); color:var(--sap-glow); font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; font-family:'Helvetica Neue',Arial; }
+  .engine-steps li div { font-size:14.5px; line-height:1.55; color:rgba(245,241,232,0.82); }
+  .engine-steps li b { color:var(--pulp); font-weight:700; }
+  .engine-foot { margin-top:22px; padding-top:20px; border-top:1px solid rgba(245,241,232,0.12); font-size:15px; line-height:1.6; color:rgba(245,241,232,0.9); }
   .feed { background:var(--ink); padding:24px 22px; }
   .feed .tag { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--signal); }
   .feed h3 { font-size:17px; font-weight:800; margin:8px 0 8px; }
@@ -258,6 +268,19 @@
         <p>Real ZIP-code boundaries and household counts, mapped to the exact territory you own &mdash; so every alert is your ground, scored by how much work is on it.</p>
         <div class="src">Source: Census boundaries &amp; housing data</div>
       </div>
+    </div>
+
+    <div class="engine">
+      <div class="engine-label">The instant a warning fires &mdash; in seconds, while you sleep</div>
+      <ol class="engine-steps">
+        <li><span class="es-n">1</span><div><b>Grabs the storm's real footprint.</b> Not the ZIP, not the county &mdash; the actual polygon the National Weather Service draws around the damage, often just a few square miles.</div></li>
+        <li><span class="es-n">2</span><div><b>Checks if it's your ground.</b> Geometrically intersects that footprint against the ZIPs you own. Three counties over? Silence. On your street? You're up.</div></li>
+        <li><span class="es-n">3</span><div><b>Names the streets inside it.</b> Samples points across the damage path and reverse-geocodes each one into real road and neighborhood names &mdash; so the alert reads "start at Pages Dairy Road," not "somewhere in 32011."</div></li>
+        <li><span class="es-n">4</span><div><b>Reads wind for trees, not roofs.</b> Pulls the gust speed off the warning and weighs it the way a tree falls &mdash; limbs at 25, whole trees past 40.</div></li>
+        <li><span class="es-n">5</span><div><b>Weighs the ground.</b> Adds up two weeks of radar rainfall over that exact footprint. Soaked soil + wind = uprooted trees = the removal jobs. Dry = cleanup. The system knows the difference before you roll.</div></li>
+        <li><span class="es-n">6</span><div><b>Ranks and delivers.</b> Scores every hit spot by damage and dollar potential, sorts the big jobs to the top, and drops it on your phone and dashboard &mdash; mapped, with a pin on where to drive. Only to you.</div></li>
+      </ol>
+      <p class="engine-foot">That's the part you couldn't build yourself &mdash; the data, the geocoding, the soil read, the ranking, all firing the second a warning drops. You don't run any of it. You just get the work.</p>
     </div>
   </div>
 </section>
