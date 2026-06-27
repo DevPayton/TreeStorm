@@ -181,6 +181,22 @@
   .alert-ev { font-weight: 600; font-size: 14px; }
   .alert-meta { font-size: 12.5px; color: var(--muted); }
   .alert-zips { font-size: 12.5px; color: var(--bark); margin-top: 3px; }
+  /* rich storm-hit cards (targeting intel) */
+  .hit-card { padding: 16px 20px; border-bottom: 1px solid var(--line-soft); }
+  .hit-card:last-child { border-bottom: none; }
+  .hit-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 3px; }
+  .hit-ev { font-weight: 700; font-size: 14.5px; color: var(--bark); }
+  .hit-wind { font-size: 12px; font-weight: 800; color: #fff; background: var(--ember); padding: 2px 8px; border-radius: 3px; flex-shrink: 0; }
+  .hit-when { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .hit-where, .hit-streets { font-size: 13px; color: var(--bark); margin-bottom: 6px; line-height: 1.4; }
+  .hw-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 1px; }
+  .hit-streets { font-weight: 600; }
+  .hit-badges { margin: 8px 0; }
+  .hit-sat { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 3px; }
+  .sat-hi { background: rgba(178,58,46,0.12); color: var(--danger); border: 1px solid rgba(178,58,46,0.3); }
+  .sat-mid { background: rgba(184,134,47,0.12); color: var(--gold); }
+  .hit-go { margin-top: 10px; width: 100%; background: var(--bark); color: var(--paper); border: none; padding: 9px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .hit-go:hover { background: var(--ember); }
   .empty { padding: 44px 24px; text-align: center; }
   .empty .e-icon { font-size: 30px; margin-bottom: 10px; opacity: 0.6; }
   .empty .e-title { font-weight: 600; font-size: 15px; color: var(--bark); margin-bottom: 5px; }
@@ -209,6 +225,10 @@
   @keyframes ring { 0% { opacity: 0.7; transform: translate(-50%,-50%) scale(1); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(3.2); } }
   @keyframes terr-breathe { 0%,100% { fill-opacity: 0.5; } 50% { fill-opacity: 0.68; } }
   .leaflet-interactive.mine-zone { animation: terr-breathe 3s ease-in-out infinite; }
+  /* storm "drive here" red pin — pulsing for urgency */
+  .hit-pin { width: 18px; height: 18px; border-radius: 50%; background: #D4483C; border: 3px solid #fff; box-shadow: 0 0 0 0 rgba(212,72,60,0.6); animation: hitpulse 1.8s infinite; cursor: pointer; }
+  @keyframes hitpulse { 0% { box-shadow: 0 0 0 0 rgba(212,72,60,0.55); } 70% { box-shadow: 0 0 0 14px rgba(212,72,60,0); } 100% { box-shadow: 0 0 0 0 rgba(212,72,60,0); } }
+  .leaflet-interactive.storm-footprint { animation: terr-breathe 3.5s ease-in-out infinite; }
 
   /* ---------- value estimator (the money panel) ---------- */
   .value-card { background: linear-gradient(140deg, var(--ink) 0%, #322820 100%); color: var(--paper); border: none; }
@@ -448,7 +468,7 @@
   // sum real households across a set of ZIPs
   function hhTotal(zips) { return [...zips].reduce((sum, z) => sum + hhForZip(z), 0); }
   let map, geoLayer, zipLayers = {}, myZips = new Set(), takenZips = {}, subscriber = null;
-  let zipData = {}, radiusCircle = null, homeMarker = null;
+  let zipData = {}, radiusCircle = null, homeMarker = null, hitLayers = [];
   let sessionToken = localStorage.getItem('tsl_session') || null;
   let lastSavedAt = 0; const COOLDOWN_MS = 30 * 60 * 1000;
 
@@ -708,7 +728,32 @@
 
   function renderAlerts() {
     const body = document.getElementById('alerts-body');
+    const hits = (subscriber.recentHits) || [];
     const hist = subscriber.alertHistory || [];
+    // prefer the rich targeting hits; fall back to legacy alert history
+    if (hits.length) {
+      body.innerHTML = '';
+      hits.slice(0, 25).forEach((h, i) => {
+        const when = h.at ? new Date(h.at).toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ' · ' + new Date(h.at).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}) : '';
+        const sat = h.saturation && h.saturation.level;
+        const satBadge = sat === 'saturated'
+          ? '<span class="hit-sat sat-hi">Saturated — whole trees down</span>'
+          : sat === 'moist' ? '<span class="hit-sat sat-mid">Moist ground</span>' : '';
+        const where = (h.communities && h.communities.length) ? h.communities.join(', ') : '';
+        const streets = (h.roads && h.roads.length) ? h.roads.slice(0,4).join(' · ') : '';
+        const row = document.createElement('div'); row.className = 'hit-card';
+        row.innerHTML =
+          '<div class="hit-top"><span class="hit-ev">' + escapeHtml(h.event || 'Storm') + '</span>' +
+          (h.wind ? '<span class="hit-wind">' + h.wind + ' mph</span>' : '') + '</div>' +
+          '<div class="hit-when">' + when + ' · ZIP ' + escapeHtml(h.zip || '') + '</div>' +
+          (where ? '<div class="hit-where"><span class="hw-label">Where it hit</span>' + escapeHtml(where) + '</div>' : '') +
+          (streets ? '<div class="hit-streets"><span class="hw-label">Start at</span>' + escapeHtml(streets) + '</div>' : '') +
+          (satBadge ? '<div class="hit-badges">' + satBadge + '</div>' : '') +
+          '<button class="hit-go" onclick="flyToHit(' + i + ')">Show me on the map →</button>';
+        body.appendChild(row);
+      });
+      return;
+    }
     if (!hist.length) return;
     body.innerHTML = '';
     hist.slice(0,25).forEach(a => {
@@ -719,6 +764,13 @@
         '<div class="alert-zips">Your ZIPs hit: ' + ((a.zips||[]).join(', ')||'—') + '</div>';
       body.appendChild(row);
     });
+  }
+  // jump the map to a specific hit and open its pin
+  function flyToHit(i) {
+    const hits = (subscriber.recentHits) || [];
+    const h = hits[i]; if (!h || !h.target || !map) return;
+    map.setView([h.target.lat, h.target.lng], 13, { animate: true });
+    document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   // ---------- territory potential (the money math) ----------
@@ -808,9 +860,57 @@
       } else {
         map.fitBounds(geoLayer.getBounds());
       }
+      drawStormHits();
     } catch (e) {
       console.error('boundary load failed', e);
       document.getElementById('map').innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">Map boundaries unavailable. Try refreshing.</div>';
+    }
+  }
+
+  // ---------- draw storm damage footprints + "drive here" markers ----------
+  function clearHits() { hitLayers.forEach(l => { try { map.removeLayer(l); } catch {} }); hitLayers = []; }
+  function drawStormHits() {
+    if (!map) return;
+    clearHits();
+    const hits = (subscriber && subscriber.recentHits) || [];
+    if (!hits.length) return;
+    hits.forEach((h, i) => {
+      // polygon comes as [[lng,lat],...] (GeoJSON order) — Leaflet needs [lat,lng]
+      if (Array.isArray(h.polygon) && h.polygon.length >= 3) {
+        const latlngs = h.polygon.map(p => [p[1], p[0]]);
+        const poly = L.polygon(latlngs, {
+          color: '#D4483C', weight: 2.5, fillColor: '#B23A2E', fillOpacity: 0.22, dashArray: '5,4', className: 'storm-footprint'
+        }).addTo(map);
+        hitLayers.push(poly);
+      }
+      // red "drive here" marker on the target point
+      if (h.target && typeof h.target.lat === 'number') {
+        const sat = h.saturation && h.saturation.level;
+        const wind = h.wind ? h.wind + ' mph' : '';
+        const where = [].concat(h.communities || [], (h.roads || []).slice(0, 2)).filter(Boolean).join(', ');
+        const marker = L.marker([h.target.lat, h.target.lng], {
+          icon: L.divIcon({
+            className: 'hit-pin-wrap',
+            html: '<div class="hit-pin"></div>',
+            iconSize: [22, 22], iconAnchor: [11, 11]
+          })
+        }).addTo(map);
+        marker.bindPopup(
+          '<div style="font-family:Inter,sans-serif;min-width:200px">' +
+          '<div style="font-weight:800;color:#B23A2E;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Drive here</div>' +
+          '<div style="font-weight:700;margin-bottom:4px">' + escapeHtml(h.event || 'Storm') + '</div>' +
+          (where ? '<div style="font-size:13px;color:#3D3023;margin-bottom:4px">' + escapeHtml(where) + '</div>' : '') +
+          '<div style="font-size:12px;color:#6B6253">' +
+          (wind ? wind + ' winds · ' : '') +
+          (sat === 'saturated' ? '<b style="color:#B23A2E">saturated ground — whole trees down</b>' : sat === 'moist' ? 'moist ground' : 'dry ground') +
+          '</div></div>'
+        );
+        hitLayers.push(marker);
+      }
+    });
+    // if there are hits, fit the map to show the most recent one prominently
+    if (hits[0] && hits[0].target) {
+      map.setView([hits[0].target.lat, hits[0].target.lng], 12, { animate: false });
     }
   }
 
