@@ -49,6 +49,7 @@
   .nav-login:hover { background: var(--bark-2); }
   .nav-link { color: var(--bark); text-decoration: none; font-weight: 600; font-size: 15px; }
   .nav-link:hover { color: var(--sap-deep); }
+  .nav-actions { display: flex; align-items: center; gap: 18px; }
 
   /* ===== Hero ===== */
   .hero {
@@ -75,6 +76,7 @@
     font-size: clamp(17px, 2.2vw, 21px); max-width: 52ch; color: var(--bark-2);
     margin-bottom: 36px;
   }
+  .sub-mobile { display: none; }
   .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
   .btn-primary {
     background: var(--sap); color: #fff; text-decoration: none;
@@ -231,13 +233,52 @@
     .ticker { font-size: 12px; }
     section { padding: 56px 0; }
   }
+
+  /* ===== MOBILE (≤600px) — phone layout; desktop untouched ===== */
+  @media (max-width: 600px) {
+    .wrap { padding: 0 18px; }
+
+    /* nav: logo on its own row, buttons full-width below, drop the text link */
+    nav { flex-direction: column; align-items: stretch; gap: 14px; padding: 16px 18px; }
+    .nav-actions { width: 100%; gap: 10px; }
+    .nav-link { display: none; }                 /* "How it works" lives in the page + footer */
+    .nav-login, .nav-cta { flex: 1; text-align: center; padding: 13px 14px; font-size: 15px; }
+
+    /* hero: tighter, shorter copy swapped in */
+    .hero { padding: 40px 0 44px; }
+    .eyebrow { font-size: 11px; letter-spacing: 1px; margin-bottom: 16px; flex-wrap: wrap; }
+    .hero h1 { letter-spacing: -1px; margin-bottom: 18px; }
+    .sub-full { display: none; }                 /* hide the long desktop paragraph */
+    .sub-mobile { display: block; }              /* show the short mobile one */
+    .hero p.sub { margin-bottom: 26px; }
+    .hero-ctas { gap: 12px; }
+    .btn-primary { flex: 1; text-align: center; padding: 15px 20px; }
+    .btn-ghost { width: 100%; text-align: center; padding: 12px 8px; }
+
+    /* steps: single column even at 4-up, so cards aren't squished */
+    .steps.steps-4 { grid-template-columns: 1fr; gap: 14px; }
+    .step { padding: 22px 20px; }
+
+    /* compare: comfortable padding */
+    .compare > div { padding: 24px 20px; }
+
+    /* tiers + signup: full width, less padding */
+    .signup-box { padding: 22px 18px; }
+
+    /* section rhythm */
+    section { padding: 46px 0; }
+    h2 { letter-spacing: -0.5px; }
+
+    /* footer stacks */
+    footer .wrap { flex-direction: column; align-items: flex-start; gap: 12px; }
+  }
 </style>
 </head>
 <body>
 
 <nav>
   <div class="logo"><span class="mark">◣</span> TreeStorm Leads</div>
-  <div style="display:flex;align-items:center;gap:18px;">
+  <div class="nav-actions">
     <a href="methodology.html" class="nav-link">How it works</a>
     <a href="dashboard.html" class="nav-login">Log in</a>
     <a href="#pricing" class="nav-cta">Start free trial</a>
@@ -249,7 +290,8 @@
   <div class="wrap">
     <span class="eyebrow"><span class="dot"></span> Live storm targeting · FL · GA · SC · NC · AL</span>
     <h1>When a storm drops trees in your area, we tell you <span class="hl">exactly which streets to drive to.</span></h1>
-    <p class="sub">Not "a storm hit your county." We pull the storm's actual damage path, name the exact streets and neighborhoods inside it, read the wind for tree damage, and check whether the ground was soaked enough to uproot whole trees — then rank the hardest-hit spots by where the real removal work is. You get it the moment the storm clears, handed to you, before anyone else knows it's there.</p>
+    <p class="sub sub-full">Not "a storm hit your county." We pull the storm's actual damage path, name the exact streets and neighborhoods inside it, read the wind for tree damage, and check whether the ground was soaked enough to uproot whole trees — then rank the hardest-hit spots by where the real removal work is. You get it the moment the storm clears, handed to you, before anyone else knows it's there.</p>
+    <p class="sub sub-mobile">We pull the storm's real damage path, name the exact streets inside it, and rank where the biggest removal jobs are — handed to you the moment it clears, before anyone else knows.</p>
     <div class="hero-ctas">
       <a href="#pricing" class="btn-primary">Claim your territory</a>
       <a href="#how" class="btn-ghost">See how it works →</a>
