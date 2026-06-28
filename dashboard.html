@@ -227,6 +227,12 @@
   .job-decline { background: var(--ink); color: var(--paper); border: none; padding: 10px 16px; border-radius: 4px; font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; flex-shrink: 0; }
   .job-decline:hover { background: #000; }
   .job-decline:disabled { opacity: 0.55; cursor: not-allowed; }
+  .job-take { display: flex; align-items: center; gap: 6px; }
+  .job-take .jt-dollar { font-size: 15px; font-weight: 700; color: var(--muted); }
+  .job-price { width: 90px; flex-shrink: 0; padding: 9px 10px; border: 1.5px solid var(--line); border-radius: 4px; font-size: 14px; font-family: inherit; color: var(--ink); }
+  .job-price:focus { outline: none; border-color: var(--ember); }
+  .job-take .job-claim { flex: 1; margin: 0; }
+  .job-quote { font-size: 12.5px; color: var(--moss); font-weight: 600; margin-top: 4px; }
   .jobs-section-label { padding: 11px 20px 4px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted-2); }
   .job-countdown { font-size: 11.5px; color: var(--ember-deep); font-weight: 600; margin-top: 6px; }
 
@@ -877,15 +883,18 @@
       });
     }
 
-    // POOL — lapsed elsewhere, open to any crew (contact hidden until claimed)
+    // POOL — open to nearby crews; take it at your price (auto-assign)
     if (pool.length) {
-      html += '<div class="jobs-section-label">Open jobs — first to claim wins</div>';
+      html += '<div class="jobs-section-label">Open jobs near you — name your price to take it</div>';
       pool.forEach(j => {
         html += '<div class="job-card">' +
           '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span><span class="job-tag pool">Open</span></div>' +
           '<div class="job-when">' + jobWhen(j.createdAt) + '</div>' +
           '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
-          '<button class="job-claim pool" onclick="claimJobLead(\'' + escapeHtml(j.id) + '\',this)">Claim this job</button>' +
+          '<div class="job-take"><span class="jt-dollar">$</span>' +
+            '<input type="number" min="1" step="1" class="job-price" id="price-' + escapeHtml(j.id) + '" placeholder="Your quote" inputmode="numeric">' +
+            '<button class="job-claim pool" onclick="takeJobLead(\'' + escapeHtml(j.id) + '\',this)">Take job</button>' +
+          '</div>' +
           '</div>';
       });
     }
@@ -898,6 +907,7 @@
           '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span><span class="job-tag claimed">Claimed</span></div>' +
           '<div class="job-when">' + jobWhen(j.claimedAt || j.createdAt) + '</div>' +
           '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
+          (j.price ? '<div class="job-quote">Your quote: $' + Number(j.price).toLocaleString() + '</div>' : '') +
           '<div class="job-contact"><span class="jc-label">Contact the homeowner</span>' +
             (j.name ? '<b>' + escapeHtml(j.name) + '</b><br>' : '') +
             escapeHtml(j.contact || '') + '</div>' +
@@ -947,6 +957,40 @@
     } catch {
       toast('Something went wrong. Try again.', 'err');
       if (btn) { btn.disabled = false; btn.textContent = 'Decline'; }
+    }
+  }
+
+  async function takeJobLead(jobId, btn) {
+    const priceInput = document.getElementById('price-' + jobId);
+    const price = priceInput ? Number(priceInput.value) : NaN;
+    if (!isFinite(price) || price <= 0) {
+      toast('Enter your price first.', 'err');
+      if (priceInput) priceInput.focus();
+      return;
+    }
+    if (btn) { btn.disabled = true; btn.textContent = 'Taking…'; }
+    try {
+      const r = await fetch(API + '/take-job', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body: JSON.stringify({ jobId, price }) });
+      const d = await r.json();
+      if (d.ok) {
+        toast('Job taken — the homeowner has been notified with your quote.', 'ok');
+        await loadJobs(); // moves into Claimed with contact revealed
+      } else if (d.error === 'already_claimed') {
+        toast('Another crew just took that one.', 'err');
+        await loadJobs();
+      } else if (d.error === 'out_of_range') {
+        toast('That job is outside your territory range.', 'err');
+        await loadJobs();
+      } else if (d.error === 'bad_price') {
+        toast('Enter a valid price.', 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Take job'; }
+      } else {
+        toast('Could not take that job. Try again.', 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Take job'; }
+      }
+    } catch {
+      toast('Something went wrong taking the job.', 'err');
+      if (btn) { btn.disabled = false; btn.textContent = 'Take job'; }
     }
   }
 
