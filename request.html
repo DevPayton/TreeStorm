@@ -54,6 +54,16 @@
   .field.err input, .field.err textarea { border-color: var(--danger); }
   .field .err-msg { font-size: 12.5px; color: var(--danger); margin-top: 6px; display: none; font-weight: 500; }
   .field.err .err-msg { display: block; }
+  .field select { width: 100%; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 15px; font-family: inherit; color: var(--ink); background: var(--card); transition: border-color 0.15s; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%236B6253' d='M1 1l5 5 5-5'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  .field select:focus { outline: none; border-color: var(--ember); }
+  .field.err select { border-color: var(--danger); }
+  .field input[type="file"] { width: 100%; padding: 11px 14px; border: 1.5px dashed var(--line); border-radius: 5px; font-size: 14px; font-family: inherit; color: var(--muted-2); background: var(--card); cursor: pointer; }
+  .field input[type="file"]:focus { outline: none; border-color: var(--ember); }
+  .photo-preview { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 11px; }
+  .photo-thumb { position: relative; width: 72px; height: 72px; border-radius: 5px; overflow: hidden; border: 1.5px solid var(--line); }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-x { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,0.62); color: #fff; font-size: 15px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+  .photo-x:hover { background: rgba(0,0,0,0.85); }
 
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 480px) { .row2 { grid-template-columns: 1fr; } }
@@ -155,6 +165,67 @@
         <div class="err-msg">Tell us a little about the job.</div>
       </div>
 
+      <div class="field" id="f-jobtype">
+        <label for="in-jobtype">What kind of work is it?</label>
+        <select id="in-jobtype">
+          <option value="">Choose one…</option>
+          <option value="storm_down">Storm damage — tree already down</option>
+          <option value="removal">Remove a standing tree</option>
+          <option value="hanging_limb">Hanging or broken limb</option>
+          <option value="trim">Trimming / pruning</option>
+          <option value="stump">Stump removal</option>
+          <option value="emergency">Emergency — tree on house/car/blocking access</option>
+          <option value="other">Something else</option>
+        </select>
+        <div class="err-msg">Pick the type of work.</div>
+      </div>
+
+      <div class="row2">
+        <div class="field" id="f-size">
+          <label for="in-size">How big is the tree?</label>
+          <select id="in-size">
+            <option value="">Choose one…</option>
+            <option value="small">Small — under 25 ft / thin trunk</option>
+            <option value="medium">Medium — 25–50 ft</option>
+            <option value="large">Large — 50–80 ft</option>
+            <option value="huge">Very large — 80+ ft / massive trunk</option>
+            <option value="unsure">Not sure</option>
+          </select>
+          <div class="err-msg">Give a rough size.</div>
+        </div>
+        <div class="field" id="f-proximity">
+          <label for="in-proximity">Near anything?</label>
+          <select id="in-proximity">
+            <option value="">Choose one…</option>
+            <option value="open">Open area — clear of structures</option>
+            <option value="near_house">Close to a house/building</option>
+            <option value="on_structure">On a house, roof, or fence</option>
+            <option value="powerlines">Near power lines</option>
+            <option value="driveway">Blocking a driveway/road</option>
+          </select>
+          <div class="err-msg">Pick the closest match.</div>
+        </div>
+      </div>
+
+      <div class="field" id="f-urgency">
+        <label for="in-urgency">How soon do you need it done?</label>
+        <select id="in-urgency">
+          <option value="">Choose one…</option>
+          <option value="emergency">Right now — it's an emergency</option>
+          <option value="few_days">Within a few days</option>
+          <option value="couple_weeks">Within a couple weeks</option>
+          <option value="flexible">I'm flexible</option>
+        </select>
+        <div class="err-msg">Let us know the timing.</div>
+      </div>
+
+      <div class="field" id="f-photos">
+        <label for="in-photos">Photos <span class="opt">(optional, but gets you a faster, more accurate quote)</span></label>
+        <input type="file" id="in-photos" accept="image/*" multiple capture="environment">
+        <div class="hint">A couple photos of the tree and where it is help a pro give you a real estimate up front.</div>
+        <div id="photo-preview" class="photo-preview"></div>
+      </div>
+
       <button class="btn" id="submit-btn" onclick="submitJob()">Get my local pro</button>
       <div class="form-foot">By submitting, you agree a local tree-service pro may contact you about your request. We don't sell your information.</div>
     </div>
@@ -201,6 +272,60 @@
   // contractor referral, if they arrived via a personal link (?ref=sub_xxx)
   const REF = new URLSearchParams(location.search).get('ref') || null;
 
+  // ---- photo handling: compress to small JPEGs, cap at 4, preview thumbnails ----
+  let collectedPhotos = [];   // array of data-URL strings, sent with the job
+  const MAX_PHOTOS = 4;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('in-photos');
+    if (input) input.addEventListener('change', handlePhotos);
+  });
+
+  async function handlePhotos(e) {
+    const files = Array.from(e.target.files || []);
+    const preview = document.getElementById('photo-preview');
+    for (const file of files) {
+      if (collectedPhotos.length >= MAX_PHOTOS) { toast('Up to ' + MAX_PHOTOS + ' photos.'); break; }
+      if (!file.type.startsWith('image/')) continue;
+      try {
+        const dataUrl = await compressImage(file, 1024, 0.7); // max 1024px, 70% quality
+        collectedPhotos.push(dataUrl);
+        const thumb = document.createElement('div');
+        thumb.className = 'photo-thumb';
+        thumb.innerHTML = '<img src="' + dataUrl + '" alt="">' +
+          '<button type="button" class="photo-x" aria-label="Remove">&times;</button>';
+        thumb.querySelector('.photo-x').addEventListener('click', () => {
+          const i = collectedPhotos.indexOf(dataUrl);
+          if (i > -1) collectedPhotos.splice(i, 1);
+          thumb.remove();
+        });
+        preview.appendChild(thumb);
+      } catch (_) { /* skip a photo that fails to process */ }
+    }
+    e.target.value = ''; // allow re-selecting the same file
+  }
+
+  // Draw the image to a canvas scaled down, export as JPEG data URL — keeps the POST small.
+  function compressImage(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        if (width > height && width > maxDim) { height = Math.round(height * maxDim / width); width = maxDim; }
+        else if (height > maxDim) { width = Math.round(width * maxDim / height); height = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
+      img.src = url;
+    });
+  }
+
+
   // if a ref is present, show the banner (the name is cosmetic until we wire a lookup; generic is fine)
   if (REF) {
     const rb = document.getElementById('ref-banner');
@@ -208,7 +333,7 @@
   }
 
   function clearErr(id){ const f=document.getElementById(id); if(f) f.classList.remove('err'); }
-  function setErr(id){ const f=document.getElementById(id); if(f){ f.classList.add('err'); const inp=f.querySelector('input,textarea'); if(inp) inp.focus(); } }
+  function setErr(id){ const f=document.getElementById(id); if(f){ f.classList.add('err'); const inp=f.querySelector('input,textarea,select'); if(inp) inp.focus(); } }
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function toast(msg, kind){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+(kind||''); clearTimeout(t._h); t._h=setTimeout(()=>t.className='toast '+(kind||''),3800); }
 
@@ -224,15 +349,23 @@
     const zip   = document.getElementById('in-zip').value.trim();
     const email = document.getElementById('in-email').value.trim();
     const desc  = document.getElementById('in-desc').value.trim();
+    const jobType   = document.getElementById('in-jobtype').value;
+    const treeSize  = document.getElementById('in-size').value;
+    const proximity = document.getElementById('in-proximity').value;
+    const urgency   = document.getElementById('in-urgency').value;
 
     // validate — clear all first
-    ['f-name','f-phone','f-zip','f-desc'].forEach(clearErr);
+    ['f-name','f-phone','f-zip','f-desc','f-jobtype','f-size','f-proximity','f-urgency'].forEach(clearErr);
     let bad = null;
+    if (!urgency) { setErr('f-urgency'); bad = bad||'f-urgency'; }
+    if (!proximity) { setErr('f-proximity'); bad = bad||'f-proximity'; }
+    if (!treeSize) { setErr('f-size'); bad = bad||'f-size'; }
+    if (!jobType) { setErr('f-jobtype'); bad = bad||'f-jobtype'; }
     if (!desc) { setErr('f-desc'); bad = bad||'f-desc'; }
     if (!/^\d{5}$/.test(zip)) { setErr('f-zip'); bad = bad||'f-zip'; }
     if (!phone || phone.replace(/\D/g,'').length < 7) { setErr('f-phone'); bad = bad||'f-phone'; }
     if (!name) { setErr('f-name'); bad = bad||'f-name'; }
-    if (bad) { return; }
+    if (bad) { document.getElementById(bad).scrollIntoView({behavior:'smooth',block:'center'}); return; }
 
     // contact = phone, with email appended if provided (backend stores a single contact string)
     const contact = email ? (phone + ' · ' + email) : phone;
@@ -243,7 +376,11 @@
       const r = await fetch(API + '/submit-job', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, contact, zip, description: desc, ref: REF })
+        body: JSON.stringify({
+          name, contact, zip, description: desc, ref: REF,
+          jobType, treeSize, proximity, urgency,
+          photos: collectedPhotos   // array of data URLs, may be empty
+        })
       });
       const d = await r.json().catch(() => ({}));
       if (r.ok && d.ok) {
