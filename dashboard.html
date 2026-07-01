@@ -236,6 +236,21 @@
   .jobs-section-label { padding: 11px 20px 4px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted-2); }
   .job-countdown { font-size: 11.5px; color: var(--ember-deep); font-weight: 600; margin-top: 6px; }
 
+  /* offering-model additions */
+  .job-card-offered { background: linear-gradient(180deg, rgba(200,83,27,0.05), transparent 60%); border-left: 3px solid var(--ember); }
+  .job-tag.offered { background: var(--ember); color: #fff; }
+  .job-tag.waiting { background: rgba(184,134,47,0.14); color: var(--gold); border: 1px solid rgba(184,134,47,0.35); }
+  .job-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 9px; }
+  .job-badge { font-size: 11px; font-weight: 600; color: var(--bark); background: var(--paper-2); border: 1px solid var(--line); border-radius: 3px; padding: 3px 8px; }
+  .job-photos { display: flex; flex-wrap: wrap; gap: 7px; margin: 2px 0 10px; }
+  .job-photo { width: 62px; height: 62px; border-radius: 4px; overflow: hidden; border: 1.5px solid var(--line); display: block; }
+  .job-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .job-pass { width: 100%; margin-top: 8px; background: none; border: 1.5px solid var(--line); color: var(--muted); padding: 9px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s; }
+  .job-pass:hover { border-color: var(--muted); color: var(--bark); }
+  .job-pass:disabled { opacity: 0.55; cursor: not-allowed; }
+  .job-fee-note { font-size: 11.5px; color: var(--muted); margin-top: 8px; line-height: 1.4; text-align: center; }
+  .job-waiting-note { font-size: 12.5px; color: var(--muted); line-height: 1.5; padding: 10px 12px; background: rgba(184,134,47,0.06); border: 1px solid rgba(184,134,47,0.2); border-radius: 4px; }
+
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(26,21,18,0.55); z-index: 1000; align-items: center; justify-content: center; padding: 24px; }
   .modal { background: var(--card); border-radius: 6px; max-width: 480px; width: 100%; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
   .modal h3 { font-size: 21px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.5px; }
@@ -819,16 +834,38 @@
   }
 
   // ---------- DIRECT JOBS (Job Center) ----------
-  // Homeowner-submitted leads: pending (in your territory, yours to claim first),
-  // claimed (yours, contact revealed), and pool (lapsed elsewhere, any sub can grab).
-  let jobsData = { pending: [], claimed: [], pool: [] };
+  // Offering model: pending (owner-exclusive, claim first), offered (the ONE job offered to you now —
+  // set a price to take it, or pass), and working (jobs you took: awaiting the homeowner's confirmation,
+  // then confirmed with their contact revealed once they confirm and the job fee clears).
+  let jobsData = { pending: [], offered: [], working: [] };
+
+  // human-readable labels for the structured intake fields (job stores the value, we show the label)
+  const JOB_TYPE_LABELS = { storm_down:'Storm damage — tree down', removal:'Tree removal', hanging_limb:'Hanging/broken limb', trim:'Trimming / pruning', stump:'Stump removal', emergency:'Emergency', other:'Other tree work' };
+  const SIZE_LABELS = { small:'Small (under 25 ft)', medium:'Medium (25–50 ft)', large:'Large (50–80 ft)', huge:'Very large (80+ ft)', unsure:'Size unsure' };
+  const PROXIMITY_LABELS = { open:'Open area', near_house:'Near a building', on_structure:'On a structure', powerlines:'Near power lines', driveway:'Blocking access' };
+  const URGENCY_LABELS = { emergency:'Emergency', few_days:'Within days', couple_weeks:'Within weeks', flexible:'Flexible' };
+  function jobBadges(j) {
+    const items = [
+      j.jobType && JOB_TYPE_LABELS[j.jobType], j.treeSize && SIZE_LABELS[j.treeSize],
+      j.proximity && PROXIMITY_LABELS[j.proximity], j.urgency && URGENCY_LABELS[j.urgency],
+    ].filter(Boolean);
+    if (!items.length) return '';
+    return '<div class="job-badges">' + items.map(t => '<span class="job-badge">' + escapeHtml(t) + '</span>').join('') + '</div>';
+  }
+  function jobPhotos(j) {
+    if (!Array.isArray(j.photos) || !j.photos.length) return '';
+    return '<div class="job-photos">' + j.photos.slice(0,4).map(src =>
+      '<a href="' + src + '" target="_blank" rel="noopener" class="job-photo"><img src="' + src + '" alt="job photo" loading="lazy"></a>'
+    ).join('') + '</div>';
+  }
 
   async function loadJobs() {
     try {
       const r = await fetch(API + '/my-jobs', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body:'{}' });
       if (!r.ok) { renderJobs(); return; }
       const d = await r.json();
-      jobsData = { pending: d.pending || [], claimed: d.claimed || [], pool: d.pool || [] };
+      // 'offered' is the offering-engine bucket; fall back to legacy 'pool' if present. 'working' = taken/confirmed.
+      jobsData = { pending: d.pending || [], offered: d.offered || d.pool || [], working: d.working || d.claimed || [] };
     } catch (e) { console.error('jobs load failed', e); }
     renderJobs();
   }
@@ -848,26 +885,57 @@
     const mins = Math.floor((left%3600000)/60000);
     return hrs >= 1 ? hrs + 'h ' + mins + 'm' : mins + 'm';
   }
+  // hours left in the 3h window to take an offered job before it rolls to the next crew
+  function offerWindowLeft(iso) {
+    if (!iso) return null;
+    const left = 3*3600*1000 - (Date.now() - new Date(iso).getTime());
+    if (left <= 0) return null;
+    const hrs = Math.floor(left/3600000);
+    const mins = Math.floor((left%3600000)/60000);
+    return hrs >= 1 ? hrs + 'h ' + mins + 'm' : mins + 'm';
+  }
 
   function renderJobs() {
     const card = document.getElementById('jobs-card');
     const body = document.getElementById('jobs-body');
     const meta = document.getElementById('jobs-meta');
     if (!card || !body) return;
-    const { pending, claimed, pool } = jobsData;
-    const total = pending.length + claimed.length + pool.length;
+    const { pending, offered, working } = jobsData;
+    const total = pending.length + offered.length + working.length;
     if (!total) {
       // keep the panel hidden entirely when there's nothing — storm alerts already carry the "all quiet" message
       card.style.display = 'none';
       return;
     }
     card.style.display = 'block';
-    const open = pending.length + pool.length;
-    meta.innerHTML = open ? '<b>' + open + '</b> to claim' : claimed.length + ' claimed';
+    const actionable = pending.length + offered.length;
+    meta.innerHTML = actionable ? '<b>' + actionable + '</b> waiting on you' : working.length + ' in progress';
 
     let html = '';
 
-    // PENDING — in your territory, yours first
+    // OFFERED — the one job offered to you right now; set a price to take it, or pass (rolls to next crew)
+    if (offered.length) {
+      html += '<div class="jobs-section-label">Offered to you — take it or pass</div>';
+      offered.forEach(j => {
+        const left = offerWindowLeft(j.offeredAt);
+        html += '<div class="job-card job-card-offered">' +
+          '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span><span class="job-tag offered">Offered to you</span></div>' +
+          '<div class="job-when">' + jobWhen(j.createdAt) + '</div>' +
+          jobBadges(j) +
+          '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
+          jobPhotos(j) +
+          (left ? '<div class="job-countdown">' + left + ' left before it moves to the next crew</div>' : '') +
+          '<div class="job-take"><span class="jt-dollar">$</span>' +
+            '<input type="number" min="1" step="1" class="job-price" id="price-' + escapeHtml(j.id) + '" placeholder="Starting estimate" inputmode="numeric">' +
+            '<button class="job-claim pool" onclick="takeJobLead(\'' + escapeHtml(j.id) + '\',this)">Take job</button>' +
+          '</div>' +
+          '<button class="job-pass" onclick="passJobLead(\'' + escapeHtml(j.id) + '\',this)">Pass — not for me</button>' +
+          '<div class="job-fee-note">You\u2019re only charged the $45 job fee if the homeowner confirms you.</div>' +
+          '</div>';
+      });
+    }
+
+    // PENDING — in your territory, yours first (owner-exclusive claim)
     if (pending.length) {
       html += '<div class="jobs-section-label">In your territory — claim first</div>';
       pending.forEach(j => {
@@ -875,7 +943,9 @@
         html += '<div class="job-card">' +
           '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span><span class="job-tag yours">Yours first</span></div>' +
           '<div class="job-when">' + jobWhen(j.createdAt) + '</div>' +
+          jobBadges(j) +
           '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
+          jobPhotos(j) +
           (left ? '<div class="job-countdown">' + left + ' left before it opens to other crews</div>' : '') +
           '<div class="job-actions"><button class="job-claim" onclick="claimJobLead(\'' + escapeHtml(j.id) + '\',this)">Claim this job</button>' +
           '<button class="job-decline" onclick="declineJobLead(\'' + escapeHtml(j.id) + '\',this)">Decline</button></div>' +
@@ -883,34 +953,23 @@
       });
     }
 
-    // POOL — open to nearby crews; take it at your price (auto-assign)
-    if (pool.length) {
-      html += '<div class="jobs-section-label">Open jobs near you — name your price to take it</div>';
-      pool.forEach(j => {
+    // WORKING — jobs you took. 'taken' = waiting on the homeowner to confirm (no contact yet);
+    // 'confirmed' = homeowner confirmed + fee cleared, contact revealed.
+    if (working.length) {
+      html += '<div class="jobs-section-label">Your jobs</div>';
+      working.forEach(j => {
+        const confirmed = j.status === 'confirmed';
         html += '<div class="job-card">' +
-          '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span><span class="job-tag pool">Open</span></div>' +
-          '<div class="job-when">' + jobWhen(j.createdAt) + '</div>' +
+          '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span>' +
+            (confirmed ? '<span class="job-tag claimed">Confirmed</span>' : '<span class="job-tag waiting">Awaiting homeowner</span>') + '</div>' +
+          '<div class="job-when">' + jobWhen(j.takenAt || j.createdAt) + '</div>' +
+          jobBadges(j) +
           '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
-          '<div class="job-take"><span class="jt-dollar">$</span>' +
-            '<input type="number" min="1" step="1" class="job-price" id="price-' + escapeHtml(j.id) + '" placeholder="Your quote" inputmode="numeric">' +
-            '<button class="job-claim pool" onclick="takeJobLead(\'' + escapeHtml(j.id) + '\',this)">Take job</button>' +
-          '</div>' +
-          '</div>';
-      });
-    }
-
-    // CLAIMED — yours, contact revealed
-    if (claimed.length) {
-      html += '<div class="jobs-section-label">Claimed — yours to call</div>';
-      claimed.forEach(j => {
-        html += '<div class="job-card">' +
-          '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span><span class="job-tag claimed">Claimed</span></div>' +
-          '<div class="job-when">' + jobWhen(j.claimedAt || j.createdAt) + '</div>' +
-          '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
-          (j.price ? '<div class="job-quote">Your quote: $' + Number(j.price).toLocaleString() + '</div>' : '') +
-          '<div class="job-contact"><span class="jc-label">Contact the homeowner</span>' +
-            (j.name ? '<b>' + escapeHtml(j.name) + '</b><br>' : '') +
-            escapeHtml(j.contact || '') + '</div>' +
+          (j.price ? '<div class="job-quote">Your starting estimate: $' + Number(j.price).toLocaleString() + '</div>' : '') +
+          (confirmed
+            ? '<div class="job-contact"><span class="jc-label">Contact the homeowner</span>' +
+                (j.name ? '<b>' + escapeHtml(j.name) + '</b><br>' : '') + escapeHtml(j.contact || '') + '</div>'
+            : '<div class="job-waiting-note">Waiting for the homeowner to confirm. We\u2019ll reveal their contact here the moment they do.</div>') +
           '</div>';
       });
     }
@@ -973,16 +1032,16 @@
       const r = await fetch(API + '/take-job', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body: JSON.stringify({ jobId, price }) });
       const d = await r.json();
       if (d.ok) {
-        toast('Job taken — the homeowner has been notified with your quote.', 'ok');
-        await loadJobs(); // moves into Claimed with contact revealed
-      } else if (d.error === 'already_claimed') {
-        toast('Another crew just took that one.', 'err');
+        toast('Taken — the homeowner has been asked to confirm. We\u2019ll reveal their contact once they do.', 'ok');
+        await loadJobs(); // moves into "Your jobs" as awaiting-homeowner (contact hidden until they confirm)
+      } else if (d.error === 'already_taken') {
+        toast('Another crew already took that one.', 'err');
         await loadJobs();
-      } else if (d.error === 'out_of_range') {
-        toast('That job is outside your territory range.', 'err');
+      } else if (d.error === 'not_your_offer') {
+        toast('That job is no longer offered to you.', 'err');
         await loadJobs();
       } else if (d.error === 'bad_price') {
-        toast('Enter a valid price.', 'err');
+        toast('Enter a valid starting estimate.', 'err');
         if (btn) { btn.disabled = false; btn.textContent = 'Take job'; }
       } else {
         toast('Could not take that job. Try again.', 'err');
@@ -991,6 +1050,28 @@
     } catch {
       toast('Something went wrong taking the job.', 'err');
       if (btn) { btn.disabled = false; btn.textContent = 'Take job'; }
+    }
+  }
+
+  // Pass on the job currently offered to you — it rolls immediately to the next nearest crew.
+  async function passJobLead(jobId, btn) {
+    if (btn) { btn.disabled = true; btn.textContent = 'Passing…'; }
+    try {
+      const r = await fetch(API + '/decline-offer', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body: JSON.stringify({ jobId }) });
+      const d = await r.json();
+      if (d.ok) {
+        toast('Passed — it\u2019s moving to the next crew.', 'ok');
+        await loadJobs(); // leaves your list
+      } else if (d.error === 'not_your_offer') {
+        toast('That job is no longer offered to you.', 'err');
+        await loadJobs();
+      } else {
+        toast('Could not pass that job. Try again.', 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Pass — not for me'; }
+      }
+    } catch {
+      toast('Something went wrong. Try again.', 'err');
+      if (btn) { btn.disabled = false; btn.textContent = 'Pass — not for me'; }
     }
   }
 
