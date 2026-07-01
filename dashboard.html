@@ -251,6 +251,31 @@
   .job-fee-note { font-size: 11.5px; color: var(--muted); margin-top: 8px; line-height: 1.4; text-align: center; }
   .job-waiting-note { font-size: 12.5px; color: var(--muted); line-height: 1.5; padding: 10px 12px; background: rgba(184,134,47,0.06); border: 1px solid rgba(184,134,47,0.2); border-radius: 4px; }
 
+  /* ---------- Verified Pro panel ---------- */
+  .verify-body { padding: 18px 20px; }
+  .verify-nudge { font-size: 13px; line-height: 1.55; color: var(--bark); background: rgba(200,83,27,0.05); border: 1px solid rgba(200,83,27,0.18); border-radius: 5px; padding: 12px 14px; margin-bottom: 14px; }
+  .verify-nudge b { color: var(--ember-deep); }
+  .verify-form { display: flex; flex-direction: column; }
+  .vf-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin: 10px 0 5px; }
+  .vf-input { padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 4px; font-size: 14px; font-family: inherit; color: var(--ink); }
+  .vf-input:focus { outline: none; border-color: var(--ember); }
+  .vf-file { padding: 9px 12px; border: 1.5px dashed var(--line); border-radius: 4px; font-size: 13px; color: var(--muted-2); background: var(--paper-2); cursor: pointer; }
+  .vf-doc-name { font-size: 12.5px; color: var(--moss); font-weight: 600; margin-top: 6px; }
+  .vf-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--bark); margin: 12px 0 2px; cursor: pointer; }
+  .vf-check input { width: 16px; height: 16px; }
+  .vf-note { font-size: 11.5px; color: var(--muted); line-height: 1.4; margin-top: 10px; }
+  .vf-note b { color: var(--bark); }
+  .verify-badge-big { display: flex; gap: 13px; align-items: flex-start; }
+  .vb-seal { width: 40px; height: 40px; border-radius: 50%; background: var(--moss); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; box-shadow: 0 0 0 4px rgba(62,82,53,0.12); }
+  .vb-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: var(--bark); }
+  .vb-sub { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin-top: 3px; }
+  .verify-fact { display: flex; justify-content: space-between; font-size: 13px; padding: 9px 0; border-top: 1px solid var(--line-soft); margin-top: 12px; }
+  .verify-fact span { color: var(--muted); } .verify-fact b { color: var(--bark); }
+  .verify-pending { text-align: center; padding: 8px 0; }
+  .vp-icon { font-size: 30px; margin-bottom: 8px; }
+  .vp-title { font-weight: 700; font-size: 15px; color: var(--bark); margin-bottom: 5px; }
+  .vp-sub { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(26,21,18,0.55); z-index: 1000; align-items: center; justify-content: center; padding: 24px; }
   .modal { background: var(--card); border-radius: 6px; max-width: 480px; width: 100%; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
   .modal h3 { font-size: 21px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.5px; }
@@ -424,6 +449,12 @@
               <button class="acct-link danger" onclick="openCancel()">Cancel subscription</button>
             </div>
           </div>
+        </div>
+
+        <!-- VERIFICATION — Verified Pro badge drives homeowner confirmations -->
+        <div class="card side-card" id="verify-card">
+          <div class="card-head"><h2>Verified Pro</h2><div class="meta" id="verify-meta"></div></div>
+          <div class="verify-body" id="verify-body"></div>
         </div>
 
         <!-- TERRITORY ACTIVITY: storm history + season -->
@@ -618,6 +649,7 @@
 
     renderCoverage();
     renderPlan();
+    renderVerification();
     renderAlerts();
     renderValue();
     renderCert();
@@ -772,6 +804,121 @@
     else note.innerHTML = (cap - myZips.size) + ' ZIP' + (cap-myZips.size===1?'':'s') + ' left' + (hz ? ' &middot; within ' + radiusMiles() + ' mi of <b>' + hz + '</b>' : '') + '.';
     const list = document.getElementById('zip-list'); list.innerHTML='';
     [...myZips].sort().forEach(z => { const c=document.createElement('div'); c.className='zchip'; c.innerHTML=z + ' <button onclick="toggleZip(\'' + z + '\')" title="Release">&times;</button>'; list.appendChild(c); });
+  }
+
+  // ---------- Verified Pro (drives homeowner confirmations) ----------
+  let verifyPhoto = null; // { filename, dataUrl } — the COI to submit
+
+  function renderVerification() {
+    const card = document.getElementById('verify-card');
+    const body = document.getElementById('verify-body');
+    const meta = document.getElementById('verify-meta');
+    if (!card || !body) return;
+    const status = subscriber.verificationStatus || 'unverified';
+
+    if (status === 'verified') {
+      meta.innerHTML = '';
+      body.innerHTML =
+        '<div class="verify-badge-big"><span class="vb-seal">&#10003;</span><div><div class="vb-title">You\u2019re a Verified Pro</div>' +
+        '<div class="vb-sub">Homeowners see your verified badge on every job — it makes them far more likely to confirm you.</div></div></div>' +
+        (subscriber.yearsInBusiness ? '<div class="verify-fact"><span>Years in business</span><b>' + escapeHtml(String(subscriber.yearsInBusiness)) + '</b></div>' : '') +
+        (subscriber.arboristCert ? '<div class="verify-fact"><span>ISA-Certified Arborist</span><b>Yes</b></div>' : '');
+      return;
+    }
+
+    if (status === 'pending') {
+      meta.innerHTML = '<span style="color:var(--gold);font-weight:700;">Under review</span>';
+      body.innerHTML =
+        '<div class="verify-pending"><div class="vp-icon">&#9203;</div>' +
+        '<div class="vp-title">Verification in review</div>' +
+        '<div class="vp-sub">We\u2019re reviewing your insurance and license. Once approved, your Verified Pro badge shows to every homeowner. This usually takes a day or less.</div></div>';
+      return;
+    }
+
+    // unverified — the nudge + form
+    meta.innerHTML = '<span style="color:var(--ember-deep);font-weight:700;">Not verified</span>';
+    body.innerHTML =
+      '<div class="verify-nudge"><b>Get verified &mdash; homeowners are far more likely to confirm a verified pro.</b> ' +
+      'Storm-time scams make homeowners wary. A Verified Pro badge tells them you\u2019re insured, licensed, and real.</div>' +
+      '<div class="verify-form">' +
+        '<label class="vf-label">Proof of insurance (Certificate of Insurance)</label>' +
+        '<input type="file" id="vf-doc" accept="image/*,application/pdf" class="vf-file">' +
+        '<div class="vf-doc-name" id="vf-doc-name"></div>' +
+        '<label class="vf-label">License / registration info</label>' +
+        '<input type="text" id="vf-license" class="vf-input" placeholder="e.g. FL Reg #12345, or city license #">' +
+        '<label class="vf-check"><input type="checkbox" id="vf-arborist"> We have an ISA-Certified Arborist on staff</label>' +
+        '<label class="vf-label">Years in business</label>' +
+        '<input type="number" id="vf-years" class="vf-input" min="0" max="100" placeholder="e.g. 8" inputmode="numeric">' +
+        '<button class="btn btn-wide" id="vf-submit" onclick="submitVerification()" style="margin-top:12px;">Submit for verification</button>' +
+        '<div class="vf-note">Your document is sent straight to our team for review and is <b>not stored on our servers</b>.</div>' +
+      '</div>';
+    const fileInput = document.getElementById('vf-doc');
+    if (fileInput) fileInput.addEventListener('change', handleVerifyDoc);
+  }
+
+  async function handleVerifyDoc(e) {
+    const file = (e.target.files || [])[0];
+    const nameEl = document.getElementById('vf-doc-name');
+    if (!file) { verifyPhoto = null; if (nameEl) nameEl.textContent=''; return; }
+    if (nameEl) nameEl.textContent = file.name;
+    try {
+      if (file.type === 'application/pdf') {
+        // PDFs: read as base64 directly (cap ~8MB to stay under email attachment limits)
+        if (file.size > 8*1024*1024) { toast('That PDF is large — try a photo or a smaller file.', 'err'); verifyPhoto=null; if(nameEl) nameEl.textContent=''; return; }
+        const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
+        verifyPhoto = { filename: file.name, dataUrl };
+      } else {
+        // images: compress to keep the email attachment small
+        const dataUrl = await compressToJpeg(file, 1400, 0.75);
+        verifyPhoto = { filename: (file.name.replace(/\.[^.]+$/, '') || 'coi') + '.jpg', dataUrl };
+      }
+    } catch (_) { toast('Could not read that file. Try another.', 'err'); verifyPhoto=null; if(nameEl) nameEl.textContent=''; }
+  }
+
+  function compressToJpeg(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const img = new Image(); const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        if (width > height && width > maxDim) { height = Math.round(height*maxDim/width); width = maxDim; }
+        else if (height > maxDim) { width = Math.round(width*maxDim/height); height = maxDim; }
+        const c = document.createElement('canvas'); c.width=width; c.height=height;
+        c.getContext('2d').drawImage(img,0,0,width,height);
+        resolve(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('img load failed')); };
+      img.src = url;
+    });
+  }
+
+  async function submitVerification() {
+    if (!verifyPhoto) { toast('Add your proof of insurance first.', 'err'); return; }
+    const license = (document.getElementById('vf-license')||{}).value || '';
+    const arborist = !!(document.getElementById('vf-arborist')||{}).checked;
+    const years = (document.getElementById('vf-years')||{}).value || '';
+    const btn = document.getElementById('vf-submit');
+    if (btn) { btn.disabled=true; btn.textContent='Submitting…'; }
+    try {
+      const r = await fetch(API + '/submit-verification', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken},
+        body: JSON.stringify({ doc: verifyPhoto, licenseInfo: license, arboristCert: arborist, yearsInBusiness: years })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        subscriber.verificationStatus = 'pending';
+        subscriber.arboristCert = arborist; subscriber.yearsInBusiness = years;
+        verifyPhoto = null;
+        renderVerification();
+        toast('Submitted — we\u2019re reviewing your verification now.', 'ok');
+      } else {
+        toast('Could not submit. Try again.', 'err');
+        if (btn) { btn.disabled=false; btn.textContent='Submit for verification'; }
+      }
+    } catch {
+      toast('Something went wrong. Try again.', 'err');
+      if (btn) { btn.disabled=false; btn.textContent='Submit for verification'; }
+    }
   }
 
   function renderPlan() {
