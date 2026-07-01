@@ -117,7 +117,52 @@
 
   .wrap { max-width: 1240px; margin: 0 auto; padding: 26px 32px 60px; }
   .layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
-  @media (max-width: 920px) { .layout { grid-template-columns: 1fr; } }
+  @media (max-width: 920px) {
+    .layout { grid-template-columns: 1fr; gap: 16px; }
+  }
+
+  /* ---------- proper mobile layout ---------- */
+  @media (max-width: 680px) {
+    /* map: no longer eats the screen — a usable, scrollable panel */
+    #map { height: 300px; }
+    /* tighten global padding so content isn't crushed against the edges but uses the width */
+    .topbar { padding: 12px 16px; }
+    .brand { font-size: 15px; }
+    .topbar-right { gap: 12px; font-size: 13px; }
+    .hero { padding: 22px 16px 20px; }
+    .greeting { font-size: 22px; letter-spacing: -0.5px; }
+    .greeting-sub { font-size: 13.5px; }
+    .wrap { padding: 18px 14px 44px; }
+    /* stats: 2x2 grid instead of a cramped single row */
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 18px; }
+    .stat { min-width: 0; padding: 12px 14px; border-left: 1px solid rgba(247,243,236,0.15); border-top: 1px solid rgba(247,243,236,0.15); }
+    .stat:nth-child(1), .stat:nth-child(2) { border-top: none; }
+    .stat:nth-child(odd) { border-left: none; padding-left: 0; }
+    .stat .v { font-size: 22px; }
+    /* live conditions: horizontal scroll instead of wrapping into a tall stack */
+    .live-strip { flex-wrap: nowrap; overflow-x: auto; gap: 10px; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+    .live-cond { flex-shrink: 0; }
+    .wind-threat { margin: 12px 0 0; padding: 11px 13px; font-size: 13px; }
+    .sys-status { margin: 14px 0 0; font-size: 11.5px; }
+    /* cards: a touch less internal padding, tighter card spacing */
+    .side-card { margin-bottom: 16px; }
+    .card-head { padding: 14px 16px; }
+    .terr-body, .plan-body, .verify-body, .value-body, .activity-body { padding: 16px; }
+    .map-foot { padding: 12px 16px; gap: 14px; }
+    .map-hint { margin-left: 0; width: 100%; }
+    /* jobs card gets its own polish below */
+    .jobs-body { max-height: none; }
+    /* modals fill the small screen sensibly */
+    .modal { padding: 22px 18px; }
+    .modal h3 { font-size: 19px; }
+    /* bigger touch targets on the primary actions */
+    .btn, .job-claim, .job-take-btn { padding: 13px; font-size: 14.5px; }
+  }
+  @media (max-width: 380px) {
+    .stats { grid-template-columns: 1fr; }
+    .stat { border-left: none; padding-left: 0; }
+    .greeting { font-size: 20px; }
+  }
 
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 5px; overflow: hidden; box-shadow: 0 1px 2px rgba(26,21,18,0.04); }
   .card-head { padding: 16px 20px; border-bottom: 1px solid var(--line-soft); display: flex; justify-content: space-between; align-items: center; }
@@ -250,6 +295,34 @@
   .job-pass:disabled { opacity: 0.55; cursor: not-allowed; }
   .job-fee-note { font-size: 11.5px; color: var(--muted); margin-top: 8px; line-height: 1.4; text-align: center; }
   .job-waiting-note { font-size: 12.5px; color: var(--muted); line-height: 1.5; padding: 10px 12px; background: rgba(184,134,47,0.06); border: 1px solid rgba(184,134,47,0.2); border-radius: 4px; }
+
+  /* ---------- redesigned job card ---------- */
+  .job-card-offered { background: linear-gradient(180deg, rgba(200,83,27,0.06), transparent 55%); border-left: 3px solid var(--ember); }
+  .job-card-yours { background: linear-gradient(180deg, rgba(62,82,53,0.06), transparent 55%); border-left: 3px solid var(--moss); }
+  /* headline row */
+  .joh { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 11px; }
+  .joh-main { min-width: 0; flex: 1; }
+  .joh-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: var(--bark); line-height: 1.2; letter-spacing: -0.3px; }
+  .joh-loc { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .joh-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; padding: 4px 9px; border-radius: 20px; flex-shrink: 0; background: var(--ember); color: #fff; }
+  .joh-tag.yours { background: var(--moss); }
+  .joh-flag { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; background: var(--danger); color: #fff; white-space: nowrap; }
+  /* detail chips */
+  .job-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 11px; }
+  .job-chip { font-size: 11.5px; font-weight: 600; color: var(--bark-soft); background: var(--paper-2); border-radius: 4px; padding: 4px 9px; }
+  /* larger photos */
+  .job-photos { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 12px; }
+  .job-photo { width: 80px; height: 80px; border-radius: 5px; overflow: hidden; border: 1.5px solid var(--line); display: block; transition: transform 0.12s; }
+  .job-photo:hover { transform: scale(1.04); }
+  .job-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* countdown timer bar */
+  .job-timer { margin: 4px 0 12px; }
+  .jt-bar { height: 5px; background: var(--paper-2); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+  .jt-fill { height: 100%; background: linear-gradient(90deg, var(--ember), var(--ember-glow)); border-radius: 3px; transition: width 0.4s; }
+  .jt-label { font-size: 11.5px; color: var(--ember-deep); font-weight: 600; }
+  /* the redesigned fee note is a bit richer */
+  .job-card-offered .job-fee-note, .job-card-yours .job-fee-note { text-align: left; background: var(--paper-2); padding: 10px 12px; border-radius: 5px; margin-top: 10px; }
+  .job-fee-note b { color: var(--bark); }
 
   /* ---------- Verified Pro panel ---------- */
   .verify-body { padding: 18px 20px; }
@@ -1058,6 +1131,28 @@
       '<a href="' + src + '" target="_blank" rel="noopener" class="job-photo"><img src="' + src + '" alt="job photo" loading="lazy"></a>'
     ).join('') + '</div>';
   }
+  // detail chips: size, proximity, and urgency (only when not already flagged as emergency in the header)
+  function jobDetailChips(j) {
+    const items = [
+      j.treeSize && SIZE_LABELS[j.treeSize],
+      j.proximity && PROXIMITY_LABELS[j.proximity],
+      (j.urgency && j.urgency !== 'emergency') && URGENCY_LABELS[j.urgency],
+    ].filter(Boolean);
+    if (!items.length) return '';
+    return '<div class="job-chips">' + items.map(t => '<span class="job-chip">' + escapeHtml(t) + '</span>').join('') + '</div>';
+  }
+  // context for a ZIP: household count if we know it (helps the contractor gauge the area)
+  function zipContext(zip) {
+    const z = zipData[zip];
+    if (z && typeof z.hh === 'number') return ' · ~' + z.hh.toLocaleString() + ' households nearby';
+    return '';
+  }
+  // percent of the 3h offer window elapsed (for the timer bar; 100 = full time left, 0 = expired)
+  function offerWindowPct(iso) {
+    if (!iso) return 0;
+    const left = 3*3600*1000 - (Date.now() - new Date(iso).getTime());
+    return Math.max(0, Math.min(100, (left / (3*3600*1000)) * 100));
+  }
 
   async function loadJobs() {
     try {
@@ -1115,38 +1210,53 @@
 
     // OFFERED — the one job offered to you right now; set a price to take it, or pass (rolls to next crew)
     if (offered.length) {
-      html += '<div class="jobs-section-label">Offered to you — take it or pass</div>';
+      html += '<div class="jobs-section-label">Offered to you now</div>';
       offered.forEach(j => {
         const left = offerWindowLeft(j.offeredAt);
+        const pct = offerWindowPct(j.offeredAt);
+        const headline = (j.jobType && JOB_TYPE_LABELS[j.jobType]) || 'Tree job';
+        const isEmergency = j.urgency === 'emergency';
         html += '<div class="job-card job-card-offered">' +
-          '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span><span class="job-tag offered">Offered to you</span></div>' +
-          '<div class="job-when">' + jobWhen(j.createdAt) + '</div>' +
-          jobBadges(j) +
-          '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
+          // headline row: the job type is the headline, urgency flag if hot
+          '<div class="joh"><div class="joh-main"><div class="joh-title">' + escapeHtml(headline) + '</div>' +
+            '<div class="joh-loc">ZIP ' + escapeHtml(j.zip) + zipContext(j.zip) + '</div></div>' +
+            (isEmergency ? '<span class="joh-flag">&#9889; Emergency</span>' : '<span class="joh-tag">Offered</span>') + '</div>' +
+          // detail chips (size, proximity, urgency-if-not-emergency)
+          jobDetailChips(j) +
+          // homeowner's description
+          (j.description ? '<div class="job-desc">' + escapeHtml(j.description) + '</div>' : '') +
+          // photos, larger
           jobPhotos(j) +
-          (left ? '<div class="job-countdown">' + left + ' left before it moves to the next crew</div>' : '') +
+          // countdown timer bar
+          (left ? '<div class="job-timer"><div class="jt-bar"><div class="jt-fill" style="width:' + pct + '%"></div></div>' +
+            '<div class="jt-label">' + left + ' left before it rolls to the next-nearest crew</div></div>' : '') +
+          // price + take
           '<div class="job-take"><span class="jt-dollar">$</span>' +
-            '<input type="number" min="1" step="1" class="job-price" id="price-' + escapeHtml(j.id) + '" placeholder="Starting estimate" inputmode="numeric">' +
+            '<input type="number" min="1" step="1" class="job-price" id="price-' + escapeHtml(j.id) + '" placeholder="Your starting estimate" inputmode="numeric">' +
             '<button class="job-claim pool" onclick="takeJobLead(\'' + escapeHtml(j.id) + '\',this)">Take job</button>' +
           '</div>' +
           '<button class="job-pass" onclick="passJobLead(\'' + escapeHtml(j.id) + '\',this)">Pass — not for me</button>' +
-          '<div class="job-fee-note">You\u2019re only charged the $45 job fee if the homeowner confirms you.</div>' +
+          // fee note + territory reassurance
+          '<div class="job-fee-note">You\u2019re only charged the $45 job fee if the homeowner confirms <b>you</b>. Pass and this one job goes to the next-nearest crew for this address — your territory and your other leads aren\u2019t affected.</div>' +
           '</div>';
       });
     }
 
     // PENDING — in your territory, yours first (owner-exclusive claim)
     if (pending.length) {
-      html += '<div class="jobs-section-label">In your territory — claim first</div>';
+      html += '<div class="jobs-section-label">In your territory — yours first</div>';
       pending.forEach(j => {
         const left = claimWindowLeft(j.createdAt);
-        html += '<div class="job-card">' +
-          '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span><span class="job-tag yours">Yours first</span></div>' +
-          '<div class="job-when">' + jobWhen(j.createdAt) + '</div>' +
-          jobBadges(j) +
-          '<div class="job-desc">' + escapeHtml(j.description || '') + '</div>' +
+        const headline = (j.jobType && JOB_TYPE_LABELS[j.jobType]) || 'Tree job';
+        const isEmergency = j.urgency === 'emergency';
+        html += '<div class="job-card job-card-yours">' +
+          '<div class="joh"><div class="joh-main"><div class="joh-title">' + escapeHtml(headline) + '</div>' +
+            '<div class="joh-loc">ZIP ' + escapeHtml(j.zip) + zipContext(j.zip) + '</div></div>' +
+            (isEmergency ? '<span class="joh-flag">&#9889; Emergency</span>' : '<span class="joh-tag yours">Yours first</span>') + '</div>' +
+          jobDetailChips(j) +
+          (j.description ? '<div class="job-desc">' + escapeHtml(j.description) + '</div>' : '') +
           jobPhotos(j) +
-          (left ? '<div class="job-countdown">' + left + ' left before it opens to other crews</div>' : '') +
+          (left ? '<div class="job-countdown">' + left + ' left before it opens to nearby crews</div>' : '') +
           '<div class="job-actions"><button class="job-claim" onclick="claimJobLead(\'' + escapeHtml(j.id) + '\',this)">Claim this job</button>' +
           '<button class="job-decline" onclick="declineJobLead(\'' + escapeHtml(j.id) + '\',this)">Decline</button></div>' +
           '</div>';
