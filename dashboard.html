@@ -276,6 +276,29 @@
   .vp-title { font-weight: 700; font-size: 15px; color: var(--bark); margin-bottom: 5px; }
   .vp-sub { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
 
+  /* ---------- Piece C: couldn't-reach refund + account review ---------- */
+  .job-unreachable { width: 100%; margin-top: 10px; background: none; border: 1.5px solid var(--line); color: var(--muted); padding: 9px; border-radius: 4px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s; }
+  .job-unreachable:hover { border-color: var(--ember); color: var(--ember-deep); }
+  .job-unreachable:disabled { opacity: 0.55; cursor: not-allowed; }
+  .job-unreachable-note { font-size: 11px; color: var(--muted); line-height: 1.4; margin-top: 6px; text-align: center; }
+  .job-unreachable-cooldown { font-size: 11.5px; color: var(--muted-2); line-height: 1.4; margin-top: 10px; padding: 8px 10px; background: var(--paper-2); border: 1px solid var(--line-soft); border-radius: 4px; }
+  .account-review-banner { background: linear-gradient(180deg, rgba(200,83,27,0.09), rgba(200,83,27,0.04)); border: 1.5px solid rgba(200,83,27,0.35); border-radius: 8px; padding: 16px 18px; margin-bottom: 20px; }
+  .arb-inner { display: flex; gap: 13px; align-items: flex-start; }
+  .arb-icon { font-size: 24px; flex-shrink: 0; }
+  .arb-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: var(--ember-deep); }
+  .arb-sub { font-size: 13px; color: var(--bark); line-height: 1.55; margin-top: 4px; }
+
+  /* ---------- Piece E: completion + reputation ---------- */
+  .job-complete { width: 100%; margin-top: 10px; background: var(--moss); border: none; color: #fff; padding: 10px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .job-complete:hover { background: var(--moss-deep, #34462c); }
+  .job-complete:disabled { opacity: 0.55; cursor: not-allowed; }
+  .job-complete-note { font-size: 11px; color: var(--muted); line-height: 1.4; margin-top: 6px; text-align: center; }
+  .rep-line { display: flex; align-items: center; gap: 8px; padding: 11px 0; border-top: 1px solid var(--line-soft); margin-top: 12px; }
+  .rep-stars { color: #E8A13A; font-size: 16px; letter-spacing: 1px; }
+  .rep-num { font-weight: 800; font-size: 15px; color: var(--bark); }
+  .rep-count { font-size: 12.5px; color: var(--muted); }
+  .rep-line.rep-new { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(26,21,18,0.55); z-index: 1000; align-items: center; justify-content: center; padding: 24px; }
   .modal { background: var(--card); border-radius: 6px; max-width: 480px; width: 100%; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
   .modal h3 { font-size: 21px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.5px; }
@@ -650,6 +673,7 @@
     renderCoverage();
     renderPlan();
     renderVerification();
+    renderAccountReview();
     renderAlerts();
     renderValue();
     renderCert();
@@ -806,8 +830,36 @@
     [...myZips].sort().forEach(z => { const c=document.createElement('div'); c.className='zchip'; c.innerHTML=z + ' <button onclick="toggleZip(\'' + z + '\')" title="Release">&times;</button>'; list.appendChild(c); });
   }
 
+  // ---------- Account under review (fraud pause from repeated unreachable reports) ----------
+  function renderAccountReview() {
+    let banner = document.getElementById('account-review-banner');
+    const underReview = subscriber.status === 'fraud_review' || subscriber.canTakeJobs === false;
+    if (!underReview) { if (banner) banner.remove(); return; }
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'account-review-banner';
+      banner.className = 'account-review-banner';
+      const main = document.querySelector('.dash-main') || document.querySelector('main') || document.body;
+      main.insertBefore(banner, main.firstChild);
+    }
+    banner.innerHTML =
+      '<div class="arb-inner"><div class="arb-icon">&#9888;</div>' +
+      '<div><div class="arb-title">Your account is under review</div>' +
+      '<div class="arb-sub">We\u2019ve paused new job-taking while we review recent activity on your account. Your territory and storm alerts are unaffected. If you think this is a mistake, reply to any TreeStorm email and we\u2019ll take a look.</div></div></div>';
+  }
+
   // ---------- Verified Pro (drives homeowner confirmations) ----------
   let verifyPhoto = null; // { filename, dataUrl } — the COI to submit
+
+  // Contractor's own reputation line (their average rating + count), honoring the display threshold.
+  function ratingLine() {
+    const rs = subscriber.ratingSummary;
+    if (!rs || !rs.count) return '<div class="rep-line rep-new">No ratings yet — completed jobs earn you reviews.</div>';
+    if (!rs.show) return '<div class="rep-line rep-new">' + rs.count + ' rating' + (rs.count===1?'':'s') + ' so far — a couple more and your score shows to homeowners.</div>';
+    const full = Math.round(rs.average);
+    const stars = '★'.repeat(full) + '☆'.repeat(5-full);
+    return '<div class="rep-line"><span class="rep-stars">' + stars + '</span><span class="rep-num">' + rs.average.toFixed(1) + '</span><span class="rep-count">(' + rs.count + ' review' + (rs.count===1?'':'s') + ')</span></div>';
+  }
 
   function renderVerification() {
     const card = document.getElementById('verify-card');
@@ -821,6 +873,7 @@
       body.innerHTML =
         '<div class="verify-badge-big"><span class="vb-seal">&#10003;</span><div><div class="vb-title">You\u2019re a Verified Pro</div>' +
         '<div class="vb-sub">Homeowners see your verified badge on every job — it makes them far more likely to confirm you.</div></div></div>' +
+        ratingLine() +
         (subscriber.yearsInBusiness ? '<div class="verify-fact"><span>Years in business</span><b>' + escapeHtml(String(subscriber.yearsInBusiness)) + '</b></div>' : '') +
         (subscriber.arboristCert ? '<div class="verify-fact"><span>ISA-Certified Arborist</span><b>Yes</b></div>' : '');
       return;
@@ -1106,6 +1159,22 @@
       html += '<div class="jobs-section-label">Your jobs</div>';
       working.forEach(j => {
         const confirmed = j.status === 'confirmed';
+        // the "couldn't reach" refund button unlocks 24h after confirmation
+        const confirmedMs = j.confirmedAt ? new Date(j.confirmedAt).getTime() : null;
+        const cooldownLeft = confirmedMs ? (24*3600*1000 - (Date.now() - confirmedMs)) : null;
+        const canReport = confirmed && confirmedMs && cooldownLeft <= 0;
+        const inCooldown = confirmed && confirmedMs && cooldownLeft > 0;
+        let unreachableBlock = '';
+        if (confirmed) {
+          if (canReport) {
+            unreachableBlock =
+              '<button class="job-unreachable" onclick="reportUnreachable(\'' + escapeHtml(j.id) + '\',this)">Couldn\u2019t reach this homeowner</button>' +
+              '<div class="job-unreachable-note">If you genuinely can\u2019t reach them, we\u2019ll refund your job fee. Limited to a few per month.</div>';
+          } else if (inCooldown) {
+            const hrs = Math.ceil(cooldownLeft/3600000);
+            unreachableBlock = '<div class="job-unreachable-cooldown">Can\u2019t reach them? You can request a refund in ' + hrs + 'h if you still haven\u2019t connected.</div>';
+          }
+        }
         html += '<div class="job-card">' +
           '<div class="job-top"><span class="job-zip">ZIP ' + escapeHtml(j.zip) + '</span>' +
             (confirmed ? '<span class="job-tag claimed">Confirmed</span>' : '<span class="job-tag waiting">Awaiting homeowner</span>') + '</div>' +
@@ -1117,11 +1186,74 @@
             ? '<div class="job-contact"><span class="jc-label">Contact the homeowner</span>' +
                 (j.name ? '<b>' + escapeHtml(j.name) + '</b><br>' : '') + escapeHtml(j.contact || '') + '</div>'
             : '<div class="job-waiting-note">Waiting for the homeowner to confirm. We\u2019ll reveal their contact here the moment they do.</div>') +
+          (confirmed ? '<button class="job-complete" onclick="completeJob(\'' + escapeHtml(j.id) + '\',this)">Mark job completed</button><div class="job-complete-note">This asks the homeowner to rate you — good ratings win you more jobs.</div>' : '') +
+          unreachableBlock +
           '</div>';
       });
     }
 
     body.innerHTML = html;
+  }
+
+  // Contractor marks a confirmed job completed -> homeowner gets a rating request.
+  async function completeJob(jobId, btn) {
+    if (btn) { btn.disabled = true; btn.textContent = 'Marking…'; }
+    try {
+      const r = await fetch(API + '/complete-job', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken},
+        body: JSON.stringify({ jobId })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        toast('Marked complete — we\u2019ve asked the homeowner to rate you.', 'ok');
+        await loadJobs();
+      } else if (d.error === 'not_confirmed') {
+        toast('This job isn\u2019t ready to complete yet.', 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Mark job completed'; }
+      } else {
+        toast('Could not mark complete. Try again.', 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Mark job completed'; }
+      }
+    } catch {
+      toast('Something went wrong. Try again.', 'err');
+      if (btn) { btn.disabled = false; btn.textContent = 'Mark job completed'; }
+    }
+  }
+
+  // Report a confirmed homeowner as unreachable -> refund the job fee (within monthly limit).
+  async function reportUnreachable(jobId, btn) {
+    if (!confirm('Report that you could not reach this homeowner? If approved, your job fee is refunded. This is limited to a few per month — repeated reports pause your account for review.')) return;
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+    try {
+      const r = await fetch(API + '/report-unreachable', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken},
+        body: JSON.stringify({ jobId })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        const dollars = d.refundedCents ? '$' + (d.refundedCents/100).toFixed(2) : 'your job fee';
+        toast('Refund issued — ' + dollars + ' is on its way back to your card.', 'ok');
+        await loadJobs();
+      } else if (d.error === 'cooldown') {
+        toast('You can request this in about ' + (d.hoursLeft||24) + 'h if you still can\u2019t reach them.', 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Couldn\u2019t reach this homeowner'; }
+      } else if (d.error === 'fraud_pause') {
+        toast('Your account is now under review for repeated unreachable reports.', 'err');
+        await loadDashboard();
+      } else if (d.error === 'already_reported') {
+        toast('This job was already reported.', 'err');
+        await loadJobs();
+      } else if (d.error === 'refund_failed') {
+        toast('The refund couldn\u2019t be processed. Please contact support.', 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Couldn\u2019t reach this homeowner'; }
+      } else {
+        toast('Could not process that request.', 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Couldn\u2019t reach this homeowner'; }
+      }
+    } catch {
+      toast('Something went wrong. Try again.', 'err');
+      if (btn) { btn.disabled = false; btn.textContent = 'Couldn\u2019t reach this homeowner'; }
+    }
   }
 
   async function claimJobLead(jobId, btn) {
