@@ -814,13 +814,15 @@
     document.getElementById('topbar-right').innerHTML = '<span class="co"><b>' + escapeHtml(subscriber.company||subscriber.email) + '</b></span> <a href="#" onclick="logout();return false;">Sign out</a>';
     document.getElementById('map-state-meta').innerHTML = '<b>' + subscriber.state + '</b>';
 
-    const storms = (subscriber.alertHistory||[]).filter(a => { const d=new Date(a.sentAt||0); const now=new Date(); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); }).length;
-    const hh = hhTotal(myZips).toLocaleString();
+    // The stats tell the money story: what we've sent, what they've won, and the value —
+    // not vanity metrics like household counts. Counts come from the backend jobStats.
+    const js = subscriber.jobStats || { sent: 0, won: 0, valueWon: 0, open: 0 };
+    const valueStr = js.valueWon >= 1000 ? '$' + (js.valueWon/1000).toFixed(js.valueWon >= 10000 ? 0 : 1) + 'k' : '$' + (js.valueWon||0).toLocaleString();
     document.getElementById('stats').innerHTML =
-      '<div class="stat ' + (myZips.size>=cap?'warn':'') + '"><div class="v">' + myZips.size + '<span class="of"> / ' + cap + '</span></div><div class="k">ZIPs claimed</div></div>' +
-      '<div class="stat"><div class="v">' + storms + '</div><div class="k">Storms this month</div></div>' +
-      '<div class="stat"><div class="v">~' + hh + '</div><div class="k">Households watched</div></div>' +
-      '<div class="stat"><div class="v" style="font-size:18px;color:var(--moss-light);display:flex;align-items:center;"><span class="live-dot"></span>Live</div><div class="k">Monitoring active</div></div>';
+      '<div class="stat"><div class="v">' + (js.sent||0) + '</div><div class="k">Jobs sent to you</div></div>' +
+      '<div class="stat"><div class="v">' + (js.won||0) + '</div><div class="k">Jobs won</div></div>' +
+      '<div class="stat"><div class="v">' + valueStr + '</div><div class="k">Est. value won</div></div>' +
+      '<div class="stat ' + (myZips.size>=cap?'warn':'') + '"><div class="v">' + myZips.size + '<span class="of"> / ' + cap + '</span></div><div class="k">ZIPs claimed</div></div>';
 
     renderCoverage();
     renderPlan();
@@ -1804,10 +1806,14 @@
     if (wasEmpty && myZips.size === 1) drawRadius();
     renderCoverage();
     const cap2 = subscriber.zipCap || 4;
+    // ZIPs-claimed is the last stat in the reframed row; update it live as ZIPs are toggled
     const statEls = document.querySelectorAll('.stat');
-    statEls[0].querySelector('.v').innerHTML = myZips.size + '<span class="of"> / ' + cap2 + '</span>';
-    statEls[0].classList.toggle('warn', myZips.size>=cap2);
-    statEls[2].querySelector('.v').textContent = '~' + hhTotal(myZips).toLocaleString();
+    const zipStat = statEls[statEls.length - 1];
+    if (zipStat) {
+      const v = zipStat.querySelector('.v');
+      if (v) v.innerHTML = myZips.size + '<span class="of"> / ' + cap2 + '</span>';
+      zipStat.classList.toggle('warn', myZips.size >= cap2);
+    }
     renderValue();
     renderCert();
     renderNudge();
