@@ -117,6 +117,29 @@
 
   .wrap { max-width: 1240px; margin: 0 auto; padding: 26px 32px 60px; }
   .layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+
+  /* ---------- jobs hero (full-width, top of page when a job exists) ---------- */
+  #jobs-hero:empty { display: none; }
+  #jobs-hero { margin-bottom: 24px; }
+  .jobs-hero-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .jobs-hero-head .jh-eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--ember); }
+  .jobs-hero-head .jh-count { font-size: 12px; color: var(--muted); }
+  .jobs-hero-head .jh-rule { flex: 1; height: 1px; background: var(--line); }
+  /* the two-panel jobcard now has the full page width to breathe */
+  #jobs-hero .jc-body { grid-template-columns: 1.6fr 1fr; }
+  #jobs-hero .jc-title { font-size: 24px; }
+  #jobs-hero .jc-facts { grid-template-columns: repeat(4, 1fr); }
+  #jobs-hero .jc-photo { width: 92px; height: 92px; }
+
+  /* ---------- state-responsive: map is the centerpiece when quiet, supporting when a job is live ---------- */
+  /* default (no active job): map spans full width, sidebar cards flow in a tidy grid below it */
+  .layout:not(.has-active-job) { grid-template-columns: 1fr; }
+  .layout:not(.has-active-job) #map-card { grid-column: 1 / -1; }
+  .layout:not(.has-active-job) #map { height: 500px; }
+  .layout:not(.has-active-job) > div:last-child { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start; }
+  .layout:not(.has-active-job) > div:last-child .side-card { margin-bottom: 0; }
+  /* when a job IS live, the hero owns the top; map + sidebar return to the two-column working layout */
+  .layout.has-active-job #map { height: 460px; }
   @media (max-width: 920px) {
     .layout { grid-template-columns: 1fr; gap: 16px; }
   }
@@ -530,8 +553,11 @@
   </div>
 
   <div class="wrap">
-    <div class="layout">
-      <div class="card">
+    <!-- JOBS HERO — when a job is offered/pending, it takes the full width up top (the hero) -->
+    <div id="jobs-hero"></div>
+
+    <div class="layout" id="dash-layout">
+      <div class="card" id="map-card">
         <div class="card-head">
           <h2>Your territory map</h2>
           <div class="meta" id="map-state-meta"></div>
@@ -546,10 +572,10 @@
       </div>
 
       <div>
-        <!-- DIRECT JOBS — homeowner-submitted leads routed to your territory (top priority: paying work) -->
+        <!-- DIRECT JOBS (sidebar) — now only holds "your jobs" (taken/confirmed); offered+pending render in the hero -->
         <div class="card side-card" id="jobs-card" style="display:none;">
           <div class="card-head">
-            <h2>Direct jobs</h2>
+            <h2>Your jobs</h2>
             <div class="meta" id="jobs-meta"></div>
           </div>
           <div class="jobs-body" id="jobs-body"></div>
@@ -1297,30 +1323,33 @@
     const card = document.getElementById('jobs-card');
     const body = document.getElementById('jobs-body');
     const meta = document.getElementById('jobs-meta');
+    const hero = document.getElementById('jobs-hero');
+    const layout = document.getElementById('dash-layout');
     if (!card || !body) return;
     const { pending, offered, working } = jobsData;
-    const total = pending.length + offered.length + working.length;
-    if (!total) {
-      // keep the panel hidden entirely when there's nothing — storm alerts already carry the "all quiet" message
-      card.style.display = 'none';
-      return;
-    }
-    card.style.display = 'block';
-    const actionable = pending.length + offered.length;
-    meta.innerHTML = actionable ? '<b>' + actionable + '</b> waiting on you' : working.length + ' in progress';
 
-    let html = '';
+    // ----- HERO: offered + pending jobs render full-width at the top of the page -----
+    const heroJobs = offered.length + pending.length;
+    let heroHtml = '';
+    if (heroJobs && hero) {
+      heroHtml += '<div class="jobs-hero-head"><span class="jh-eyebrow">' +
+        (heroJobs === 1 ? 'Job waiting on you' : heroJobs + ' jobs waiting on you') + '</span>' +
+        '<span class="jh-count">' + (offered.length ? offered.length + ' offered' : '') +
+        (offered.length && pending.length ? ' · ' : '') +
+        (pending.length ? pending.length + ' in your territory' : '') + '</span><span class="jh-rule"></span></div>';
+    }
+
+    let html = ''; // sidebar html (working jobs)
 
     // OFFERED — the one job offered to you right now; set a price to take it, or pass (rolls to next crew)
     if (offered.length) {
-      html += '<div class="jobs-section-label">Offered to you now</div>';
       offered.forEach(j => {
         const left = offerWindowLeft(j.offeredAt);
         const pct = offerWindowPct(j.offeredAt);
         const headline = (j.jobType && JOB_TYPE_LABELS[j.jobType]) || 'Tree job';
         const isEmergency = j.urgency === 'emergency';
         const where = (j.community || j.city) ? escapeHtml(j.community || j.city) + ' · ZIP ' + escapeHtml(j.zip) : 'ZIP ' + escapeHtml(j.zip);
-        html += '<div class="jobcard' + (isEmergency ? ' hot' : '') + '">' +
+        heroHtml += '<div class="jobcard' + (isEmergency ? ' hot' : '') + '">' +
           // status ribbon with circular timer
           '<div class="jc-ribbon' + (isEmergency ? ' hot' : '') + '">' +
             '<div class="jc-status">' + (isEmergency ? '<span class="jc-badge emergency">⚡ Emergency</span>' : '<span class="jc-badge offered">Offered</span>') + ' Offered to you</div>' +
@@ -1351,13 +1380,12 @@
 
     // PENDING — in your territory, yours first (owner-exclusive claim)
     if (pending.length) {
-      html += '<div class="jobs-section-label">In your territory — yours first</div>';
       pending.forEach(j => {
         const left = claimWindowLeft(j.createdAt);
         const headline = (j.jobType && JOB_TYPE_LABELS[j.jobType]) || 'Tree job';
         const isEmergency = j.urgency === 'emergency';
         const where = (j.community || j.city) ? escapeHtml(j.community || j.city) + ' · ZIP ' + escapeHtml(j.zip) : 'ZIP ' + escapeHtml(j.zip);
-        html += '<div class="jobcard jobcard-yours' + (isEmergency ? ' hot' : '') + '">' +
+        heroHtml += '<div class="jobcard jobcard-yours' + (isEmergency ? ' hot' : '') + '">' +
           '<div class="jc-ribbon' + (isEmergency ? ' hot' : ' yours') + '">' +
             '<div class="jc-status">' + (isEmergency ? '<span class="jc-badge emergency">⚡ Emergency</span>' : '<span class="jc-badge yours">Yours first</span>') + ' In your territory</div>' +
             (left ? '<div class="jc-timer"><span>' + left + ' before it opens to nearby crews</span></div>' : '') +
@@ -1382,9 +1410,8 @@
     }
 
     // WORKING — jobs you took. 'taken' = waiting on the homeowner to confirm (no contact yet);
-    // 'confirmed' = homeowner confirmed + fee cleared, contact revealed.
+    // 'confirmed' = homeowner confirmed + fee cleared, contact revealed. These stay in the sidebar.
     if (working.length) {
-      html += '<div class="jobs-section-label">Your jobs</div>';
       working.forEach(j => {
         const confirmed = j.status === 'confirmed';
         // the "couldn't reach" refund button unlocks 24h after confirmation
@@ -1420,7 +1447,21 @@
       });
     }
 
-    body.innerHTML = html;
+    // ----- write the hero (offered/pending, full-width top) -----
+    if (hero) { hero.innerHTML = heroHtml; }
+    // when a hero job exists, shrink the map to a supporting sidebar-height role;
+    // when quiet, the map gets the full width and stands as the centerpiece.
+    if (layout) { layout.classList.toggle('has-active-job', heroJobs > 0); }
+
+    // ----- sidebar "Your jobs" card only shows when there are working jobs -----
+    if (working.length) {
+      card.style.display = 'block';
+      meta.innerHTML = working.length + ' in progress';
+      body.innerHTML = html;
+    } else {
+      card.style.display = 'none';
+      body.innerHTML = '';
+    }
   }
 
   // Contractor marks a confirmed job completed -> homeowner gets a rating request.
