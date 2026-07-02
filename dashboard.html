@@ -94,6 +94,23 @@
   .season-dot.peak { background: var(--ember); } .season-dot.off { background: var(--muted-2); }
   .season-txt { font-size: 12.5px; color: var(--muted); } .season-txt b { color: var(--bark); }
 
+  /* ---------- your pipeline (job funnel) ---------- */
+  .pipeline-body { padding: 18px 20px; }
+  .pipe-stage { margin-bottom: 14px; }
+  .pipe-stage:last-of-type { margin-bottom: 0; }
+  .pipe-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+  .pipe-label { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .pipe-num { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; color: var(--bark); letter-spacing: -0.3px; }
+  .pipe-bar { height: 8px; background: var(--paper-2); border-radius: 4px; overflow: hidden; }
+  .pipe-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+  .pipe-fill.sent { background: linear-gradient(90deg, var(--muted-2), var(--bark-soft)); }
+  .pipe-fill.open { background: linear-gradient(90deg, var(--gold), #d4a24a); }
+  .pipe-fill.won { background: linear-gradient(90deg, var(--moss), var(--moss-light)); }
+  .pipe-value { margin-top: 16px; padding-top: 15px; border-top: 1px solid var(--line-soft); text-align: center; }
+  .pv-amt { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: var(--moss); letter-spacing: -1px; line-height: 1; }
+  .pv-label { font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .pipe-hint { margin-top: 14px; font-size: 12px; color: var(--muted); line-height: 1.5; background: rgba(184,134,47,0.06); border: 1px solid rgba(184,134,47,0.18); border-radius: 5px; padding: 10px 12px; }
+
   /* recent storms list — wind front and center */
   .recent-storms { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
   .rs-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
@@ -633,6 +650,12 @@
         </div>
 
         <!-- TERRITORY ACTIVITY: storm history + season -->
+        <!-- YOUR PIPELINE — the job funnel (sent -> in progress -> won), the contractor's ROI story -->
+        <div class="card side-card" id="pipeline-card" style="display:none;">
+          <div class="card-head"><h2>Your pipeline</h2><div class="meta" id="pipeline-meta"></div></div>
+          <div class="pipeline-body" id="pipeline-body"></div>
+        </div>
+
         <div class="card side-card" id="activity-card" style="display:none;">
           <div class="card-head"><h2>Territory activity</h2></div>
           <div class="activity-body">
@@ -835,6 +858,7 @@
     renderLiveConditions();
     renderCancelBanner();
     renderSysStatus();
+    renderPipeline();
     renderActivity();
     loadJobs();
   }
@@ -846,6 +870,43 @@
     el.style.display='flex';
     const hh = hhTotal(myZips).toLocaleString();
     el.innerHTML = '<span class="dot"></span>Actively monitoring <b>' + hh + ' households</b> across <b>' + myZips.size + ' ZIP' + (myZips.size===1?'':'s') + '</b> &middot; checking NWS storm feeds every few minutes &middot; last swept just now';
+  }
+
+  // ---------- your pipeline: the job funnel (sent -> in progress -> won) ----------
+  function renderPipeline() {
+    const card = document.getElementById('pipeline-card');
+    const body = document.getElementById('pipeline-body');
+    const meta = document.getElementById('pipeline-meta');
+    if (!card || !body) return;
+    const js = subscriber.jobStats || { sent: 0, won: 0, valueWon: 0, open: 0 };
+    // hide the panel entirely until at least one job has reached this contractor —
+    // an empty funnel is discouraging and says nothing
+    if (!js.sent) { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+
+    const sent = js.sent || 0, won = js.won || 0, open = js.open || 0;
+    const winRate = sent > 0 ? Math.round((won / sent) * 100) : 0;
+    const valueStr = js.valueWon >= 1000 ? '$' + (js.valueWon/1000).toFixed(js.valueWon >= 10000 ? 0 : 1) + 'k' : '$' + (js.valueWon||0).toLocaleString();
+    meta.innerHTML = won ? '<b>' + winRate + '%</b> win rate' : '';
+
+    // three funnel stages, bar widths relative to "sent"
+    const openPct = sent > 0 ? Math.max(8, Math.round((open / sent) * 100)) : 0;
+    const wonPct = sent > 0 ? Math.max(won ? 8 : 0, Math.round((won / sent) * 100)) : 0;
+    body.innerHTML =
+      '<div class="pipe-stage">' +
+        '<div class="pipe-row"><span class="pipe-label">Sent to you</span><span class="pipe-num">' + sent + '</span></div>' +
+        '<div class="pipe-bar"><div class="pipe-fill sent" style="width:100%"></div></div>' +
+      '</div>' +
+      '<div class="pipe-stage">' +
+        '<div class="pipe-row"><span class="pipe-label">In progress</span><span class="pipe-num">' + open + '</span></div>' +
+        '<div class="pipe-bar"><div class="pipe-fill open" style="width:' + openPct + '%"></div></div>' +
+      '</div>' +
+      '<div class="pipe-stage">' +
+        '<div class="pipe-row"><span class="pipe-label">Won</span><span class="pipe-num">' + won + '</span></div>' +
+        '<div class="pipe-bar"><div class="pipe-fill won" style="width:' + wonPct + '%"></div></div>' +
+      '</div>' +
+      '<div class="pipe-value"><div class="pv-amt">' + valueStr + '</div><div class="pv-label">in tree work won through TreeStorm</div></div>' +
+      (won === 0 && open > 0 ? '<div class="pipe-hint">You\u2019ve got ' + open + ' job' + (open===1?'':'s') + ' in progress — confirmed wins show here once the homeowner confirms you.</div>' : '');
   }
 
   // ---------- territory activity: storm history + season ----------
