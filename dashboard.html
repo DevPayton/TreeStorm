@@ -206,8 +206,9 @@
   .plan-badge { display: inline-block; background: var(--ink); color: var(--paper); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 4px 11px; border-radius: 3px; }
   .plan-badge.pro { background: var(--ember); }
   .plan-badge.empire { background: var(--gold); }
-  .upgrade-link { display: block; text-align: center; margin-top: 14px; font-size: 13.5px; color: var(--ember-deep); text-decoration: none; font-weight: 600; padding: 11px; border: 1.5px dashed var(--line); border-radius: 3px; transition: border-color 0.15s, background 0.15s; }
+  .upgrade-link { display: block; width: 100%; text-align: center; margin-top: 14px; font-size: 13.5px; color: var(--ember-deep); text-decoration: none; font-weight: 600; padding: 11px; border: 1.5px dashed var(--line); border-radius: 3px; transition: border-color 0.15s, background 0.15s; background: none; cursor: pointer; font-family: inherit; }
   .upgrade-link:hover { border-color: var(--ember); background: rgba(200,83,27,0.04); }
+  .upgrade-link:disabled { opacity: 0.6; cursor: wait; }
 
   .account-actions { display: flex; flex-direction: column; gap: 2px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
   .acct-link { background: none; border: none; text-align: left; padding: 7px 0; font-size: 13px; color: var(--muted); cursor: pointer; font-family: inherit; transition: color 0.15s; }
@@ -295,6 +296,58 @@
   .job-pass:disabled { opacity: 0.55; cursor: not-allowed; }
   .job-fee-note { font-size: 11.5px; color: var(--muted); margin-top: 8px; line-height: 1.4; text-align: center; }
   .job-waiting-note { font-size: 12.5px; color: var(--muted); line-height: 1.5; padding: 10px 12px; background: rgba(184,134,47,0.06); border: 1px solid rgba(184,134,47,0.2); border-radius: 4px; }
+
+  /* ---------- two-panel job card (matches redesign mockup) ---------- */
+  .jobcard { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(43,33,24,0.04); margin-bottom: 14px; }
+  .jobcard:last-child { margin-bottom: 0; }
+  .jobcard.hot { border-color: var(--danger-soft); }
+  .jc-ribbon { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 18px; background: var(--paper-2); border-bottom: 1px solid var(--line); }
+  .jc-ribbon.hot { background: linear-gradient(90deg, rgba(178,58,46,0.12), rgba(178,58,46,0.03)); }
+  .jc-ribbon.yours { background: linear-gradient(90deg, rgba(62,82,53,0.1), transparent); }
+  .jc-status { display: flex; align-items: center; gap: 9px; font-size: 12.5px; font-weight: 700; color: var(--bark); }
+  .jc-badge { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .jc-badge.offered { background: var(--ember); color: #fff; }
+  .jc-badge.emergency { background: var(--danger); color: #fff; }
+  .jc-badge.yours { background: var(--moss); color: #fff; }
+  .jc-timer { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ember-deep); font-weight: 600; white-space: nowrap; }
+  .jc-ring { width: 16px; height: 16px; flex-shrink: 0; }
+  .jc-body { display: grid; grid-template-columns: 1.5fr 1fr; }
+  .jc-main { padding: 18px 20px; min-width: 0; }
+  .jc-side { padding: 18px 20px; border-left: 1px solid var(--line-soft); background: #FCFAF6; }
+  .jc-title { font-family: 'Fraunces', serif; font-size: 21px; font-weight: 600; color: var(--bark); line-height: 1.15; letter-spacing: -0.4px; }
+  .jc-where { font-size: 12.5px; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 6px; }
+  .jc-where .pin { color: var(--ember); font-size: 9px; }
+  .jc-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); border-radius: 7px; overflow: hidden; margin: 15px 0; }
+  .jc-fact { background: #fff; padding: 9px 12px; }
+  .jc-fact .fk { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted-2); font-weight: 600; }
+  .jc-fact .fv { font-size: 13.5px; font-weight: 600; color: var(--bark); margin-top: 2px; }
+  .jc-fact.hazard .fv { color: var(--danger); }
+  .jc-note { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; margin: 15px 0; }
+  .jc-note .nk { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted-2); font-weight: 600; margin-bottom: 3px; }
+  .jc-note .nv { font-size: 13.5px; color: var(--bark-soft); font-style: italic; line-height: 1.5; }
+  .jc-photos { display: flex; gap: 8px; flex-wrap: wrap; }
+  .jc-photo { width: 84px; height: 84px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); cursor: pointer; transition: transform 0.12s; display: block; }
+  .jc-photo:hover { transform: scale(1.04); }
+  .jc-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .jc-side-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 700; }
+  .jc-claim-note { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin: 8px 0 4px; }
+  .jc-price-wrap { display: flex; align-items: stretch; margin: 10px 0 5px; border: 1.5px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+  .jc-price-wrap:focus-within { border-color: var(--ember); }
+  .jc-dollar { display: flex; align-items: center; padding: 0 12px; background: var(--paper-2); font-weight: 700; color: var(--bark); font-size: 16px; }
+  .jc-price { flex: 1; border: none; padding: 12px; font-size: 16px; font-family: inherit; outline: none; min-width: 0; }
+  .jc-take { width: 100%; background: var(--ember); color: #fff; border: none; padding: 13px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; font-family: inherit; transition: background 0.15s; }
+  .jc-take:hover { background: var(--ember-deep); }
+  .jc-take:disabled { opacity: 0.6; cursor: wait; }
+  .jc-pass { width: 100%; background: none; border: 1.5px solid var(--line); color: var(--muted); padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 9px; font-family: inherit; }
+  .jc-pass:hover { border-color: var(--muted); color: var(--bark); }
+  .jc-reassure { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
+  .jc-reassure b { color: var(--bark); }
+  @media (max-width: 720px) {
+    .jc-body { grid-template-columns: 1fr; }
+    .jc-side { border-left: none; border-top: 1px solid var(--line-soft); }
+    .jc-title { font-size: 19px; }
+    .jc-photo { width: 72px; height: 72px; }
+  }
 
   /* ---------- redesigned job card ---------- */
   .job-card-offered { background: linear-gradient(180deg, rgba(200,83,27,0.06), transparent 55%); border-left: 3px solid var(--ember); }
@@ -538,7 +591,7 @@
             <div class="plan-row"><span class="lbl">Plan</span><span class="val"><span class="plan-badge" id="plan-badge">&mdash;</span></span></div>
             <div class="plan-row"><span class="lbl">ZIP allowance</span><span class="val" id="plan-allow">&mdash;</span></div>
             <div class="plan-row"><span class="lbl">Monitoring</span><span class="val" style="color:var(--moss-light);"><span class="live-dot"></span>Active 24/7</span></div>
-            <a class="upgrade-link" id="upgrade-link" href="#">Need more ZIPs? Upgrade your plan &rarr;</a>
+            <button class="upgrade-link" id="upgrade-link" onclick="openBillingPortal(this)">Manage plan &amp; billing &rarr;</button>
             <div id="cancel-banner" style="display:none;"></div>
             <div class="account-actions">
               <button class="acct-link" onclick="openChangeHome()">Change home base</button>
@@ -1055,8 +1108,20 @@
     badge.textContent = tname; badge.className = 'plan-badge ' + (tk==='pro'?'pro':tk==='empire'?'empire':'');
     document.getElementById('plan-allow').textContent = 'Up to ' + cap + ' ZIPs';
     const up = document.getElementById('upgrade-link');
-    if (tk === 'empire') { up.style.display='none'; }
-    else { up.textContent = tk==='starter' ? 'Need more ground? See Pro & Empire →' : 'Ready to go regional? See Empire →'; up.href = 'https://treestormleads.com/#pricing'; }
+    if (up) { up.textContent = 'Manage plan & billing →'; }
+  }
+
+  // Open the Stripe billing portal — the contractor manages plan, card, invoices, and cancellation there.
+  async function openBillingPortal(btn) {
+    if (btn) { btn.disabled = true; btn.textContent = 'Opening…'; }
+    try {
+      const r = await fetch(API + '/create-portal-session', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionToken}, body:'{}' });
+      const d = await r.json();
+      if (d.ok && d.url) { window.location.href = d.url; return; }
+      if (d.error === 'no_customer') toast('No billing account found yet. Contact support if this persists.', 'err');
+      else toast('Could not open billing. Try again in a moment.', 'err');
+    } catch { toast('Could not open billing. Try again.', 'err'); }
+    if (btn) { btn.disabled = false; btn.textContent = 'Manage plan & billing →'; }
   }
 
   function renderAlerts() {
@@ -1153,6 +1218,44 @@
     const left = 3*3600*1000 - (Date.now() - new Date(iso).getTime());
     return Math.max(0, Math.min(100, (left / (3*3600*1000)) * 100));
   }
+  // a small circular countdown ring (SVG) — pct is 0..100 of time remaining
+  function timerRing(pct) {
+    const C = 94; // circumference for r=15
+    const off = C * (1 - Math.max(0, Math.min(100, pct)) / 100);
+    return '<svg class="jc-ring" viewBox="0 0 36 36" aria-hidden="true">' +
+      '<circle cx="18" cy="18" r="15" fill="none" stroke="var(--line)" stroke-width="4"></circle>' +
+      '<circle cx="18" cy="18" r="15" fill="none" stroke="var(--ember)" stroke-width="4" stroke-linecap="round" ' +
+      'stroke-dasharray="' + C + '" stroke-dashoffset="' + off.toFixed(1) + '" transform="rotate(-90 18 18)"></circle></svg>';
+  }
+  // the fact grid: the things that actually affect a quote + safety (no household noise)
+  function jobFactGrid(j) {
+    const facts = [];
+    if (j.treeSize && SIZE_LABELS[j.treeSize]) facts.push(['Tree size', SIZE_LABELS[j.treeSize], false]);
+    // proximity to structures/lines is the hazard signal
+    if (j.proximity && PROXIMITY_LABELS[j.proximity]) {
+      const hazard = /power|line|structure|house|roof|building/i.test(PROXIMITY_LABELS[j.proximity]);
+      facts.push([hazard ? 'Hazard' : 'Proximity', (hazard ? '⚠ ' : '') + PROXIMITY_LABELS[j.proximity], hazard]);
+    }
+    if (j.jobType && JOB_TYPE_LABELS[j.jobType]) facts.push(['Job type', JOB_TYPE_LABELS[j.jobType], false]);
+    const when = jobWhen(j.createdAt);
+    if (when) facts.push(['Received', when, false]);
+    if (!facts.length) return '';
+    return '<div class="jc-facts">' + facts.map(f =>
+      '<div class="jc-fact' + (f[2] ? ' hazard' : '') + '"><div class="fk">' + escapeHtml(f[0]) + '</div><div class="fv">' + escapeHtml(f[1]) + '</div></div>'
+    ).join('') + '</div>';
+  }
+  // framed homeowner note (styled as a quote, not a bare string)
+  function jobNote(j) {
+    if (!j.description) return '';
+    return '<div class="jc-note"><div class="nk">Homeowner\u2019s note</div><div class="nv">\u201c' + escapeHtml(j.description) + '\u201d</div></div>';
+  }
+  // larger photos for the two-panel card
+  function jobPhotosLg(j) {
+    if (!Array.isArray(j.photos) || !j.photos.length) return '';
+    return '<div class="jc-photos">' + j.photos.slice(0,4).map(src =>
+      '<a href="' + src + '" target="_blank" rel="noopener" class="jc-photo"><img src="' + src + '" alt="job photo" loading="lazy"></a>'
+    ).join('') + '</div>';
+  }
 
   async function loadJobs() {
     try {
@@ -1216,28 +1319,32 @@
         const pct = offerWindowPct(j.offeredAt);
         const headline = (j.jobType && JOB_TYPE_LABELS[j.jobType]) || 'Tree job';
         const isEmergency = j.urgency === 'emergency';
-        html += '<div class="job-card job-card-offered">' +
-          // headline row: the job type is the headline, urgency flag if hot
-          '<div class="joh"><div class="joh-main"><div class="joh-title">' + escapeHtml(headline) + '</div>' +
-            '<div class="joh-loc">ZIP ' + escapeHtml(j.zip) + zipContext(j.zip) + '</div></div>' +
-            (isEmergency ? '<span class="joh-flag">&#9889; Emergency</span>' : '<span class="joh-tag">Offered</span>') + '</div>' +
-          // detail chips (size, proximity, urgency-if-not-emergency)
-          jobDetailChips(j) +
-          // homeowner's description
-          (j.description ? '<div class="job-desc">' + escapeHtml(j.description) + '</div>' : '') +
-          // photos, larger
-          jobPhotos(j) +
-          // countdown timer bar
-          (left ? '<div class="job-timer"><div class="jt-bar"><div class="jt-fill" style="width:' + pct + '%"></div></div>' +
-            '<div class="jt-label">' + left + ' left before it rolls to the next-nearest crew</div></div>' : '') +
-          // price + take
-          '<div class="job-take"><span class="jt-dollar">$</span>' +
-            '<input type="number" min="1" step="1" class="job-price" id="price-' + escapeHtml(j.id) + '" placeholder="Your starting estimate" inputmode="numeric">' +
-            '<button class="job-claim pool" onclick="takeJobLead(\'' + escapeHtml(j.id) + '\',this)">Take job</button>' +
+        const where = (j.community || j.city) ? escapeHtml(j.community || j.city) + ' · ZIP ' + escapeHtml(j.zip) : 'ZIP ' + escapeHtml(j.zip);
+        html += '<div class="jobcard' + (isEmergency ? ' hot' : '') + '">' +
+          // status ribbon with circular timer
+          '<div class="jc-ribbon' + (isEmergency ? ' hot' : '') + '">' +
+            '<div class="jc-status">' + (isEmergency ? '<span class="jc-badge emergency">⚡ Emergency</span>' : '<span class="jc-badge offered">Offered</span>') + ' Offered to you</div>' +
+            (left ? '<div class="jc-timer">' + timerRing(pct) + '<span>' + left + ' left</span></div>' : '') +
           '</div>' +
-          '<button class="job-pass" onclick="passJobLead(\'' + escapeHtml(j.id) + '\',this)">Pass — not for me</button>' +
-          // fee note + territory reassurance
-          '<div class="job-fee-note">You\u2019re only charged the $45 job fee if the homeowner confirms <b>you</b>. Pass and this one job goes to the next-nearest crew for this address — your territory and your other leads aren\u2019t affected.</div>' +
+          '<div class="jc-body">' +
+            // left: the details
+            '<div class="jc-main">' +
+              '<div class="jc-title">' + escapeHtml(headline) + '</div>' +
+              '<div class="jc-where"><span class="pin">●</span> ' + where + '</div>' +
+              jobFactGrid(j) +
+              jobNote(j) +
+              jobPhotosLg(j) +
+            '</div>' +
+            // right: the take action
+            '<div class="jc-side">' +
+              '<div class="jc-side-label">Your starting estimate</div>' +
+              '<div class="jc-price-wrap"><span class="jc-dollar">$</span>' +
+                '<input type="number" min="1" step="1" class="jc-price" id="price-' + escapeHtml(j.id) + '" placeholder="0" inputmode="numeric"></div>' +
+              '<button class="jc-take" onclick="takeJobLead(\'' + escapeHtml(j.id) + '\',this)">Take this job</button>' +
+              '<button class="jc-pass" onclick="passJobLead(\'' + escapeHtml(j.id) + '\',this)">Pass — not for me</button>' +
+              '<div class="jc-reassure">You\u2019re only charged the <b>$45 job fee if the homeowner confirms you</b>. Pass and this one job goes to the next-nearest crew for this address — <b>your territory and other leads aren\u2019t affected.</b></div>' +
+            '</div>' +
+          '</div>' +
           '</div>';
       });
     }
@@ -1249,16 +1356,27 @@
         const left = claimWindowLeft(j.createdAt);
         const headline = (j.jobType && JOB_TYPE_LABELS[j.jobType]) || 'Tree job';
         const isEmergency = j.urgency === 'emergency';
-        html += '<div class="job-card job-card-yours">' +
-          '<div class="joh"><div class="joh-main"><div class="joh-title">' + escapeHtml(headline) + '</div>' +
-            '<div class="joh-loc">ZIP ' + escapeHtml(j.zip) + zipContext(j.zip) + '</div></div>' +
-            (isEmergency ? '<span class="joh-flag">&#9889; Emergency</span>' : '<span class="joh-tag yours">Yours first</span>') + '</div>' +
-          jobDetailChips(j) +
-          (j.description ? '<div class="job-desc">' + escapeHtml(j.description) + '</div>' : '') +
-          jobPhotos(j) +
-          (left ? '<div class="job-countdown">' + left + ' left before it opens to nearby crews</div>' : '') +
-          '<div class="job-actions"><button class="job-claim" onclick="claimJobLead(\'' + escapeHtml(j.id) + '\',this)">Claim this job</button>' +
-          '<button class="job-decline" onclick="declineJobLead(\'' + escapeHtml(j.id) + '\',this)">Decline</button></div>' +
+        const where = (j.community || j.city) ? escapeHtml(j.community || j.city) + ' · ZIP ' + escapeHtml(j.zip) : 'ZIP ' + escapeHtml(j.zip);
+        html += '<div class="jobcard jobcard-yours' + (isEmergency ? ' hot' : '') + '">' +
+          '<div class="jc-ribbon' + (isEmergency ? ' hot' : ' yours') + '">' +
+            '<div class="jc-status">' + (isEmergency ? '<span class="jc-badge emergency">⚡ Emergency</span>' : '<span class="jc-badge yours">Yours first</span>') + ' In your territory</div>' +
+            (left ? '<div class="jc-timer"><span>' + left + ' before it opens to nearby crews</span></div>' : '') +
+          '</div>' +
+          '<div class="jc-body">' +
+            '<div class="jc-main">' +
+              '<div class="jc-title">' + escapeHtml(headline) + '</div>' +
+              '<div class="jc-where"><span class="pin">●</span> ' + where + '</div>' +
+              jobFactGrid(j) +
+              jobNote(j) +
+              jobPhotosLg(j) +
+            '</div>' +
+            '<div class="jc-side">' +
+              '<div class="jc-side-label">Claim this job first</div>' +
+              '<div class="jc-claim-note">This job is in your territory — it\u2019s yours before any other crew. Claim it to lock it in.</div>' +
+              '<button class="jc-take" onclick="claimJobLead(\'' + escapeHtml(j.id) + '\',this)">Claim this job</button>' +
+              '<button class="jc-pass" onclick="declineJobLead(\'' + escapeHtml(j.id) + '\',this)">Decline</button>' +
+            '</div>' +
+          '</div>' +
           '</div>';
       });
     }
