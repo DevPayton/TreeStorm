@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Get a Local Tree Pro — TreeStorm Leads</title>
-<meta name="description" content="Storm damage or a tree that needs to come down? Tell us what you need and we'll connect you with a vetted local tree-service pro who covers your area.">
+<title>Storm Damage? Get a Vetted Local Tree Crew — TreeStorm</title>
+<meta name="description" content="Tree down from the storm? Get a vetted, insured local tree crew out fast. Tell us what happened — no fee to you.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -22,151 +22,184 @@
   body { font-family: 'Inter', system-ui, sans-serif; background: var(--paper); color: var(--ink); line-height: 1.5; -webkit-font-smoothing: antialiased; }
   .serif { font-family: 'Fraunces', Georgia, serif; }
 
-  .topbar { display: flex; justify-content: center; align-items: center; padding: 16px 24px; background: var(--ink); color: var(--paper); border-bottom: 3px solid var(--ember); }
-  .brand { font-weight: 700; font-size: 17px; letter-spacing: -0.3px; display: flex; align-items: center; gap: 9px; }
-  .brand .mk { color: var(--ember); font-size: 19px; }
+  .demo-bar { background:#14100d; color:#fff; padding:9px 16px; font-size:12.5px; text-align:center; border-bottom:2px solid var(--ember); }
+  .demo-bar b { color: var(--ember-glow); }
+
+  .topbar { display: flex; justify-content: center; align-items: center; padding: 14px 24px; background: var(--ink); color: var(--paper); border-bottom: 3px solid var(--ember); }
+  .brand { font-weight: 700; font-size: 16px; letter-spacing: -0.3px; display: flex; align-items: center; gap: 9px; }
+  .brand .mk { color: var(--ember); font-size: 18px; }
 
   .page { max-width: 600px; margin: 0 auto; padding: 0 20px 60px; }
 
-  /* hero — speaks to a stressed homeowner, not a contractor */
-  .hero { text-align: center; padding: 48px 8px 32px; }
-  .hero .eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--ember); margin-bottom: 16px; }
-  .hero h1 { font-family: 'Fraunces', serif; font-size: 38px; line-height: 1.1; letter-spacing: -1.2px; font-weight: 600; margin-bottom: 14px; }
-  .hero p { font-size: 17px; color: var(--bark-soft); max-width: 480px; margin: 0 auto; line-height: 1.55; }
+  /* hero — message-matched to a storm ad, speaks to a stressed homeowner */
+  .hero { text-align: center; padding: 40px 8px 8px; }
+  .hero .eyebrow { display:inline-flex; align-items:center; gap:7px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ember); margin-bottom: 14px; background: rgba(200,83,27,0.08); padding: 5px 13px; border-radius: 20px; }
+  .hero h1 { font-family: 'Fraunces', serif; font-size: 36px; line-height: 1.08; letter-spacing: -1.2px; font-weight: 600; margin-bottom: 13px; }
+  .hero p { font-size: 17px; color: var(--bark-soft); max-width: 470px; margin: 0 auto; line-height: 1.5; }
 
-  /* trust row — honest, no fake numbers */
-  .trust { display: flex; justify-content: center; gap: 26px; flex-wrap: wrap; margin: 26px 0 4px; }
-  .trust-item { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--muted); }
-  .trust-item .ti-ic { color: var(--moss); font-size: 16px; line-height: 1; }
+  /* trust row */
+  .trust { display: flex; justify-content: center; gap: 22px; flex-wrap: wrap; margin: 22px 0 0; }
+  .trust-item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); font-weight: 500; }
+  .trust-item .ti-ic { color: var(--moss); font-size: 15px; line-height: 1; }
 
   /* form card */
-  .form-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 32px 28px; margin-top: 28px; box-shadow: 0 1px 3px rgba(26,21,18,0.06), 0 14px 44px rgba(26,21,18,0.08); }
-  .form-card h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 4px; }
-  .form-card .sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+  .form-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 28px 26px; margin-top: 24px; box-shadow: 0 1px 3px rgba(26,21,18,0.06), 0 14px 44px rgba(26,21,18,0.08); }
+  .form-card h2 { font-family: 'Fraunces', serif; font-size: 21px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 3px; }
+  .form-card .sub { font-size: 13.5px; color: var(--muted); margin-bottom: 22px; }
 
-  .field { margin-bottom: 18px; }
-  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--bark); margin-bottom: 7px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--bark); margin-bottom: 6px; }
   .field label .opt { color: var(--muted-2); font-weight: 500; }
-  .field input, .field textarea { width: 100%; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 15px; font-family: inherit; color: var(--ink); transition: border-color 0.15s; background: var(--card); }
-  .field input:focus, .field textarea:focus { outline: none; border-color: var(--ember); }
-  .field textarea { resize: vertical; min-height: 110px; line-height: 1.5; }
-  .field .hint { font-size: 12.5px; color: var(--muted-2); margin-top: 6px; }
-  .field.err input, .field.err textarea { border-color: var(--danger); }
-  .field .err-msg { font-size: 12.5px; color: var(--danger); margin-top: 6px; display: none; font-weight: 500; }
+  .field input, .field textarea, .field select { width: 100%; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: 6px; font-size: 15px; font-family: inherit; color: var(--ink); transition: border-color 0.15s; background: var(--card); }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--ember); }
+  .field textarea { resize: vertical; min-height: 88px; line-height: 1.5; }
+  .field .hint { font-size: 12px; color: var(--muted-2); margin-top: 5px; }
+  .field.err input, .field.err textarea, .field.err select { border-color: var(--danger); }
+  .field .err-msg { font-size: 12.5px; color: var(--danger); margin-top: 5px; display: none; font-weight: 500; }
   .field.err .err-msg { display: block; }
-  .field select { width: 100%; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: 5px; font-size: 15px; font-family: inherit; color: var(--ink); background: var(--card); transition: border-color 0.15s; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%236B6253' d='M1 1l5 5 5-5'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
-  .field select:focus { outline: none; border-color: var(--ember); }
-  .field.err select { border-color: var(--danger); }
-  .field input[type="file"] { width: 100%; padding: 11px 14px; border: 1.5px dashed var(--line); border-radius: 5px; font-size: 14px; font-family: inherit; color: var(--muted-2); background: var(--card); cursor: pointer; }
-  .field input[type="file"]:focus { outline: none; border-color: var(--ember); }
-  .photo-preview { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 11px; }
-  .photo-thumb { position: relative; width: 72px; height: 72px; border-radius: 5px; overflow: hidden; border: 1.5px solid var(--line); }
-  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .photo-x { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,0.62); color: #fff; font-size: 15px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
-  .photo-x:hover { background: rgba(0,0,0,0.85); }
+  .field select { -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%236B6253' d='M1 1l5 5 5-5'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
 
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
   @media (max-width: 480px) { .row2 { grid-template-columns: 1fr; } }
 
-  .btn { width: 100%; background: var(--ember); color: #fff; border: none; padding: 16px 26px; font-weight: 700; font-size: 16px; cursor: pointer; border-radius: 5px; font-family: inherit; transition: background 0.15s, transform 0.1s; margin-top: 6px; }
+  /* urgency as tappable buttons (faster than a dropdown, and sets the tone) */
+  .urgency-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  @media (max-width: 480px) { .urgency-opts { grid-template-columns: 1fr; } }
+  .urg-btn { padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 7px; background: var(--card); font-size: 14px; font-weight: 600; color: var(--bark); cursor: pointer; font-family: inherit; text-align: left; transition: all 0.12s; display: flex; align-items: center; gap: 9px; }
+  .urg-btn:hover { border-color: var(--muted-2); }
+  .urg-btn.sel { border-color: var(--ember); background: rgba(200,83,27,0.06); color: var(--ember-deep); }
+  .urg-btn.emergency.sel { border-color: var(--danger); background: rgba(178,58,46,0.07); color: var(--danger); }
+  .urg-btn .ub-ic { font-size: 16px; }
+
+  /* the optional "more detail" section — collapsed by default so the form looks short */
+  .more-toggle { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: 1px dashed var(--line); border-radius: 7px; padding: 12px 14px; font-size: 13.5px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; margin-bottom: 16px; transition: border-color 0.15s; }
+  .more-toggle:hover { border-color: var(--muted-2); color: var(--bark); }
+  .more-toggle .mt-chev { margin-left: auto; transition: transform 0.2s; }
+  .more-toggle.open .mt-chev { transform: rotate(180deg); }
+  .more-fields { display: none; }
+  .more-fields.open { display: block; }
+  .more-note { font-size: 12px; color: var(--muted-2); margin: -4px 0 14px; }
+
+  .field input[type="file"] { padding: 11px 14px; border: 1.5px dashed var(--line); font-size: 14px; color: var(--muted-2); cursor: pointer; }
+  .photo-preview { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 11px; }
+  .photo-thumb { position: relative; width: 68px; height: 68px; border-radius: 5px; overflow: hidden; border: 1.5px solid var(--line); }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-x { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,0.62); color: #fff; font-size: 15px; line-height: 1; cursor: pointer; }
+
+  .btn { width: 100%; background: var(--ember); color: #fff; border: none; padding: 16px 26px; font-weight: 700; font-size: 16.5px; cursor: pointer; border-radius: 7px; font-family: inherit; transition: background 0.15s, transform 0.1s; margin-top: 4px; }
   .btn:hover { background: var(--ember-deep); }
   .btn:active { transform: translateY(1px); }
   .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .btn-reassure { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: 11px; line-height: 1.5; }
+  .btn-reassure b { color: var(--bark); }
 
-  .form-foot { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: 16px; line-height: 1.5; }
+  /* trust proof block — the scam-wary homeowner needs to feel safe */
+  .safe { background: rgba(62,82,53,0.05); border: 1px solid rgba(62,82,53,0.16); border-radius: 10px; padding: 20px 22px; margin-top: 22px; }
+  .safe h3 { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; color: var(--bark); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .safe h3 .sh-ic { width: 26px; height: 26px; border-radius: 50%; background: var(--moss); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .safe-item { display: flex; gap: 10px; margin-bottom: 11px; font-size: 13.5px; color: var(--bark-soft); line-height: 1.5; }
+  .safe-item:last-child { margin-bottom: 0; }
+  .safe-item .si-ic { color: var(--moss); flex-shrink: 0; font-weight: 700; }
+  .safe-item b { color: var(--bark); }
 
-  /* the contractor whose link sent them here (ref attribution) */
-  .ref-banner { display: none; align-items: center; gap: 11px; background: rgba(62,82,53,0.07); border: 1px solid rgba(62,82,53,0.18); border-radius: 6px; padding: 13px 16px; margin-bottom: 22px; font-size: 13.5px; color: var(--bark); }
-  .ref-banner .rb-ic { color: var(--moss); font-size: 18px; line-height: 1; flex-shrink: 0; }
-  .ref-banner b { color: var(--moss); }
-
-  /* how it works — 3 quick steps, reassuring */
-  .how { margin-top: 44px; }
-  .how h3 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; text-align: center; margin-bottom: 22px; color: var(--bark); }
+  .how { margin-top: 34px; }
+  .how h3 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; text-align: center; margin-bottom: 20px; }
   .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   @media (max-width: 480px) { .steps { grid-template-columns: 1fr; gap: 14px; } }
-  .step { text-align: center; padding: 4px; }
-  .step .s-num { width: 32px; height: 32px; margin: 0 auto 11px; border-radius: 50%; background: var(--ink); color: var(--ember-glow); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; font-family: 'Fraunces', serif; }
-  .step .s-t { font-size: 14px; font-weight: 600; color: var(--bark); margin-bottom: 4px; }
-  .step .s-d { font-size: 13px; color: var(--muted); line-height: 1.45; }
+  .step { text-align: center; }
+  .s-num { width: 30px; height: 30px; border-radius: 50%; background: var(--ember); color: #fff; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 9px; font-family: 'Fraunces', serif; }
+  .s-t { font-size: 14px; font-weight: 700; color: var(--bark); margin-bottom: 3px; }
+  .s-d { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 
-  /* success state */
-  .success { display: none; text-align: center; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 48px 32px; margin-top: 28px; box-shadow: 0 1px 3px rgba(26,21,18,0.06), 0 14px 44px rgba(26,21,18,0.08); }
-  .success .s-seal { width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 50%; background: var(--moss); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 32px; box-shadow: 0 0 0 6px rgba(62,82,53,0.12); }
+  .footer { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 40px; line-height: 1.6; }
+  .footer a { color: var(--ember-deep); }
+
+  /* success */
+  .success { display: none; text-align: center; padding: 56px 24px; max-width: 520px; margin: 0 auto; }
+  .s-seal { width: 62px; height: 62px; border-radius: 50%; background: var(--moss); color: #fff; font-size: 30px; display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; box-shadow: 0 0 0 6px rgba(62,82,53,0.12); }
   .success h2 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600; letter-spacing: -0.6px; margin-bottom: 12px; }
-  .success p { font-size: 15.5px; color: var(--bark-soft); max-width: 420px; margin: 0 auto 8px; line-height: 1.6; }
-  .success .s-note { font-size: 13.5px; color: var(--muted); margin-top: 18px; }
+  .success > p { font-size: 16px; color: var(--bark-soft); line-height: 1.55; margin-bottom: 22px; }
+  .next-steps { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 22px; text-align: left; margin: 0 auto; }
+  .next-steps .ns-t { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 14px; }
+  .ns-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; font-size: 14px; color: var(--bark-soft); line-height: 1.5; }
+  .ns-item:last-child { margin-bottom: 0; }
+  .ns-num { width: 22px; height: 22px; border-radius: 50%; background: var(--paper-2); color: var(--bark); font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ns-item b { color: var(--bark); }
 
-  .footer { text-align: center; font-size: 12.5px; color: var(--muted-2); margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line-soft); }
-  .footer a { color: var(--muted); text-decoration: none; }
-  .footer a:hover { color: var(--bark); }
-
-  .toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: #fff; padding: 13px 22px; border-radius: 4px; font-size: 14px; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 1100; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: #fff; padding: 13px 20px; border-radius: 7px; font-size: 14px; opacity: 0; transition: all 0.3s; z-index: 50; }
   .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-  .toast.err { border-left: 3px solid var(--danger); }
+  .toast.err { background: var(--danger); }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="brand"><span class="mk">&#9699;</span> TreeStorm Leads</div>
+  <div class="brand"><span class="mk">&#9670;</span> TreeStorm Leads</div>
 </div>
 
-<div class="page">
-  <div id="form-view">
-    <div class="hero">
-      <div class="eyebrow">Free &middot; No obligation</div>
-      <h1 class="serif">Tree down? Get a local pro on it.</h1>
-      <p>Tell us what you need. We'll connect you with a vetted tree-service crew that covers your area &mdash; one that's ready to work, not a call center.</p>
-      <div class="trust">
-        <div class="trust-item"><span class="ti-ic">&#10003;</span> Local, vetted crews</div>
-        <div class="trust-item"><span class="ti-ic">&#10003;</span> No fee to you</div>
-        <div class="trust-item"><span class="ti-ic">&#10003;</span> Fast callback</div>
+<div class="page" id="form-view">
+  <div class="hero">
+    <span class="eyebrow">⚡ Fast local response</span>
+    <h1 class="serif">Storm took down a tree?</h1>
+    <p>Tell us what happened. We'll get a vetted, insured local crew reaching out to you — fast. No fee to you, ever.</p>
+    <div class="trust">
+      <div class="trust-item"><span class="ti-ic">✓</span> Insured, vetted crews</div>
+      <div class="trust-item"><span class="ti-ic">✓</span> No fee to you</div>
+      <div class="trust-item"><span class="ti-ic">✓</span> Local, not a call center</div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="ref-banner" id="ref-banner" style="display:none; align-items:center; gap:11px; background:rgba(62,82,53,0.07); border:1px solid rgba(62,82,53,0.18); border-radius:6px; padding:13px 16px; margin-bottom:20px; font-size:13.5px; color:var(--bark);"><span style="color:var(--moss); font-size:18px; line-height:1; flex-shrink:0;">&#9733;</span><span>You were referred to <b id="ref-name">a local crew</b>. Your request goes straight to them.</span></div>
+
+    <h2 class="serif">Get a local pro out fast</h2>
+    <div class="sub">Takes 30 seconds. A local crew reaches out to you directly.</div>
+
+    <div class="field" id="f-name">
+      <label for="in-name">Your name</label>
+      <input type="text" id="in-name" placeholder="First and last name" autocomplete="name" maxlength="120">
+      <div class="err-msg">Please enter your name.</div>
+    </div>
+
+    <div class="row2">
+      <div class="field" id="f-phone">
+        <label for="in-phone">Phone</label>
+        <input type="tel" id="in-phone" placeholder="(904) 555-0123" autocomplete="tel" inputmode="tel" maxlength="40">
+        <div class="err-msg">Enter a phone number.</div>
+      </div>
+      <div class="field" id="f-zip">
+        <label for="in-zip">ZIP code</label>
+        <input type="text" id="in-zip" placeholder="32046" autocomplete="postal-code" inputmode="numeric" maxlength="5">
+        <div class="err-msg">Enter your 5-digit ZIP.</div>
       </div>
     </div>
 
-    <div class="form-card">
-      <div class="ref-banner" id="ref-banner">
-        <span class="rb-ic">&#9733;</span>
-        <span>You were referred to <b id="ref-name">a local crew</b>. Your request goes straight to them.</span>
+    <div class="field" id="f-desc">
+      <label for="in-desc">What happened?</label>
+      <textarea id="in-desc" placeholder="Example: A big oak came down across my driveway in the storm. There's a limb hanging over the roof too." maxlength="2000"></textarea>
+      <div class="err-msg">Tell us a little about the job.</div>
+    </div>
+
+    <div class="field" id="f-urgency">
+      <label>How soon do you need it?</label>
+      <div class="urgency-opts">
+        <button type="button" class="urg-btn emergency" data-urg="emergency"><span class="ub-ic">⚡</span> It's an emergency</button>
+        <button type="button" class="urg-btn" data-urg="few_days"><span class="ub-ic">📅</span> Within a few days</button>
+        <button type="button" class="urg-btn" data-urg="couple_weeks"><span class="ub-ic">🗓️</span> Couple of weeks</button>
+        <button type="button" class="urg-btn" data-urg="flexible"><span class="ub-ic">👍</span> I'm flexible</button>
       </div>
+      <div class="err-msg" style="margin-top:8px;">Let us know the timing.</div>
+    </div>
 
-      <h2 class="serif">Tell us about the job</h2>
-      <div class="sub">Takes about a minute. A local pro will reach out to you directly.</div>
-
-      <div class="field" id="f-name">
-        <label for="in-name">Your name</label>
-        <input type="text" id="in-name" placeholder="First and last name" autocomplete="name" maxlength="120">
-        <div class="err-msg">Please enter your name.</div>
-      </div>
-
-      <div class="row2">
-        <div class="field" id="f-phone">
-          <label for="in-phone">Phone number</label>
-          <input type="tel" id="in-phone" placeholder="(904) 555-0123" autocomplete="tel" inputmode="tel" maxlength="40">
-          <div class="err-msg">Enter a phone number so a pro can reach you.</div>
-        </div>
-        <div class="field" id="f-zip">
-          <label for="in-zip">ZIP code</label>
-          <input type="text" id="in-zip" placeholder="32046" autocomplete="postal-code" inputmode="numeric" maxlength="5">
-          <div class="err-msg">Enter your 5-digit ZIP.</div>
-        </div>
-      </div>
-
-      <div class="field" id="f-email">
-        <label for="in-email">Email <span class="opt">(optional)</span></label>
-        <input type="email" id="in-email" placeholder="you@email.com" autocomplete="email" maxlength="200">
-      </div>
-
-      <div class="field" id="f-desc">
-        <label for="in-desc">What do you need done?</label>
-        <textarea id="in-desc" placeholder="Example: A large oak came down across my driveway in the storm last night. Needs to be cut up and hauled away. There's also a big limb hanging over the roof I'm worried about." maxlength="2000"></textarea>
-        <div class="hint">The more detail, the better a crew can help &mdash; size of the tree, where it is, anything urgent.</div>
-        <div class="err-msg">Tell us a little about the job.</div>
-      </div>
-
+    <!-- optional enrichment, collapsed so the form reads short -->
+    <button type="button" class="more-toggle" id="more-toggle" onclick="toggleMore()">
+      <span>➕ Add details for a faster, more accurate quote</span>
+      <span class="mt-chev">▾</span>
+    </button>
+    <div class="more-fields" id="more-fields">
+      <div class="more-note">Optional — but the more a crew knows up front, the faster they can quote you.</div>
       <div class="field" id="f-jobtype">
-        <label for="in-jobtype">What kind of work is it?</label>
+        <label for="in-jobtype">Type of work <span class="opt">(optional)</span></label>
         <select id="in-jobtype">
           <option value="">Choose one…</option>
           <option value="storm_down">Storm damage — tree already down</option>
@@ -177,91 +210,79 @@
           <option value="emergency">Emergency — tree on house/car/blocking access</option>
           <option value="other">Something else</option>
         </select>
-        <div class="err-msg">Pick the type of work.</div>
       </div>
-
       <div class="row2">
         <div class="field" id="f-size">
-          <label for="in-size">How big is the tree?</label>
+          <label for="in-size">Tree size <span class="opt">(optional)</span></label>
           <select id="in-size">
             <option value="">Choose one…</option>
-            <option value="small">Small — under 25 ft / thin trunk</option>
+            <option value="small">Small — under 25 ft</option>
             <option value="medium">Medium — 25–50 ft</option>
             <option value="large">Large — 50–80 ft</option>
-            <option value="huge">Very large — 80+ ft / massive trunk</option>
+            <option value="huge">Very large — 80+ ft</option>
             <option value="unsure">Not sure</option>
           </select>
-          <div class="err-msg">Give a rough size.</div>
         </div>
         <div class="field" id="f-proximity">
-          <label for="in-proximity">Near anything?</label>
+          <label for="in-proximity">Near anything? <span class="opt">(optional)</span></label>
           <select id="in-proximity">
             <option value="">Choose one…</option>
-            <option value="open">Open area — clear of structures</option>
-            <option value="near_house">Close to a house/building</option>
-            <option value="on_structure">On a house, roof, or fence</option>
+            <option value="open">Open area</option>
+            <option value="near_house">Close to a building</option>
+            <option value="on_structure">On a house/roof/fence</option>
             <option value="powerlines">Near power lines</option>
             <option value="driveway">Blocking a driveway/road</option>
           </select>
-          <div class="err-msg">Pick the closest match.</div>
         </div>
       </div>
-
-      <div class="field" id="f-urgency">
-        <label for="in-urgency">How soon do you need it done?</label>
-        <select id="in-urgency">
-          <option value="">Choose one…</option>
-          <option value="emergency">Right now — it's an emergency</option>
-          <option value="few_days">Within a few days</option>
-          <option value="couple_weeks">Within a couple weeks</option>
-          <option value="flexible">I'm flexible</option>
-        </select>
-        <div class="err-msg">Let us know the timing.</div>
-      </div>
-
       <div class="field" id="f-photos">
-        <label for="in-photos">Photos <span class="opt">(optional, but gets you a faster, more accurate quote)</span></label>
+        <label for="in-photos">Photos <span class="opt">(optional)</span></label>
         <input type="file" id="in-photos" accept="image/*" multiple capture="environment">
-        <div class="hint">A couple photos of the tree and where it is help a pro give you a real estimate up front.</div>
+        <div class="hint">A couple photos help a pro give you a real estimate up front.</div>
         <div id="photo-preview" class="photo-preview"></div>
       </div>
-
-      <button class="btn" id="submit-btn" onclick="submitJob()">Get my local pro</button>
-      <div class="form-foot">By submitting, you agree a local tree-service pro may contact you about your request. We don't sell your information.</div>
-    </div>
-
-    <div class="how">
-      <h3 class="serif">How it works</h3>
-      <div class="steps">
-        <div class="step">
-          <div class="s-num">1</div>
-          <div class="s-t">Tell us the job</div>
-          <div class="s-d">Describe what you need and where you are.</div>
-        </div>
-        <div class="step">
-          <div class="s-num">2</div>
-          <div class="s-t">We route it locally</div>
-          <div class="s-d">It goes to a vetted crew that covers your ZIP.</div>
-        </div>
-        <div class="step">
-          <div class="s-num">3</div>
-          <div class="s-t">They reach out</div>
-          <div class="s-d">A local pro contacts you to set it up.</div>
-        </div>
+      <div class="field" id="f-email">
+        <label for="in-email">Email <span class="opt">(optional)</span></label>
+        <input type="email" id="in-email" placeholder="you@email.com" autocomplete="email" maxlength="200">
       </div>
     </div>
+
+    <button class="btn" id="submit-btn" onclick="submitJob()">Get my local pro →</button>
+    <div class="btn-reassure">We connect you with <b>one</b> local crew that covers your area — not a dozen robocalls. <b>No fee to you.</b></div>
   </div>
 
-  <div class="success" id="success-view">
-    <div class="s-seal">&#10003;</div>
-    <h2 class="serif">You're all set.</h2>
-    <p id="success-msg">Your request is in. A local tree-service pro who covers your area will reach out to you directly &mdash; usually within a day.</p>
-    <p class="s-note">Keep an eye on your phone. If you don't hear back soon, you can submit again or call around locally.</p>
+  <!-- trust proof: reassure the scam-wary homeowner -->
+  <div class="safe">
+    <h3><span class="sh-ic">✓</span> How we keep you safe</h3>
+    <div class="safe-item"><span class="si-ic">✓</span><div><b>Every crew is insurance-verified.</b> We check that each pro carries real liability coverage before they ever reach you — no fly-by-night operators.</div></div>
+    <div class="safe-item"><span class="si-ic">✓</span><div><b>You're never charged.</b> The crew pays us, not you. Getting connected is completely free.</div></div>
+    <div class="safe-item"><span class="si-ic">✓</span><div><b>One local crew, not a lead auction.</b> Your info isn't sold to a dozen callers — it goes to one vetted crew that covers your ZIP.</div></div>
+  </div>
+
+  <div class="how">
+    <h3 class="serif">How it works</h3>
+    <div class="steps">
+      <div class="step"><div class="s-num">1</div><div class="s-t">Tell us what happened</div><div class="s-d">30 seconds. Where you are and what you need.</div></div>
+      <div class="step"><div class="s-num">2</div><div class="s-t">We route it locally</div><div class="s-d">Straight to a vetted, insured crew that covers your ZIP.</div></div>
+      <div class="step"><div class="s-num">3</div><div class="s-t">They call you</div><div class="s-d">A local pro reaches out directly to set it up.</div></div>
+    </div>
   </div>
 
   <div class="footer">
     TreeStorm Leads &middot; <a href="https://treestormleads.com">treestormleads.com</a><br>
-    Connecting homeowners with local tree-service professionals.
+    Connecting homeowners with vetted local tree-service pros.
+  </div>
+</div>
+
+<div class="success" id="success-view">
+  <div class="s-seal">✓</div>
+  <h2 class="serif">Help is on the way.</h2>
+  <p id="success-msg">Your request is in. A vetted local crew that covers your area will call you shortly.</p>
+  <div class="next-steps">
+    <div class="ns-t">What happens next</div>
+    <div class="ns-item"><span class="ns-num">1</span><div><b>Keep your phone handy.</b> A local pro will call the number you gave us — often within the hour for urgent jobs.</div></div>
+    <div class="ns-item"><span class="ns-num">2</span><div><b>They'll be insurance-verified.</b> The crew reaching out has been checked by us, so you can trust who's calling.</div></div>
+    <div class="ns-item"><span class="ns-num">3</span><div><b>You confirm before anything's charged.</b> Talk it through, get your estimate — you're in control the whole way.</div></div>
   </div>
 </div>
 
@@ -269,17 +290,34 @@
 
 <script>
   const API = 'https://api.treestormleads.com';
-  // contractor referral, if they arrived via a personal link (?ref=sub_xxx)
   const REF = new URLSearchParams(location.search).get('ref') || null;
 
-  // ---- photo handling: compress to small JPEGs, cap at 4, preview thumbnails ----
-  let collectedPhotos = [];   // array of data-URL strings, sent with the job
+  let selectedUrgency = '';
+  let collectedPhotos = [];
   const MAX_PHOTOS = 4;
 
   document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('in-photos');
     if (input) input.addEventListener('change', handlePhotos);
+    document.querySelectorAll('.urg-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('.urg-btn').forEach(x => x.classList.remove('sel'));
+        b.classList.add('sel');
+        selectedUrgency = b.dataset.urg;
+        document.getElementById('f-urgency').classList.remove('err');
+      });
+    });
+    ['name','phone','zip','email','desc'].forEach(k => {
+      const inp = document.getElementById('in-'+k);
+      if (inp) inp.addEventListener('input', () => clearErr('f-'+k));
+    });
+    if (REF) { const rb = document.getElementById('ref-banner'); if (rb) rb.style.display = 'flex'; }
   });
+
+  function toggleMore() {
+    document.getElementById('more-fields').classList.toggle('open');
+    document.getElementById('more-toggle').classList.toggle('open');
+  }
 
   async function handlePhotos(e) {
     const files = Array.from(e.target.files || []);
@@ -288,7 +326,7 @@
       if (collectedPhotos.length >= MAX_PHOTOS) { toast('Up to ' + MAX_PHOTOS + ' photos.'); break; }
       if (!file.type.startsWith('image/')) continue;
       try {
-        const dataUrl = await compressImage(file, 1024, 0.7); // max 1024px, 70% quality
+        const dataUrl = await compressImage(file, 1024, 0.7);
         collectedPhotos.push(dataUrl);
         const thumb = document.createElement('div');
         thumb.className = 'photo-thumb';
@@ -300,12 +338,11 @@
           thumb.remove();
         });
         preview.appendChild(thumb);
-      } catch (_) { /* skip a photo that fails to process */ }
+      } catch (_) {}
     }
-    e.target.value = ''; // allow re-selecting the same file
+    e.target.value = '';
   }
 
-  // Draw the image to a canvas scaled down, export as JPEG data URL — keeps the POST small.
   function compressImage(file, maxDim, quality) {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -325,23 +362,10 @@
     });
   }
 
-
-  // if a ref is present, show the banner (the name is cosmetic until we wire a lookup; generic is fine)
-  if (REF) {
-    const rb = document.getElementById('ref-banner');
-    if (rb) rb.style.display = 'flex';
-  }
-
   function clearErr(id){ const f=document.getElementById(id); if(f) f.classList.remove('err'); }
   function setErr(id){ const f=document.getElementById(id); if(f){ f.classList.add('err'); const inp=f.querySelector('input,textarea,select'); if(inp) inp.focus(); } }
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function toast(msg, kind){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+(kind||''); clearTimeout(t._h); t._h=setTimeout(()=>t.className='toast '+(kind||''),3800); }
-
-  // clear field errors as the user types
-  ['name','phone','zip','email','desc'].forEach(k => {
-    const inp = document.getElementById('in-'+k);
-    if (inp) inp.addEventListener('input', () => clearErr('f-'+k));
-  });
 
   async function submitJob() {
     const name  = document.getElementById('in-name').value.trim();
@@ -352,26 +376,21 @@
     const jobType   = document.getElementById('in-jobtype').value;
     const treeSize  = document.getElementById('in-size').value;
     const proximity = document.getElementById('in-proximity').value;
-    const urgency   = document.getElementById('in-urgency').value;
+    const urgency   = selectedUrgency;
 
-    // validate — clear all first
-    ['f-name','f-phone','f-zip','f-desc','f-jobtype','f-size','f-proximity','f-urgency'].forEach(clearErr);
+    ['f-name','f-phone','f-zip','f-desc','f-urgency'].forEach(clearErr);
     let bad = null;
-    if (!urgency) { setErr('f-urgency'); bad = bad||'f-urgency'; }
-    if (!proximity) { setErr('f-proximity'); bad = bad||'f-proximity'; }
-    if (!treeSize) { setErr('f-size'); bad = bad||'f-size'; }
-    if (!jobType) { setErr('f-jobtype'); bad = bad||'f-jobtype'; }
+    if (!urgency) { document.getElementById('f-urgency').classList.add('err'); bad = bad||'f-urgency'; }
     if (!desc) { setErr('f-desc'); bad = bad||'f-desc'; }
     if (!/^\d{5}$/.test(zip)) { setErr('f-zip'); bad = bad||'f-zip'; }
     if (!phone || phone.replace(/\D/g,'').length < 7) { setErr('f-phone'); bad = bad||'f-phone'; }
     if (!name) { setErr('f-name'); bad = bad||'f-name'; }
     if (bad) { document.getElementById(bad).scrollIntoView({behavior:'smooth',block:'center'}); return; }
 
-    // contact = phone, with email appended if provided (backend stores a single contact string)
-    const contact = email ? (phone + ' · ' + email) : phone;
+    const contact = email ? (phone + ' \u00b7 ' + email) : phone;
 
     const btn = document.getElementById('submit-btn');
-    btn.disabled = true; btn.textContent = 'Sending…';
+    btn.disabled = true; btn.textContent = 'Sending\u2026';
     try {
       const r = await fetch(API + '/submit-job', {
         method: 'POST',
@@ -379,31 +398,30 @@
         body: JSON.stringify({
           name, contact, zip, description: desc, ref: REF,
           jobType, treeSize, proximity, urgency,
-          photos: collectedPhotos   // array of data URLs, may be empty
+          photos: collectedPhotos
         })
       });
       const d = await r.json().catch(() => ({}));
       if (r.ok && d.ok) {
-        // tailor the success message by routing outcome
         const msg = document.getElementById('success-msg');
         if (d.routed === 'waitlist') {
-          msg.innerHTML = 'Your request is in. We don\u2019t have a crew covering ' + escapeHtml(zip) + ' just yet &mdash; we\u2019ll connect you with a local pro as soon as one does. In the meantime, it may be worth calling around locally too.';
+          msg.innerHTML = 'Your request is in. We\u2019re still lining up a crew for ' + escapeHtml(zip) + ' \u2014 we\u2019ll connect you with a local pro the moment one covers your area.';
         } else {
-          msg.innerHTML = 'Your request is in. A local tree-service pro who covers ' + escapeHtml(zip) + ' will reach out to you directly &mdash; usually within a day.';
+          msg.innerHTML = 'Your request is in. A vetted local crew that covers ' + escapeHtml(zip) + ' will call you shortly.';
         }
         document.getElementById('form-view').style.display = 'none';
         document.getElementById('success-view').style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (d.error === 'duplicate') {
-        toast('Looks like you just sent this — give it a moment.', 'err');
-        btn.disabled = false; btn.textContent = 'Get my local pro';
+        toast('Looks like you just sent this \u2014 give it a moment.', 'err');
+        btn.disabled = false; btn.textContent = 'Get my local pro \u2192';
       } else {
         toast('Something went wrong sending your request. Please try again.', 'err');
-        btn.disabled = false; btn.textContent = 'Get my local pro';
+        btn.disabled = false; btn.textContent = 'Get my local pro \u2192';
       }
     } catch {
       toast('Couldn\u2019t send your request. Check your connection and try again.', 'err');
-      btn.disabled = false; btn.textContent = 'Get my local pro';
+      btn.disabled = false; btn.textContent = 'Get my local pro \u2192';
     }
   }
 </script>
